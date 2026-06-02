@@ -1984,12 +1984,23 @@
         }
       ];
 
-      if (!localStorage.getItem("walker_leads")) {
+      let hasLeads = false;
+      try {
+        hasLeads = !!localStorage.getItem("walker_leads");
+      } catch (e) {
+        console.warn("Erro ao verificar walker_leads no localStorage:", e);
+      }
+      if (!hasLeads) {
         safeSaveLeads(INITIAL_MOCK_LEADS);
       }
 
       // Migração: converte status legado "Aguardando Averbação" → "Recebida"
-      const rawLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+      let rawLeads = [];
+      try {
+        rawLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+      } catch (e) {
+        console.warn("Erro ao ler walker_leads para migração:", e);
+      }
       const migrated = rawLeads.map(l => l.status === "Aguardando Averbação" ? { ...l, status: "Recebida" } : l);
       if (migrated.some((l, i) => l.status !== rawLeads[i].status)) {
         safeSaveLeads(migrated);
@@ -2034,13 +2045,23 @@
         if (currentLeads && currentLeads.length > 0) {
           return currentLeads;
         }
-        return JSON.parse(localStorage.getItem("walker_leads") || "[]");
+        try {
+          return JSON.parse(localStorage.getItem("walker_leads") || "[]");
+        } catch (e) {
+          console.warn("Erro ao obter leads do localStorage:", e);
+          return [];
+        }
       };
       const getConfigs = () => {
         if (currentConfigs && Object.keys(currentConfigs).length > 0) {
           return currentConfigs;
         }
-        return JSON.parse(localStorage.getItem("walker_configs") || "{}");
+        try {
+          return JSON.parse(localStorage.getItem("walker_configs") || "{}");
+        } catch (e) {
+          console.warn("Erro ao obter configs do localStorage:", e);
+          return {};
+        }
       };
 
       // Funções de sincronização com o Supabase
@@ -2090,11 +2111,19 @@
           if (error && error.code !== 'PGRST116') throw error; // PGRST116 é row not found
           if (data && data.data) {
             currentConfigs = data.data;
-            localStorage.setItem("walker_configs", JSON.stringify(currentConfigs));
+            try {
+              localStorage.setItem("walker_configs", JSON.stringify(currentConfigs));
+            } catch (e) {
+              console.warn("Erro ao gravar walker_configs no localStorage:", e);
+            }
           }
         } catch (err) {
           console.warn("Erro ao buscar configs do Supabase, usando local:", err);
-          currentConfigs = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+          try {
+            currentConfigs = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+          } catch (e) {
+            currentConfigs = {};
+          }
         }
       };
 
@@ -2490,17 +2519,18 @@
           if (lead.id === activeLeadId) {
             const valorSolicitadoVal = parseFloat(document.getElementById("edit-c-valor").value.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
             const prazoVal = parseInt(document.getElementById("edit-c-prazo").value);
-            const taxaPow = Math.pow(1 + taxaMensal, prazoVal);
-            const valorParcelaVal = valorSolicitadoVal * (taxaMensal * taxaPow) / (taxaPow - 1);
+            const taxaDoLead = lead.proposta?.taxa_juros_mensal !== undefined ? lead.proposta.taxa_juros_mensal : taxaMensal;
+            const taxaPow = Math.pow(1 + taxaDoLead, prazoVal);
+            const valorParcelaVal = valorSolicitadoVal * (taxaDoLead * taxaPow) / (taxaPow - 1);
             const totalFinanciadoVal = valorParcelaVal * prazoVal;
-            const cetAnualVal = (Math.pow(1 + taxaMensal, 12) - 1) * 100 + 1.8;
+            const cetAnualVal = (Math.pow(1 + taxaDoLead, 12) - 1) * 100 + 1.8;
 
             targetLead = {
               ...lead,
               lead: { ...lead.lead, nome: document.getElementById("edit-p-nome").value.trim(), cpf: document.getElementById("edit-p-cpf").value.replace(/\D/g, ""), data_nascimento: document.getElementById("edit-p-nascimento").value.trim(), celular: document.getElementById("edit-p-celular").value.replace(/\D/g, ""), email: document.getElementById("edit-p-email").value.trim(), genero: document.getElementById("edit-p-genero").value, estado_civil: document.getElementById("edit-p-estado-civil").value, nome_mae: document.getElementById("edit-p-nome-mae").value.trim(), rg: document.getElementById("edit-p-rg").value.replace(/\D/g, ""), rg_orgao: document.getElementById("edit-p-rg-emissor").value.trim().toUpperCase(), rg_data_emissao: document.getElementById("edit-p-rg-emissao").value.trim(), rg_uf: document.getElementById("edit-p-rg-uf").value },
               dados_funcionais: { ...lead.dados_funcionais, convenio: document.getElementById("edit-f-convenio").value, matricula: document.getElementById("edit-f-matricula").value.trim(), salario_liquido: parseFloat(document.getElementById("edit-f-salario").value.replace(/[^\d,]/g, "").replace(",", ".")) || 0, uf_orgao: document.getElementById("edit-f-uf").value },
               dados_bancarios: { ...lead.dados_bancarios, banco: document.getElementById("edit-b-banco").value.trim(), tipo_conta: document.getElementById("edit-b-tipo").value, agencia: document.getElementById("edit-b-agencia").value.trim(), conta: document.getElementById("edit-b-conta").value.trim() },
-              proposta: { ...lead.proposta, valor_solicitado: valorSolicitadoVal, prazo_meses: prazoVal, valor_parcela: valorParcelaVal, taxa_juros_mensal: taxaMensal, total_financiado: totalFinanciadoVal, cet_anual: cetAnualVal },
+              proposta: { ...lead.proposta, valor_solicitado: valorSolicitadoVal, prazo_meses: prazoVal, valor_parcela: valorParcelaVal, taxa_juros_mensal: taxaDoLead, total_financiado: totalFinanciadoVal, cet_anual: cetAnualVal },
               arquivos: {
                 identidade_cnh_rg: newRgBase64 || lead.arquivos?.identidade_cnh_rg || null,
                 contracheque: newContraBase64 || lead.arquivos?.contracheque || null
@@ -3172,7 +3202,11 @@
           lim_mun: document.getElementById("cfg-lim-mun").value.trim()
         };
         currentConfigs = cfg;
-        localStorage.setItem("walker_configs", JSON.stringify(cfg));
+        try {
+          localStorage.setItem("walker_configs", JSON.stringify(cfg));
+        } catch (e) {
+          console.warn("Erro ao gravar walker_configs no localStorage:", e);
+        }
 
         // Envia para o Supabase
         try {

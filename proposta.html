@@ -1373,8 +1373,8 @@
           const agencia = document.getElementById("agencia");
           const conta = document.getElementById("conta");
 
-          // Verifica se foi selecionado algum banco da lista
-          if (banco.value.trim() === "" || !bancosList.includes(banco.value)) {
+          // Permite qualquer banco com pelo menos 3 caracteres (flexibilidade para cooperativas/regionais)
+          if (banco.value.trim() === "" || banco.value.trim().length < 3) {
             banco.classList.add("error");
             document.getElementById("bank-list").nextElementSibling.style.display = "block";
             isValid = false;
@@ -1696,7 +1696,7 @@
               valor_solicitado: simulacaoData.valor,
               prazo_meses: simulacaoData.prazo,
               valor_parcela: simulacaoData.parcela,
-              taxa_juros_mensal: (() => { const cfg = JSON.parse(localStorage.getItem("walker_configs") || "{}"); return cfg.taxa_juros ? parseFloat(cfg.taxa_juros) / 100 : 0.0399; })(),
+              taxa_juros_mensal: (() => { if (simulacaoData && simulacaoData.taxa) { const t = parseFloat(simulacaoData.taxa.replace(',', '.').replace('% a.m.', '')); if (!isNaN(t)) return t / 100; } let cfg = {}; try { cfg = JSON.parse(localStorage.getItem("walker_configs") || "{}"); } catch(e) { console.warn("Erro ao acessar walker_configs no localStorage:", e); } return cfg.taxa_juros ? parseFloat(cfg.taxa_juros) / 100 : 0.0399; })(),
               total_financiado: simulacaoData.total,
               cet_anual: parseFloat(document.getElementById("sum-cet").textContent.replace(/[^\d,]/g, "").replace(",", ".")),
               assinatura_sms_validada: smsAssinado,
@@ -1765,7 +1765,7 @@
                 status: newLead.status,
                 convenio: newLead.dados_funcionais.convenio,
                 valor_solicitado: newLead.proposta.valor_solicitado,
-                payload: payload
+                payload: newLead
               }]);
 
             if (dbError) throw dbError;

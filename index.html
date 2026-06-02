@@ -2205,7 +2205,12 @@
       const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
       // Leitura dinâmica de parâmetros comerciais configurados no Sistema Interno
-      const walkerCfg = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+      let walkerCfg = {};
+      try {
+        walkerCfg = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+      } catch (e) {
+        console.warn("Erro ao ler walker_configs do localStorage:", e);
+      }
       const cfgTaxa = walkerCfg.taxa_juros ? parseFloat(walkerCfg.taxa_juros) / 100 : 0.0399;
       const cfgTaxaLabel = walkerCfg.taxa_juros ? `${parseFloat(walkerCfg.taxa_juros).toFixed(2).replace('.', ',')}% a.m.` : "3,99% a.m.";
       const cfgValMin = walkerCfg.val_min ? parseFloat(walkerCfg.val_min) : 500;
@@ -2589,7 +2594,11 @@
 
           if (error) throw error;
           if (data && data.data) {
-            localStorage.setItem("walker_configs", JSON.stringify(data.data));
+            try {
+              localStorage.setItem("walker_configs", JSON.stringify(data.data));
+            } catch (e) {
+              console.warn("Erro ao gravar walker_configs no localStorage:", e);
+            }
             const walkerCfg = data.data;
             const cfgTaxa = walkerCfg.taxa_juros ? parseFloat(walkerCfg.taxa_juros) / 100 : 0.0399;
             const cfgTaxaLabel = walkerCfg.taxa_juros ? `${parseFloat(walkerCfg.taxa_juros).toFixed(2).replace('.', ',')}% a.m.` : "3,99% a.m.";
