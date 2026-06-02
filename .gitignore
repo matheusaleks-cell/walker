@@ -18,3 +18,10 @@ $RECYCLE.BIN/
 *.log
 tmp/
 temp/
+
+# Segurança e Credenciais
+.env
+.env.local
+.env.production
+*.key
+*.pem

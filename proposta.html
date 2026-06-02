@@ -979,6 +979,17 @@
               </div>
               <span class="error-msg" id="err-contracheque">Obrigatório anexar o contracheque</span>
             </div>
+
+            <!-- Documento 3: Arquivos Adicionais (Opcional) -->
+            <div class="form-control" style="margin-top: 20px;">
+              <label>Outros comprovantes ou documentos adicionais (Opcional)</label>
+              <div class="upload-zone" id="zone-outros">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Arraste outros arquivos ou <strong>clique para anexar</strong></div>
+                <input type="file" class="file-input" id="file-input-outros" multiple accept="image/*,application/pdf">
+              </div>
+              <div id="outros-files-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;"></div>
+            </div>
           </div>
 
           <!-- ETAPA 5: RESUMO E ASSINATURA -->
@@ -1601,6 +1612,95 @@
       initUploadZone("zone-rg", "preview-rg", "rg");
       initUploadZone("zone-contracheque", "preview-contracheque", "contracheque");
 
+      // Array para guardar os arquivos adicionais anexados (como objetos File)
+      let outrosDocumentos = [];
+
+      // Inicializa a zona de arquivos adicionais com validações de segurança (Zod/Mime/Tamanho)
+      const initOutrosUploadZone = () => {
+        const zone = document.getElementById("zone-outros");
+        const fileInput = document.getElementById("file-input-outros");
+        const listContainer = document.getElementById("outros-files-list");
+        if (!zone || !fileInput || !listContainer) return;
+
+        const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+        const TAMANHO_MAXIMO = 10 * 1024 * 1024; // 10MB por arquivo
+
+        const updateOutrosListUI = () => {
+          listContainer.innerHTML = "";
+          outrosDocumentos.forEach((file, idx) => {
+            const item = document.createElement("div");
+            item.className = "file-preview active";
+            item.style = "display: flex; justify-content: space-between; align-items: center; background: rgba(24, 27, 44, 0.02); border: 1px solid rgba(24, 27, 44, 0.08); border-radius: 8px; padding: 10px 14px; margin-top: 5px;";
+            item.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--green-success); font-weight: bold;">✓</span>
+                <span style="font-size: 0.85rem; font-weight: 500; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+              </div>
+              <button type="button" class="remove-outro" data-idx="${idx}" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--red-error); line-height: 1; padding: 0 4px;">&times;</button>
+            `;
+            listContainer.appendChild(item);
+          });
+
+          // Adiciona listener para remoção
+          listContainer.querySelectorAll(".remove-outro").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const idx = parseInt(btn.dataset.idx);
+              outrosDocumentos.splice(idx, 1);
+              updateOutrosListUI();
+            });
+          });
+        };
+
+        const processFiles = (files) => {
+          Array.from(files).forEach(file => {
+            // Valida tipo do arquivo (MIME-type no navegador)
+            if (!TIPOS_PERMITIDOS.includes(file.type)) {
+              alert(`Arquivo "${file.name}" inválido. Permitido apenas imagens (JPG/PNG) ou PDF.`);
+              return;
+            }
+            
+            // Valida tamanho do arquivo (10MB)
+            if (file.size > TAMANHO_MAXIMO) {
+              alert(`Arquivo "${file.name}" excede o limite máximo de 10MB.`);
+              return;
+            }
+
+            // Previne duplicados
+            if (!outrosDocumentos.some(d => d.name === file.name && d.size === file.size)) {
+              outrosDocumentos.push(file);
+            }
+          });
+          updateOutrosListUI();
+        };
+
+        fileInput.addEventListener("change", (e) => {
+          if (e.target.files.length > 0) {
+            processFiles(e.target.files);
+            fileInput.value = ""; // Limpa input para permitir o mesmo arquivo se deletado
+          }
+        });
+
+        // Configura Drag and Drop
+        zone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          zone.classList.add("dragover");
+        });
+
+        zone.addEventListener("dragleave", () => {
+          zone.classList.remove("dragover");
+        });
+
+        zone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          zone.classList.remove("dragover");
+          if (e.dataTransfer.files.length > 0) {
+            processFiles(e.dataTransfer.files);
+          }
+        });
+      };
+
+      initOutrosUploadZone();
+
       /* ==========================================================================
          Simulação de Envio de Código SMS (Assinatura Digital)
          ========================================================================== */
@@ -1713,6 +1813,21 @@
             contrachequeBase64 = await fileToBase64(documentosAnexados.contracheque);
           }
 
+          // Converter arquivos adicionais para Base64 assincronamente se existirem
+          const outrosBase64 = [];
+          for (let i = 0; i < outrosDocumentos.length; i++) {
+            try {
+              const b64 = await fileToBase64(outrosDocumentos[i]);
+              outrosBase64.push({
+                nome: outrosDocumentos[i].name,
+                tipo: outrosDocumentos[i].type,
+                base64: b64
+              });
+            } catch (errFile) {
+              console.error("Erro ao converter arquivo adicional:", outrosDocumentos[i].name, errFile);
+            }
+          }
+
           // Recuperar dados de UTM no sessionStorage
           const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
           const marketingData = {};
@@ -1762,7 +1877,8 @@
             },
             arquivos: {
               identidade_cnh_rg: rgBase64,
-              contracheque: contrachequeBase64
+              contracheque: contrachequeBase64,
+              outros: outrosBase64
             },
             marketing: marketingData
           };
@@ -1798,7 +1914,7 @@
               // salvamos no localStorage removendo os arquivos pesados de imagem
               if (localLeads.length === 1) {
                 try {
-                  const lightweightLead = { ...newLead, arquivos: { identidade_cnh_rg: null, contracheque: null } };
+                  const lightweightLead = { ...newLead, arquivos: { identidade_cnh_rg: null, contracheque: null, outros: null } };
                   localStorage.setItem("walker_leads", JSON.stringify([lightweightLead]));
                   console.log("[Walker Bank] Salvo no localStorage sem anexos pesados para evitar estouro de cota.");
                 } catch (errBackup) {
