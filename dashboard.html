@@ -3164,37 +3164,75 @@
       // ==========================================
       let knownLeadIds = new Set(getLeads().map(l => l.id));
 
+      let audioCtx = null;
+
+      const initAudioContext = () => {
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+        } catch (e) {
+          console.error("[Walker Bank] Não foi possível inicializar o AudioContext:", e);
+        }
+      };
+
+      const unlockAudio = () => {
+        initAudioContext();
+        if (audioCtx && audioCtx.state === 'running') {
+          document.removeEventListener('click', unlockAudio);
+          document.removeEventListener('touchstart', unlockAudio);
+          document.removeEventListener('keydown', unlockAudio);
+          console.log("[Walker Bank] Sistema de áudio desbloqueado com sucesso.");
+        }
+      };
+
+      document.addEventListener('click', unlockAudio);
+      document.addEventListener('touchstart', unlockAudio);
+      document.addEventListener('keydown', unlockAudio);
+
       const playNotificationSound = () => {
         try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          initAudioContext();
+          if (!audioCtx) return;
+
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+
+          const now = audioCtx.currentTime;
           
           // Primeiro tom (D5)
-          const osc1 = ctx.createOscillator();
-          const gain1 = ctx.createGain();
+          const osc1 = audioCtx.createOscillator();
+          const gain1 = audioCtx.createGain();
           osc1.type = 'sine';
-          osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
-          gain1.gain.setValueAtTime(0.08, ctx.currentTime);
-          gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+          osc1.frequency.setValueAtTime(587.33, now);
+          gain1.gain.setValueAtTime(0.08, now);
+          gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
           osc1.connect(gain1);
-          gain1.connect(ctx.destination);
-          osc1.start();
-          osc1.stop(ctx.currentTime + 0.15);
+          gain1.connect(audioCtx.destination);
+          osc1.start(now);
+          osc1.stop(now + 0.15);
           
           // Segundo tom (A5)
           setTimeout(() => {
-            const osc2 = ctx.createOscillator();
-            const gain2 = ctx.createGain();
+            if (!audioCtx) return;
+            const now2 = audioCtx.currentTime;
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
             osc2.type = 'sine';
-            osc2.frequency.setValueAtTime(880.00, ctx.currentTime);
-            gain2.gain.setValueAtTime(0.08, ctx.currentTime);
-            gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+            osc2.frequency.setValueAtTime(880.00, now2);
+            gain2.gain.setValueAtTime(0.08, now2);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now2 + 0.35);
             osc2.connect(gain2);
-            gain2.connect(ctx.destination);
-            osc2.start();
-            osc2.stop(ctx.currentTime + 0.35);
+            gain2.connect(audioCtx.destination);
+            osc2.start(now2);
+            osc2.stop(now2 + 0.35);
           }, 120);
         } catch (e) {
-          console.error("AudioContext bloqueado ou não suportado:", e);
+          console.error("[Walker Bank] Erro ao reproduzir som de notificação:", e);
         }
       };
 
@@ -3223,10 +3261,13 @@
         // Toca som
         playNotificationSound();
 
+        const nomeCliente = lead.lead?.nome || lead.nome || 'Sem Nome';
+        const valorSolicitado = lead.proposta?.valor_solicitado || lead.valor_solicitado || 0;
+
         // Dispara notificação nativa
         triggerNativeNotification(
           "Nova Proposta de Crédito!",
-          `Cliente: ${lead.lead?.nome}\nValor: ${formatBRL(lead.proposta?.valor_solicitado || 0)}`,
+          `Cliente: ${nomeCliente}\nValor: ${formatBRL(valorSolicitado)}`,
           lead.id
         );
 
@@ -3241,7 +3282,7 @@
             <span style="font-weight:700; color:var(--gold); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">Nova Proposta Recebida!</span>
           </div>
           <div style="font-size:0.8rem; color:rgba(255,255,255,0.9); line-height:1.4;">
-            O cliente <strong>${lead.lead?.nome || 'Sem Nome'}</strong> acaba de solicitar um empréstimo de <strong>${formatBRL(lead.proposta?.valor_solicitado || 0)}</strong>.
+            O cliente <strong>${nomeCliente}</strong> acaba de solicitar um empréstimo de <strong>${formatBRL(valorSolicitado)}</strong>.
           </div>
           <button class="btn-action" style="padding:6px 12px; font-size:0.725rem; background:var(--gold); color:var(--navy); font-weight:700; border-radius:6px; border:none; cursor:pointer; align-self:flex-end;" id="toast-btn-ver-${lead.id}">
             Analisar Proposta
@@ -3310,12 +3351,40 @@
                 const newRow = payload.new;
                 if (!knownLeadIds.has(newRow.id)) {
                   knownLeadIds.add(newRow.id);
+
+                  let parsedPayload = {};
+                  if (newRow.payload) {
+                    if (typeof newRow.payload === 'string') {
+                      try {
+                        parsedPayload = JSON.parse(newRow.payload);
+                      } catch (e) {
+                        console.error("[Walker Bank] Erro ao parsear newRow.payload no setupRealtime:", e);
+                      }
+                    } else if (typeof newRow.payload === 'object') {
+                      parsedPayload = newRow.payload;
+                    }
+                  }
+
                   const leadData = {
                     id: newRow.id,
                     createdAt: newRow.created_at,
                     status: newRow.status,
-                    ...(newRow.payload || {})
+                    ...parsedPayload
                   };
+
+                  // Garantir estruturas e aplicar fallbacks a partir das colunas principais do banco
+                  if (!leadData.lead) leadData.lead = {};
+                  if (!leadData.lead.nome && newRow.nome) leadData.lead.nome = newRow.nome;
+                  if (!leadData.lead.cpf && newRow.cpf) leadData.lead.cpf = newRow.cpf;
+
+                  if (!leadData.dados_funcionais) leadData.dados_funcionais = {};
+                  if (!leadData.dados_funcionais.convenio && newRow.convenio) leadData.dados_funcionais.convenio = newRow.convenio;
+
+                  if (!leadData.proposta) leadData.proposta = {};
+                  if (!leadData.proposta.valor_solicitado && newRow.valor_solicitado) {
+                    leadData.proposta.valor_solicitado = newRow.valor_solicitado;
+                  }
+
                   showNewProposalAlert(leadData);
                 }
               }
