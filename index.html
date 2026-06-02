@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Walker Bank — Crédito Consignado para Servidor Público</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Simule seu crédito consignado no Walker Bank. As menores taxas para servidores públicos (INSS, Forças Armadas, Estaduais e Municipais). Sem burocracia e com aprovação rápida.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#181b2c">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"/>
+  
+  <style>
+    /* Custom Fonts declarations */
+    @font-face {
+      font-family: 'Giga Sans';
+      src: url('FONTE/GIGA SANS/Locomotype  GigaSansRegular.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Giga Sans';
+      src: url('FONTE/GIGA SANS/Locomotype  GigaSansMedium.otf') format('opentype');
+      font-weight: 500;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Giga Sans';
+      src: url('FONTE/GIGA SANS/Locomotype  GigaSansSemiBold.otf') format('opentype');
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Giga Sans';
+      src: url('FONTE/GIGA SANS/Locomotype  GigaSansBold.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      --navy: #181b2c;
+      --cobalt: #20274a;
+      --gold: #d4bc6e;
+      --nardo: #cecfd3;
+      --white: #ffffff;
+      --black: #000000;
+      --dark-gold: #a69458;
+      --light-gray: #f5f6fa;
+      --gray-text: #606266;
+      --gray-light-text: #8e9094;
+      --font-title: 'Giga Sans', sans-serif;
+      --font-body: 'Giga Sans', sans-serif;
+      --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-fast: all 0.2s ease;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 10px 30px rgba(24, 27, 44, 0.08);
+      --shadow-lg: 0 20px 50px rgba(24, 27, 44, 0.15);
+      --container-width: 1200px;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      color: var(--navy);
+      font-family: var(--font-body);
+      background-color: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    body {
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--font-title);
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: var(--transition-fast);
+    }
+    
+    /* Layout Helpers */
+    .container {
+      width: 100%;
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-padding {
+      padding: 100px 0;
+    }
+    @media (max-width: 768px) {
+      .section-padding {
+        padding: 60px 0;
+      }
+    }
+
+    /* Scroll Reveal Styles - Managed by AOS */
+    
+    /* Header Styles */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: transparent;
+      padding: 24px 0;
+      transition: var(--transition-smooth);
+    }
+
+    header.scrolled {
+      background: rgba(24, 27, 44, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 16px 0;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid rgba(212, 188, 110, 0.15);
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-img {
+      height: 58px;
+      width: auto;
+      display: block;
+      transition: var(--transition-smooth);
+    }
+
+    .nav-btn {
+      display: inline-block;
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 10px 22px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      border-radius: 40px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(212, 188, 110, 0.1);
+    }
+
+    .nav-btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 188, 110, 0.3);
+    }
+
+    /* Button Primary Component */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gold);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 16px 36px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(212, 188, 110, 0.25);
+      transition: var(--transition-smooth);
+    }
+
+    .btn-primary:hover {
+      background: var(--dark-gold);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(212, 188, 110, 0.4);
+    }
+
+    .btn-primary svg {
+      margin-left: 8px;
+      transition: var(--transition-fast);
+    }
+
+    .btn-primary:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* Section 01 — Hero */
+    .hero-section {
+      background-color: var(--navy);
+      background-image: radial-gradient(circle at 80% 20%, rgba(32, 39, 74, 0.5), transparent 50%);
+      background-size: cover;
+      min-height: 100vh;
+      padding-top: 160px;
+      padding-bottom: 80px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Camada 1: Imagem do Escritório com Transparência */
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('IMAGENS/Generated Image May 31, 2026 - 6_53PM.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.08; /* Um pouco mais sutil para não clarear o fundo */
+      mix-blend-mode: overlay;
+      filter: grayscale(100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Camada 2: Logotipo Oficial de Linhas Estourado no Fundo */
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 65%; /* Desloca o centro da imagem para a direita, saindo de trás do texto */
+      transform: translate(-50%, -50%);
+      width: 130vw; /* Bem estourado, pegando mais do que a tela */
+      height: 130vh;
+      background-image: url('LOGOTIPO/LOGO WALKER BANK LINHA.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.035; /* Transparência muito sutil e elegante */
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero-section .container {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    @media (max-width: 991px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 40px;
+      }
+      
+      .hero-image-wrapper {
+        display: flex; /* Exibido no mobile/tablet de forma centralizada */
+        justify-content: center;
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        margin: 40px auto 0 auto;
+        height: auto;
+        z-index: 3;
+      }
+    }
+
+    .hero-tagline {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+
+    @media (max-width: 576px) {
+      .hero-title {
+        font-size: 2.2rem;
+      }
+    }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 40px;
+      font-weight: 400;
+      max-width: 540px;
+    }
+
+    @media (max-width: 991px) {
+      .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+
+    .hero-cta-wrapper {
+      margin-bottom: 32px;
+    }
+
+    .hero-social-proof {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 991px) {
+      .hero-social-proof {
+        justify-content: center;
+      }
+    }
+
+    .stars {
+      color: var(--gold);
+      letter-spacing: 2px;
+      font-size: 1rem;
+    }
+
+    .hero-image-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    @media (min-width: 992px) {
+      .hero-image-wrapper {
+        position: absolute;
+        bottom: 45px; /* Subiu 45px para destacar o efeito de flutuação */
+        left: 50%;
+        width: 50%;
+        max-width: 600px;
+        height: 80%;
+        z-index: 3;
+        pointer-events: none;
+      }
+    }
+
+    .hero-image-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 440px;
+      height: 440px;
+      border: 1px dashed rgba(212, 188, 110, 0.2);
+      border-radius: 50%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero-image-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(214, 188, 110, 0.45) 0%, rgba(24, 27, 44, 0.3) 50%, transparent 70%);
+      filter: blur(40px);
+      z-index: 1;
+      pointer-events: none;
+      border-radius: 50%;
+      animation: pulseFlare 6s ease-in-out infinite alternate;
+    }
+
+    .hero-img {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      max-height: 580px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.35));
+      transform: scale(1.1);
+      transform-origin: bottom center;
+      pointer-events: auto;
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    @keyframes pulseFlare {
+      0% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.7;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+      }
+    }
+
+    /* Section 02 — Benefícios */
+    .benefits-section {
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .benefits-section::before {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      right: -100px;
+      width: 850px;
+      height: 850px;
+      background-image: url('IMAGENS/—Pngtree—eagle bird_21049858.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom right;
+      filter: grayscale(100%);
+      opacity: 0.06; /* Reduzido de 0.08 para 0.06 para maior sofisticação em tamanho grande */
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .benefits-section .container {
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+      margin-bottom: 60px;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+
+    .section-header p {
+      color: var(--gray-text);
+      font-size: 1.1rem;
+    }
+
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 991px) {
+      .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .benefits-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .benefit-card {
+      background: var(--white);
+      border: 0.5px solid var(--nardo);
+      border-radius: 12px;
+      padding: 32px 24px;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      perspective: 1000px;
+      transform-style: preserve-3d;
+    }
+
+    .benefit-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+      transform: skewX(-20deg);
+      z-index: 3;
+      pointer-events: none;
+      transition: none;
+    }
+
+    .benefit-card:hover {
+      background: linear-gradient(135deg, #181b2c 0%, #1e2646 50%, #293466 100%);
+      border-color: var(--gold);
+      transform: translateY(-8px) rotateY(12deg) rotateX(4deg);
+      box-shadow: 0 20px 40px rgba(24, 27, 44, 0.3);
+    }
+
+    .benefit-card:hover::after {
+      left: 150%;
+      transition: left 0.8s ease-in-out;
+    }
+
+    .benefit-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: rgba(24, 27, 44, 0.06);
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .benefit-card:hover .benefit-icon {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--gold);
+      transform: translateZ(20px);
+    }
+
+    .benefit-title {
+      font-family: var(--font-body);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 12px;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .benefit-card:hover .benefit-title {
+      color: var(--white);
+      transform: translateZ(15px);
+    }
+
+    .benefit-desc {
+      font-size: 0.93rem;
+      color: var(--gray-text);
+      line-height: 1.5;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .benefit-card:hover .benefit-desc {
+      color: rgba(255, 255, 255, 0.8);
+      transform: translateZ(10px);
+    }
+
+    /* Section 03 — Simulador (⚡ Seção Mais Importante) */
+    .simulator-section {
+      background: var(--light-gray);
+      position: relative;
+    }
+
+    .simulator-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid rgba(24, 27, 44, 0.05);
+    }
+
+    @media (max-width: 576px) {
+      .simulator-card {
+        padding: 24px 16px;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 32px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Pill Selection styles */
+    .pill-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 576px) {
+      .pill-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .pill-btn {
+      background: var(--white);
+      border: 1.5px solid var(--nardo);
+      color: var(--navy);
+      padding: 12px 16px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--navy);
+      background: rgba(24, 27, 44, 0.05);
+      color: var(--navy);
+    }
+
+    .pill-btn.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(24, 27, 44, 0.2);
+    }
+
+    .pill-btn.active:hover {
+      background: #202742;
+      border-color: #202742;
+      color: var(--white);
+    }
+
+    /* Range Slider styles */
+    .slider-display {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .slider-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: var(--font-body);
+      line-height: 1;
+    }
+
+    .slider-container {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--nardo);
+      outline: none;
+      margin: 15px 0;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      border: 4px solid var(--navy);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: var(--transition-fast);
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+      background: var(--dark-gold);
+      transform: scale(1.1);
+    }
+
+    .slider-limits {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8125rem;
+      color: var(--gray-light-text);
+      font-weight: 500;
+    }
+
+    /* Prazo Selection (Pills 24x - 96x) */
+    .prazo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 576px) {
+      .prazo-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .prazo-grid button:last-child {
+        grid-column: span 3;
+      }
+    }
+
+    /* Result Box style */
+    .result-outer-container {
+      min-height: 180px; /* Reserves layout space preventing CLS */
+      margin: 40px 0 24px 0;
+    }
+
+    .result-container {
+      background: var(--light-gray);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px dashed var(--nardo);
+      text-align: center;
+      transition: var(--transition-smooth);
+    }
+
+    .result-title {
+      font-size: 0.875rem;
+      color: var(--gray-text);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .result-value-main {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .result-value-main span {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--gray-text);
+    }
+
+    .result-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      border-top: 1px solid var(--nardo);
+      padding-top: 12px;
+      font-size: 0.875rem;
+    }
+
+    .detail-item {
+      text-align: center;
+    }
+
+    .detail-label {
+      color: var(--gray-light-text);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .detail-val {
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    /* Fade transition in JS */
+    .fade-anim {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0.4;
+        transform: scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .btn-submit-sim {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .disclaimer-text {
+      text-align: center;
+      font-size: 0.6875rem;
+      color: var(--gray-light-text);
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+
+    /* Simulator Layout Grid & Vertical Steps */
+    .simulator-layout-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 60px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 991px) {
+      .simulator-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+    }
+
+    .vertical-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      position: relative;
+      margin-top: 20px;
+      background: var(--white);
+      padding: 32px;
+      border-radius: 16px;
+      border: 1px solid rgba(24, 27, 44, 0.05);
+      box-shadow: var(--shadow-md);
+    }
+
+    .vertical-steps::before {
+      content: '';
+      position: absolute;
+      top: 60px; /* Metade do padding vertical (32px) + metade do diâmetro do primeiro círculo (28px) */
+      bottom: 60px; /* Metade do padding vertical (32px) + metade do diâmetro do último círculo (28px) */
+      left: 60px; /* Padding vertical (32px) + metade do diâmetro do círculo (28px) */
+      width: 2px;
+      border-left: 2px dashed var(--nardo);
+      z-index: 1;
+    }
+
+    .vertical-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .vertical-step-item .step-number {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid var(--white);
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+      z-index: 2;
+    }
+
+    .vertical-step-item .step-content {
+      padding-top: 10px;
+    }
+
+    .vertical-step-item .step-title {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .vertical-step-item .step-desc {
+      font-size: 0.9rem;
+      color: var(--gray-text);
+      line-height: 1.5;
+    }
+
+    /* Section 05 — Depoimentos */
+    .testimonials-section {
+      background: var(--light-gray);
+    }
+
+    .testimonials-slider {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 991px) {
+      .testimonials-slider {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 20px;
+        gap: 16px;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .testimonial-card {
+        min-width: 300px;
+        flex: 1 0 auto;
+        scroll-snap-align: start;
+      }
+    }
+
+    .testimonial-card {
+      background: var(--white);
+      border: 0.5px solid var(--nardo);
+      border-radius: 12px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .testimonial-stars {
+      color: var(--gold);
+      margin-bottom: 16px;
+      font-size: 1.1rem;
+    }
+
+    .testimonial-text {
+      color: var(--navy);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      font-size: 0.85rem;
+      color: var(--gray-light-text);
+      font-weight: 500;
+      border-top: 1px solid var(--light-gray);
+      padding-top: 16px;
+    }
+
+    .testimonial-author strong {
+      color: var(--navy);
+      display: block;
+      font-size: 0.93rem;
+      font-style: normal;
+      margin-bottom: 2px;
+    }
+
+    /* Section 06 — Convênios Atendidos Premium */
+    .convenios-section {
+      background-color: var(--navy);
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(212, 188, 110, 0.08), transparent 70%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80' fill='none' stroke='%23ffffff' stroke-opacity='0.01' stroke-width='1'%3E%3Cpath d='M0 0 L80 80 M80 0 L0 80'/%3E%3C/svg%3E");
+      color: var(--white);
+      text-align: center;
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .convenios-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 188, 110, 0.2), transparent);
+    }
+
+    .convenios-section::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 188, 110, 0.2), transparent);
+    }
+
+    .convenios-section .tagline {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .convenios-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .convenios-section .section-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto 60px auto;
+    }
+
+    .convenios-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      text-align: left;
+    }
+
+    @media (max-width: 991px) {
+      .convenios-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .convenios-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .convenio-card {
+      background: rgba(32, 39, 74, 0.4);
+      border: 1px solid rgba(212, 188, 110, 0.15);
+      border-radius: 16px;
+      padding: 32px 24px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+    }
+
+    .convenio-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      background: radial-gradient(circle at 50% 0%, rgba(212, 188, 110, 0.12), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .convenio-card:hover {
+      background: rgba(32, 39, 74, 0.75);
+      border-color: rgba(212, 188, 110, 0.5);
+      transform: translateY(-8px);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.3),
+        0 0 24px rgba(212, 188, 110, 0.12);
+    }
+
+    .convenio-card:hover::before {
+      opacity: 1;
+    }
+
+    .convenio-icon {
+      width: 54px;
+      height: 54px;
+      background: rgba(212, 188, 110, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      margin-bottom: 24px;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2;
+    }
+
+    .convenio-card:hover .convenio-icon {
+      background: var(--gold);
+      color: var(--navy);
+      transform: scale(1.08) rotate(5deg);
+    }
+
+    .convenio-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+      z-index: 2;
+    }
+
+    .convenio-type {
+      font-size: 0.8125rem;
+      color: var(--gold);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+      z-index: 2;
+    }
+
+    .convenio-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.75);
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+      z-index: 2;
+    }
+
+    .convenio-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .convenio-features li::before {
+      content: '✓';
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    /* Section 07 — FAQ (Accordion) */
+    .faq-section {
+      background: var(--white);
+    }
+
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border-bottom: 1.5px solid var(--nardo);
+      padding: 8px 0;
+    }
+
+    .faq-item:first-child {
+      border-top: 1.5px solid var(--nardo);
+    }
+
+    .faq-trigger {
+      width: 100%;
+      background: transparent;
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      text-align: left;
+      cursor: pointer;
+      color: var(--navy);
+    }
+
+    .faq-question {
+      font-size: 1.125rem;
+      font-weight: 700;
+      font-family: var(--font-body);
+      padding-right: 20px;
+      transition: var(--transition-fast);
+    }
+
+    .faq-trigger:hover .faq-question {
+      color: var(--gold);
+    }
+
+    .faq-icon {
+      font-size: 1.5rem;
+      color: var(--gold);
+      line-height: 1;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+      flex-shrink: 0;
+    }
+
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .faq-content p {
+      padding-bottom: 24px;
+      color: var(--gray-text);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .faq-item.active .faq-content {
+      /* max-height handled in JS */
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    /* Section 08 — CTA Final & Footer */
+    .cta-final-section {
+      background-color: var(--navy);
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(32, 39, 74, 0.5), transparent 45%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%23d4bc6e' stroke-width='1' stroke-opacity='0.04'%3E%3Cpath d='M10 20 L35 80 L50 45 L65 80 L90 20' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-size: cover, 100px 100px;
+      color: var(--white);
+      text-align: center;
+      padding: 100px 0 60px 0;
+    }
+
+    .cta-final-content {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .cta-final-title {
+      font-size: 2.75rem;
+      margin-bottom: 16px;
+      color: var(--white);
+    }
+
+    @media (max-width: 576px) {
+      .cta-final-title {
+        font-size: 2rem;
+      }
+    }
+
+    .cta-final-subtitle {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 36px;
+    }
+
+    .cta-final-btn-wrap {
+      margin-bottom: 40px;
+    }
+
+    .cta-badges-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 60px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
+    }
+
+    .cta-badge-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cta-badge-icon {
+      color: var(--gold);
+      font-size: 1.1rem;
+    }
+
+    /* Footer Bottom */
+    .footer-divider {
+      border: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--gray-light-text);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a:hover {
+      color: var(--gold);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(24, 27, 44, 0.85);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background: var(--white);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 460px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(20px);
+      transition: var(--transition-smooth);
+      border: 1px solid rgba(24, 27, 44, 0.05);
+      position: relative;
+    }
+
+    /* Modal Largo para Políticas e Termos */
+    .modal-card.modal-large {
+      max-width: 600px;
+      text-align: left;
+      padding: 32px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--gray-light-text);
+      cursor: pointer;
+      line-height: 1;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+
+    .modal-close:hover {
+      color: var(--navy);
+      background: var(--light-gray);
+    }
+
+    .modal-scroll-content {
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 12px;
+      margin-top: 10px;
+      font-size: 0.875rem;
+      color: var(--gray-text);
+      line-height: 1.6;
+    }
+
+    /* Estilização da barra de rolagem */
+    .modal-scroll-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .modal-scroll-content::-webkit-scrollbar-track {
+      background: var(--light-gray);
+      border-radius: 4px;
+    }
+
+    .modal-scroll-content::-webkit-scrollbar-thumb {
+      background: var(--nardo);
+      border-radius: 4px;
+    }
+
+    .modal-scroll-content::-webkit-scrollbar-thumb:hover {
+      background: var(--gray-light-text);
+    }
+
+    .modal-scroll-content h4 {
+      color: var(--navy);
+      margin: 18px 0 8px 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .modal-scroll-content p {
+      margin-bottom: 12px;
+    }
+
+    .modal-scroll-content ul {
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+
+    .modal-scroll-content li {
+      margin-bottom: 6px;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(212, 188, 110, 0.1);
+      color: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin: 0 auto 24px auto;
+    }
+
+    .modal-title {
+      font-size: 1.75rem;
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+
+    .modal-text {
+      font-size: 0.95rem;
+      color: var(--gray-text);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .modal-btn {
+      width: 100%;
+      background: var(--navy);
+      color: var(--white);
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      box-shadow: 0 4px 12px rgba(24, 27, 44, 0.15);
+    }
+
+    .modal-btn:hover {
+      background: #202742;
+      transform: translateY(-2px);
+    }
+
+    /* Spinner Loader para transição de modal */
+    .spinner-loader {
+      width: 48px;
+      height: 48px;
+      border: 4px dashed rgba(212, 188, 110, 0.2);
+      border-top: 4px solid var(--gold);
+      border-radius: 50%;
+      animation: spinLoader 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      margin: 0 auto 24px auto;
+    }
+
+    @keyframes spinLoader {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Floating UI Tooltips */
+    .tooltip-trigger {
+      cursor: pointer;
+      color: var(--gold);
+      font-size: 0.725rem;
+      font-weight: normal;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: rgba(212, 188, 110, 0.1);
+      transition: var(--transition-fast);
+      outline: none;
+    }
+
+    .tooltip-trigger:hover, .tooltip-trigger:focus {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .tooltip-popup {
+      position: absolute;
+      background: var(--navy);
+      color: var(--white);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      max-width: 220px;
+      z-index: 2100;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(212, 188, 110, 0.2);
+      line-height: 1.4;
+      pointer-events: none; /* Evita que o tooltip bloqueie cliques */
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      visibility: hidden;
+    }
+
+    .tooltip-popup.show {
+      opacity: 1;
+      transform: scale(1);
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="header">
+    <div class="container header-container">
+      <a href="#" class="logo-group" aria-label="Walker Bank Home">
+        <img src="LOGOTIPO/LOGO WALKER BANK BRANCO.png" alt="Walker Bank" class="logo-img">
+      </a>
+      <nav>
+        <a href="#simulador" class="nav-btn">Simular agora</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <p class="hero-tagline animate__animated animate__fadeInDown" style="animation-duration: 0.8s;">Crédito Consignado</p>
+          <h1 class="hero-title animate__animated animate__fadeInUp" style="animation-duration: 0.8s; animation-delay: 0.1s;">Crédito consignado com as menores taxas para servidores públicos</h1>
+          <p class="hero-subtitle animate__animated animate__fadeInUp" style="animation-duration: 0.8s; animation-delay: 0.2s;">Simule agora e descubra quanto você pode ter em até 2 minutos. Sem burocracia. Parcelas direto na folha.</p>
+          <div class="hero-cta-wrapper animate__animated animate__fadeInUp" style="animation-duration: 0.8s; animation-delay: 0.3s;">
+            <a href="#simulador" class="btn-primary">
+              Simular meu crédito agora
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+          </div>
+          <div class="hero-social-proof animate__animated animate__fadeInUp" style="animation-duration: 0.8s; animation-delay: 0.4s;">
+            <span class="stars">★★★★★</span>
+            <span>+2.000 servidores aprovados</span>
+          </div>
+        </div>
+        <!-- Coluna vazia para preservar o espaço do layout no grid desktop -->
+        <div></div>
+      </div>
+    </div>
+    
+    <!-- Wrapper posicionado de forma absoluta em relação ao fundo do Hero -->
+    <div class="hero-image-wrapper animate__animated animate__fadeInRight" style="animation-duration: 1s; animation-delay: 0.2s;">
+      <img src="IMAGENS/Pessoas.png" alt="Servidores públicos sorrindo e confiantes" class="hero-img" width="540" height="480">
+    </div>
+  </section>
+
+  <!-- Benefícios Section -->
+  <section class="benefits-section section-padding" id="beneficios">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <h2>Por que escolher a Walker Bank?</h2>
+        <p>Desenvolvemos soluções para garantir a melhor experiência e segurança financeira para você.</p>
+      </div>
+      <div class="benefits-grid">
+        <!-- Benefit 1 -->
+        <div class="benefit-card" data-aos="fade-up" data-aos-delay="0">
+          <div class="benefit-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <h3 class="benefit-title">Menor taxa do mercado</h3>
+          <p class="benefit-desc">Desconto direto na folha de pagamento, reduzindo os riscos e garantindo taxas altamente competitivas.</p>
+        </div>
+        <!-- Benefit 2 -->
+        <div class="benefit-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="benefit-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <h3 class="benefit-title">Aprovação em minutos</h3>
+          <p class="benefit-desc">Sem filas, sem papelada acumulada. Todo o processo é realizado 100% online pelo celular ou computador.</p>
+        </div>
+        <!-- Benefit 3 -->
+        <div class="benefit-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="benefit-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <h3 class="benefit-title">Parcelas que cabem no bolso</h3>
+          <p class="benefit-desc">Opções de parcelamento estendidas em até 96 meses. Você simula e escolhe o valor e o prazo ideais.</p>
+        </div>
+        <!-- Benefit 4 -->
+        <div class="benefit-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="benefit-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          <h3 class="benefit-title">Suporte humano completo</h3>
+          <p class="benefit-desc">Um especialista dedicado acompanha você em cada etapa, desde a simulação até a liberação do dinheiro.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Simulador & Como Funciona Section -->
+  <section class="simulator-section section-padding" id="simulador">
+    <div class="container">
+      <div class="simulator-layout-grid">
+        
+        <!-- Coluna da Calculadora (Simulador) -->
+        <div class="simulator-col">
+          <div class="section-header" style="text-align: left; margin-bottom: 30px; max-width: none;" data-aos="fade-up">
+            <h2>Simule seu crédito em segundos</h2>
+            <p>Escolha seu convênio, o valor que precisa e veja as parcelas estimadas em tempo real.</p>
+          </div>
+          
+          <div class="simulator-card" data-aos="fade-up" data-aos-delay="100">
+            <!-- Campo 1 — Convênio -->
+            <div class="form-group">
+              <label class="form-label">Seu convênio</label>
+              <div class="pill-grid" id="convenio-selector">
+                <button type="button" class="pill-btn active" data-convenio="inss">INSS</button>
+                <button type="button" class="pill-btn" data-convenio="mil">Forças Armadas</button>
+                <button type="button" class="pill-btn" data-convenio="est">Estadual</button>
+                <button type="button" class="pill-btn" data-convenio="mun">Municipal</button>
+              </div>
+            </div>
+            
+            <!-- Campo 2 — Valor -->
+            <div class="form-group">
+              <label class="form-label">Quanto você precisa?</label>
+              <div class="slider-display">
+                <div class="slider-value" id="val-display">R$ 3.500</div>
+              </div>
+              <div class="slider-container">
+                <input type="range" class="range-slider" id="val-slider" min="500" max="5000" step="100" value="3500">
+                <div class="slider-limits">
+                  <span id="limit-min">R$ 500</span>
+                  <span id="limit-max">R$ 5.000</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Campo 3 — Prazo -->
+            <div class="form-group">
+              <label class="form-label">Em quantas parcelas?</label>
+              <div class="prazo-grid" id="prazo-selector">
+                <button type="button" class="pill-btn" data-prazo="24">24x</button>
+                <button type="button" class="pill-btn active" data-prazo="36">36x</button>
+                <button type="button" class="pill-btn" data-prazo="48">48x</button>
+                <button type="button" class="pill-btn" data-prazo="72">72x</button>
+                <button type="button" class="pill-btn" data-prazo="96">96x</button>
+              </div>
+            </div>
+            
+            <!-- Resultado do Simulador -->
+            <div class="result-outer-container">
+              <div class="result-container" id="result-box">
+                <div class="result-title">Sua parcela estimada</div>
+                <div class="result-value-main" id="parcela-display">R$ 0,00 <span>/ mês</span></div>
+                <div class="result-details-grid">
+                  <div class="detail-item">
+                    <div class="detail-label" style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      Taxa aplicada
+                      <span class="tooltip-trigger" id="taxa-info-trigger" tabindex="0" aria-label="Informações sobre a taxa">ⓘ</span>
+                    </div>
+                    <div class="detail-val" id="taxa-display">1,80% a.m.</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label" style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      Total financiado
+                      <span class="tooltip-trigger" id="total-info-trigger" tabindex="0" aria-label="Informações sobre o total">ⓘ</span>
+                    </div>
+                    <div class="detail-val" id="total-display">R$ 0,00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- CTA do Simulador -->
+            <button type="button" class="btn-primary btn-submit-sim" id="btn-submit-simulation">
+              Quero esse crédito
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+          
+          <p class="disclaimer-text" style="text-align: left;">
+            *Simulação meramente ilustrativa, sujeita à análise de crédito e margem consignável disponível. 
+            Taxas e condições podem variar conforme convênio, regulamentação do órgão público e perfil do solicitante.
+          </p>
+        </div>
+        
+        <!-- Coluna do Como Funciona (Simples Assim) -->
+        <div class="steps-col" id="como-funciona">
+          <div class="section-header" style="text-align: left; margin-bottom: 30px; max-width: none;">
+            <h2>Simples assim — 3 passos</h2>
+            <p>Sem processos burocráticos ou idas à agência. Resolva tudo diretamente do seu smartphone.</p>
+          </div>
+          
+          <div class="vertical-steps">
+            <!-- Passo 1 -->
+            <div class="vertical-step-item">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h3 class="step-title">Simule</h3>
+                <p class="step-desc">Escolha o valor e o prazo ideal no simulador ao lado. Rápido, transparente e sem cadastro prévio.</p>
+              </div>
+            </div>
+            
+            <!-- Passo 2 -->
+            <div class="vertical-step-item">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h3 class="step-title">Preencha</h3>
+                <p class="step-desc">Insira suas informações de forma segura em nosso formulário 100% online em menos de 3 minutos.</p>
+              </div>
+            </div>
+            
+            <!-- Passo 3 -->
+            <div class="vertical-step-item">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h3 class="step-title">Receba</h3>
+                <p class="step-desc">Assim que aprovado, o dinheiro entra na sua conta de preferência em até 1 dia útil.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- Depoimentos Section -->
+  <section class="testimonials-section section-padding" id="depoimentos">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <h2>Quem já aproveitou conta</h2>
+        <p>Opinião de quem buscou menor taxa, transparência e atendimento diferenciado com a gente.</p>
+      </div>
+      
+      <div class="testimonials-slider">
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="0">
+          <div>
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">"Aprovado em 1 dia e sem sair de casa. Todo o processo pelo WhatsApp e sistema foi muito mais simples do que eu esperava. Recomendo muito!"</p>
+          </div>
+          <div class="testimonial-author">
+            <strong>Maria S.</strong>
+            Professora Estadual · SP
+          </div>
+        </div>
+        
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+          <div>
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">"Taxa muito melhor do que no meu banco tradicional de sempre. Valeu muito a pena parar e simular. Economizei um bom valor nas parcelas."</p>
+          </div>
+          <div class="testimonial-author">
+            <strong>Carlos R.</strong>
+            Servidor Municipal · MG
+          </div>
+        </div>
+        
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+          <div>
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">"Atendimento humano de verdade. Me explicaram tudo com calma e sem qualquer pressão. Dinheiro na conta no dia seguinte da aprovação."</p>
+          </div>
+          <div class="testimonial-author">
+            <strong>João P.</strong>
+            Policial Militar · RJ
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Convênios Atendidos -->
+  <section class="convenios-section" id="convenios">
+    <div class="container">
+      <span class="tagline" data-aos="fade-up">Órgãos Averbadores</span>
+      <h2 data-aos="fade-up" data-aos-delay="50">Convênios atendidos</h2>
+      <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+        Disponibilizamos crédito consignado rápido e 100% online para as principais esferas do serviço público brasileiro.
+      </p>
+      
+      <div class="convenios-grid">
+        <!-- Card 1: INSS -->
+        <div class="convenio-card" data-aos="fade-up" data-aos-delay="0">
+          <div class="convenio-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M6 22V11"></path>
+              <path d="M18 22V11"></path>
+            </svg>
+          </div>
+          <h3 class="convenio-title">INSS</h3>
+          <p class="convenio-type">Aposentados e Pensionistas</p>
+          <ul class="convenio-features">
+            <li>Taxa padrão de 3,99% a.m.</li>
+            <li>Aprovação para negativados</li>
+            <li>Parcelamento em até 84 meses</li>
+          </ul>
+        </div>
+
+        <!-- Card 2: Forças Armadas -->
+        <div class="convenio-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="convenio-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <h3 class="convenio-title">Forças Armadas</h3>
+          <p class="convenio-type">Marinha, Exército e Aeronáutica</p>
+          <ul class="convenio-features">
+            <li>Taxa de 3,99% a.m.</li>
+            <li>Opções de carência estendida</li>
+            <li>Crédito pré-aprovado imediato</li>
+          </ul>
+        </div>
+
+        <!-- Card 3: Servidor Estadual -->
+        <div class="convenio-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="convenio-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3 class="convenio-title">Estadual</h3>
+          <p class="convenio-type">Servidores Públicos Estaduais</p>
+          <ul class="convenio-features">
+            <li>Taxa atrativa de 3,99% a.m.</li>
+            <li>Amortização direta em folha</li>
+            <li>Prazo estendido em até 96 meses</li>
+          </ul>
+        </div>
+
+        <!-- Card 4: Servidor Municipal -->
+        <div class="convenio-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="convenio-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <h3 class="convenio-title">Municipal</h3>
+          <p class="convenio-type">Servidores Públicos Municipais</p>
+          <ul class="convenio-features">
+            <li>Taxa de 3,99% a.m.</li>
+            <li>Sem necessidade de avalista</li>
+            <li>Simulação simples pelo celular</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section (Accordion) -->
+  <section class="faq-section section-padding" id="faq">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <h2>Dúvidas frequentes</h2>
+        <p>Selecione as perguntas abaixo para esclarecer dúvidas sobre contratação, taxas e liberação.</p>
+      </div>
+      
+      <div class="faq-container" data-aos="fade-up" data-aos-delay="100">
+        <!-- FAQ 1 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span class="faq-question">Preciso ter conta na Walker Bank para contratar?</span>
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-content">
+            <p>Não. Qualquer servidor público elegível pode simular e contratar nosso crédito consignado. O depósito das parcelas aprovadas pode ser realizado em qualquer conta bancária de sua titularidade.</p>
+          </div>
+        </div>
+        
+        <!-- FAQ 2 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span class="faq-question">O crédito afeta minha margem consignável?</span>
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-content">
+            <p>Sim. O desconto em folha respeita o limite legal de até 35% de margem consignável para empréstimo bruto da sua remuneração, conforme a legislação vigente do seu respectivo convênio.</p>
+          </div>
+        </div>
+        
+        <!-- FAQ 3 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span class="faq-question">Em quanto tempo o dinheiro cai na conta?</span>
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-content">
+            <p>Após a aprovação formal do convênio e da averbação da margem consignável pelo seu órgão pagador, o dinheiro cai na conta indicada por você em até 1 dia útil.</p>
+          </div>
+        </div>
+        
+        <!-- FAQ 4 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span class="faq-question">Meu nome sujo impede a aprovação?</span>
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-content">
+            <p>Não necessariamente. Como a modalidade de crédito possui desconto direto na folha de pagamento e garantia de recebimento direto do órgão pagador, a análise é muito facilitada, permitindo a contratação por negativados em órgãos de proteção ao crédito (SPC/Serasa).</p>
+          </div>
+        </div>
+        
+        <!-- FAQ 5 -->
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false">
+            <span class="faq-question">Posso quitar antecipadamente?</span>
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-content">
+            <p>Sim. Você pode solicitar a liquidação parcial ou total do saldo devedor a qualquer momento, contando com a redução proporcional dos juros e encargos contratuais de acordo com a legislação do Banco Central.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Final Section & Footer -->
+  <section class="cta-final-section">
+    <div class="container">
+      <div class="cta-final-content" data-aos="fade-up">
+        <h2 class="cta-final-title">Pronto para dar o próximo passo?</h2>
+        <p class="cta-final-subtitle">Simule agora, sem compromisso. Em minutos você sabe exatamente quanto pode ter liberado.</p>
+        <div class="cta-final-btn-wrap">
+          <a href="#simulador" class="btn-primary">
+            Simular meu crédito
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+        
+        <div class="cta-badges-row">
+          <div class="cta-badge-item">
+            <span class="cta-badge-icon">🔒</span>
+            <span>Dados protegidos pela LGPD</span>
+          </div>
+          <div class="cta-badge-item">
+            <span class="cta-badge-icon">✓</span>
+            <span>Banco autorizado pelo Banco Central</span>
+          </div>
+        </div>
+      </div>
+      
+      <hr class="footer-divider">
+      
+      <div class="footer-bottom">
+        <p>Walker Bank © 2025  |  Todos os direitos reservados</p>
+        <div class="footer-links">
+          <a href="#politica" id="politica-link">Política de Privacidade</a>
+          <a href="#termos" id="termos-link">Termos de Uso</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Component Placeholder (Transição) -->
+  <div class="modal-overlay" id="leads-modal">
+    <div class="modal-card">
+      <div class="spinner-loader"></div>
+      <h3 class="modal-title">Processando Simulação...</h3>
+      <p class="modal-text">Estamos preparando o seu formulário de formalização 100% segura. Você será redirecionado em instantes.</p>
+    </div>
+  </div>
+
+  <!-- Floating UI Tooltips -->
+  <div class="tooltip-popup" id="taxa-tooltip" role="tooltip">
+    Taxa de juros nominal aplicada mensalmente sobre o saldo devedor, definida de acordo com as regras de cada convênio e órgão público pagador.
+  </div>
+  <div class="tooltip-popup" id="total-tooltip" role="tooltip">
+    Soma total estimada de todas as parcelas ao final do prazo escolhido, incluindo a amortização do principal e taxas de juros aplicadas.
+  </div>
+
+  <!-- Modal Política de Privacidade -->
+  <div class="modal-overlay" id="politica-modal">
+    <div class="modal-card modal-large">
+      <button class="modal-close" id="close-politica-btn" aria-label="Fechar Política de Privacidade">&times;</button>
+      <h3 class="modal-title" style="text-align: left; margin-bottom: 20px; border-bottom: 1px solid var(--nardo); padding-bottom: 10px; font-size: 1.5rem;">Política de Privacidade</h3>
+      <div class="modal-scroll-content">
+        <p>A sua privacidade é de extrema importância para o <strong>Walker Bank</strong>. Esta Política de Privacidade descreve como coletamos, usamos, processamos e protegemos as suas informações pessoais ao utilizar nosso site de simulação de crédito consignado.</p>
+        
+        <h4>1. Coleta de Informações</h4>
+        <p>Coletamos os dados que você fornece voluntariamente ao realizar simulações ou solicitar contato, tais como: nome completo, telefone/WhatsApp, endereço de e-mail, tipo de convênio (INSS, Forças Armadas, Estadual ou Municipal), além de informações sobre o valor e prazo de crédito simulados.</p>
+        
+        <h4>2. Finalidade do Tratamento de Dados (LGPD)</h4>
+        <p>Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), seus dados pessoais são coletados e tratados para as seguintes finalidades legítimas:</p>
+        <ul>
+          <li>Realizar simulações de parcelas e taxas de crédito personalizadas;</li>
+          <li>Entrar em contato via WhatsApp, ligação ou e-mail para apresentar propostas comerciais e dar suporte na contratação;</li>
+          <li>Verificar a elegibilidade do seu perfil perante os órgãos consignadores.</li>
+        </ul>
+        
+        <h4>3. Compartilhamento de Dados</h4>
+        <p>O Walker Bank não vende nem comercializa os seus dados pessoais. Seus dados poderão ser compartilhados apenas com órgãos públicos reguladores, parceiros bancários averbadores ou sistemas de prevenção a fraudes estritamente necessários para a análise e liberação do seu crédito consignado.</p>
+        
+        <h4>4. Segurança e Retenção</h4>
+        <p>Adotamos medidas de segurança técnicas e administrativas para proteger seus dados contra acessos não autorizados. Seus dados serão mantidos apenas pelo tempo necessário para cumprir as finalidades descritas ou conforme exigido por obrigações legais e regulatórias do Banco Central do Brasil.</p>
+        
+        <h4>5. Seus Direitos</h4>
+        <p>Você pode, a qualquer momento, solicitar a confirmação da existência de tratamento, o acesso, a correção de dados incompletos ou a exclusão de seus dados pessoais do nosso banco de dados enviando uma solicitação aos nossos canais oficiais de suporte.</p>
+      </div>
+      <button type="button" class="modal-btn" id="confirm-politica-btn" style="margin-top: 20px;">Entendido</button>
+    </div>
+  </div>
+
+  <!-- Modal Termos de Uso -->
+  <div class="modal-overlay" id="termos-modal">
+    <div class="modal-card modal-large">
+      <button class="modal-close" id="close-termos-btn" aria-label="Fechar Termos de Uso">&times;</button>
+      <h3 class="modal-title" style="text-align: left; margin-bottom: 20px; border-bottom: 1px solid var(--nardo); padding-bottom: 10px; font-size: 1.5rem;">Termos de Uso</h3>
+      <div class="modal-scroll-content">
+        <p>Ao acessar e utilizar este simulador de crédito do <strong>Walker Bank</strong>, você concorda em cumprir e se submeter aos seguintes Termos e Condições de Uso. Por favor, leia-os com atenção.</p>
+        
+        <h4>1. Caráter Informativo da Simulação</h4>
+        <p>Os valores, prazos e taxas exibidos no simulador são estimativas baseadas nas informações gerais fornecidas por você e nas taxas vigentes de cada convênio. A simulação realizada neste site <strong>não constitui uma proposta formal de contratação</strong> e não obriga o Walker Bank a conceder o crédito.</p>
+        
+        <h4>2. Elegibilidade e Condições de Contratação</h4>
+        <p>A contratação efetiva do crédito consignado está sujeita a:</p>
+        <ul>
+          <li>Análise cadastral e de crédito nos termos das políticas internas da instituição;</li>
+          <li>Disponibilidade de margem consignável averbada junto ao seu órgão pagador (INSS ou órgão público correspondente);</li>
+          <li>Validação de documentos pessoais e comprovante de vínculo funcional/aposentadoria.</li>
+        </ul>
+        
+        <h4>3. Exatidão das Informações</h4>
+        <p>O usuário é inteiramente responsável pela veracidade e exatidão de todos os dados inseridos no simulador. Informações incorretas ou fraudulentas resultarão no cancelamento imediato de qualquer solicitação e poderão ensejar responsabilidades legais.</p>
+        
+        <h4>4. Limitação de Responsabilidade</h4>
+        <p>O Walker Bank envida seus melhores esforços para manter as taxas do simulador atualizadas. Contudo, as taxas oficiais e o limite de parcelas podem sofrer alterações sem aviso prévio, de acordo com resoluções governamentais, políticas do Banco Central ou regulamentos específicos de cada órgão público conveniado.</p>
+        
+        <h4>5. Propriedade Intelectual</h4>
+        <p>Todo o conteúdo deste site, incluindo textos, layout, marca Walker Bank, ícones e códigos-fonte, são de propriedade intelectual exclusiva do Walker Bank, sendo proibida a reprodução ou cópia sem autorização prévia por escrito.</p>
+      </div>
+      <button type="button" class="modal-btn" id="confirm-termos-btn" style="margin-top: 20px;">Entendido</button>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://unpkg.com/scrollreveal"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.6.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.3"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      /* ==========================================================================
+         UTM Parameters Preservation Logic
+         ========================================================================== */
+      const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+      utmParams.forEach(p => {
+        const val = new URLSearchParams(window.location.search).get(p);
+        if (val) {
+          sessionStorage.setItem(p, val);
+        }
+      });
+      
+      /* ==========================================================================
+         AOS (Animate on Scroll) Initialization
+         ========================================================================== */
+      AOS.init({
+        duration: 800,
+        easing: 'ease-in-out-cubic',
+        once: true,
+        offset: 80
+      });
+
+      /* ==========================================================================
+         Sticky Header Scroll Behavior
+         ========================================================================== */
+      const header = document.getElementById("header");
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 50) {
+          header.classList.add("scrolled");
+        } else {
+          header.classList.remove("scrolled");
+        }
+      });
+
+      /* ==========================================================================
+         FAQ Accordion Functional Logic
+         ========================================================================== */
+      const faqTriggers = document.querySelectorAll(".faq-trigger");
+      
+      faqTriggers.forEach(trigger => {
+        trigger.addEventListener("click", () => {
+          const faqItem = trigger.parentElement;
+          const faqContent = faqItem.querySelector(".faq-content");
+          const isOpen = faqItem.classList.contains("active");
+          
+          // Close other active FAQ items
+          document.querySelectorAll(".faq-item").forEach(item => {
+            if (item !== faqItem && item.classList.contains("active")) {
+              item.classList.remove("active");
+              item.querySelector(".faq-content").style.maxHeight = "0";
+              item.querySelector(".faq-trigger").setAttribute("aria-expanded", "false");
+            }
+          });
+          
+          if (isOpen) {
+            faqItem.classList.remove("active");
+            faqContent.style.maxHeight = "0";
+            trigger.setAttribute("aria-expanded", "false");
+          } else {
+            faqItem.classList.add("active");
+            // Set max-height to the scrollHeight of content for smooth dynamic height transition
+            faqContent.style.maxHeight = faqContent.scrollHeight + "px";
+            trigger.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+
+      /* ==========================================================================
+         Simulador Reativo (⚡ Seção Mais Importante)
+         ========================================================================== */
+      
+      // Inicialização do Supabase Client
+      const supabaseUrl = "https://jmbolyzmpfnggvoedaiu.supabase.co";
+      const supabaseKey = "sb_publishable_EuvTPlZxoQqG9Owc3Yr9Uw_L1rTcLnP";
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+      // Leitura dinâmica de parâmetros comerciais configurados no Sistema Interno
+      const walkerCfg = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+      const cfgTaxa = walkerCfg.taxa_juros ? parseFloat(walkerCfg.taxa_juros) / 100 : 0.0399;
+      const cfgTaxaLabel = walkerCfg.taxa_juros ? `${parseFloat(walkerCfg.taxa_juros).toFixed(2).replace('.', ',')}% a.m.` : "3,99% a.m.";
+      const cfgValMin = walkerCfg.val_min ? parseFloat(walkerCfg.val_min) : 500;
+
+      // Configurações por convênio (Parâmetros lidos do walker_configs ou padrão 3,99% a.m.)
+      const convenioConfigs = {
+        inss: {
+          min: cfgValMin,
+          max: walkerCfg.lim_inss ? parseFloat(walkerCfg.lim_inss) : 5000,
+          default: 3500,
+          taxa: cfgTaxa,
+          labelTaxa: cfgTaxaLabel
+        },
+        mil: {
+          min: cfgValMin,
+          max: walkerCfg.lim_mil ? parseFloat(walkerCfg.lim_mil) : 15000,
+          default: 7500,
+          taxa: cfgTaxa,
+          labelTaxa: cfgTaxaLabel
+        },
+        est: {
+          min: cfgValMin,
+          max: walkerCfg.lim_est ? parseFloat(walkerCfg.lim_est) : 20000,
+          default: 10000,
+          taxa: cfgTaxa,
+          labelTaxa: cfgTaxaLabel
+        },
+        mun: {
+          min: cfgValMin,
+          max: walkerCfg.lim_mun ? parseFloat(walkerCfg.lim_mun) : 15000,
+          default: 7500,
+          taxa: cfgTaxa,
+          labelTaxa: cfgTaxaLabel
+        }
+      };
+
+      // Estado interno da simulação
+      let activeConvenio = "inss";
+      let activePrazo = 36;
+      
+      // Estado para transição numérica reativa com Anime.js
+      let animValues = {
+        parcela: 0,
+        total: 0,
+        valorSlider: 0
+      };
+      
+      const convButtons = document.querySelectorAll("#convenio-selector [data-convenio]");
+      const prazoButtons = document.querySelectorAll("#prazo-selector [data-prazo]");
+      const valSlider = document.getElementById("val-slider");
+      const valDisplay = document.getElementById("val-display");
+      const limitMin = document.getElementById("limit-min");
+      const limitMax = document.getElementById("limit-max");
+      
+      const resultBox = document.getElementById("result-box");
+      const parcelaDisplay = document.getElementById("parcela-display");
+      const taxaDisplay = document.getElementById("taxa-display");
+      const totalDisplay = document.getElementById("total-display");
+
+      // Formatar moeda BRL
+      const formatBRL = (value) => {
+        return new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 2
+        }).format(value);
+      };
+
+      // Executa o cálculo da parcela (Price Simplificado com transição Anime.js)
+      const calculatePrice = () => {
+        const config = convenioConfigs[activeConvenio];
+        const valor = parseFloat(valSlider.value);
+        const taxa = config.taxa;
+        const prazo = activePrazo;
+
+        // Fórmula: parcela = valor * (taxa * (1 + taxa)^prazo) / ((1 + taxa)^prazo - 1)
+        const taxaPow = Math.pow(1 + taxa, prazo);
+        const parcela = valor * (taxa * taxaPow) / (taxaPow - 1);
+        const totalFinanciado = parcela * prazo;
+
+        // Atualiza a taxa imediatamente
+        taxaDisplay.textContent = config.labelTaxa;
+
+        // Transição numérica reativa em tempo real com Anime.js
+        anime({
+          targets: animValues,
+          parcela: parcela,
+          total: totalFinanciado,
+          valorSlider: valor,
+          round: 100, // Duas casas decimais
+          easing: 'easeOutExpo',
+          duration: 600,
+          update: () => {
+            parcelaDisplay.innerHTML = `${formatBRL(animValues.parcela)} <span>/ mês</span>`;
+            totalDisplay.textContent = formatBRL(animValues.total);
+            valDisplay.textContent = formatBRL(Math.round(animValues.valorSlider));
+          }
+        });
+      };
+
+      // Atualiza limites e sliders baseados no convênio
+      const updateSliderLimits = (convenio) => {
+        const config = convenioConfigs[convenio];
+        
+        valSlider.min = config.min;
+        valSlider.max = config.max;
+        
+        limitMin.textContent = formatBRL(config.min);
+        limitMax.textContent = formatBRL(config.max);
+        
+        // Ajusta o valor atual caso esteja fora dos limites
+        let valAtual = parseInt(valSlider.value);
+        if (valAtual < config.min || valAtual > config.max) {
+          valSlider.value = config.default;
+          valAtual = config.default;
+        }
+        
+        // Atualiza o estado da animação para começar do valor atual
+        animValues.valorSlider = valAtual;
+        valDisplay.textContent = formatBRL(valAtual);
+      };
+
+      // Event Listener para botões de convênio
+      convButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          convButtons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          
+          activeConvenio = btn.dataset.convenio;
+          updateSliderLimits(activeConvenio);
+          calculatePrice();
+        });
+      });
+
+      // Event Listener para Slider
+      valSlider.addEventListener("input", () => {
+        calculatePrice();
+      });
+
+      // Event Listener para botões de prazo
+      prazoButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          prazoButtons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          
+          activePrazo = parseInt(btn.dataset.prazo);
+          calculatePrice();
+        });
+      });
+
+      // Inicialização do simulador
+      updateSliderLimits(activeConvenio);
+      calculatePrice();
+
+      /* ==========================================================================
+         Inicialização do ScrollReveal nos 3 passos
+         ========================================================================== */
+      ScrollReveal().reveal('.steps-col .section-header', {
+        delay: 200,
+        distance: '30px',
+        origin: 'top',
+        opacity: 0,
+        duration: 800,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        cleanup: true
+      });
+
+      ScrollReveal().reveal('.vertical-step-item', {
+        delay: 400,
+        distance: '50px',
+        origin: 'right', // Surge em slide a partir da direita no desktop
+        opacity: 0,
+        interval: 200,   // Efeito cascata (stagger) de 200ms entre as etapas
+        duration: 900,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        cleanup: true    // Restaura o estado natural do HTML após a animação
+      });
+
+      /* ==========================================================================
+         Inicialização do Floating UI para os Tooltips com autoUpdate e animação
+         ========================================================================== */
+      const { computePosition, autoUpdate, flip, shift, offset } = FloatingUIDOM;
+
+      const initTooltip = (triggerId, tooltipId) => {
+        const trigger = document.getElementById(triggerId);
+        const tooltip = document.getElementById(tooltipId);
+        let cleanupAutoUpdate = null;
+
+        function updatePosition() {
+          computePosition(trigger, tooltip, {
+            placement: 'top',
+            middleware: [
+              offset(8),
+              flip(),
+              shift({ padding: 8 })
+            ]
+          }).then(({ x, y }) => {
+            Object.assign(tooltip.style, {
+              left: `${x}px`,
+              top: `${y}px`
+              // computePosition calcula coordenadas relativas ao offsetParent do tooltip
+            });
+          });
+        }
+
+        const show = () => {
+          tooltip.classList.add("show");
+          // Inicia o autoUpdate para recalcular a posição em tempo real ao dar scroll/resize
+          cleanupAutoUpdate = autoUpdate(trigger, tooltip, updatePosition);
+        };
+
+        const hide = () => {
+          tooltip.classList.remove("show");
+          // Para de recalcular quando o tooltip é ocultado
+          if (cleanupAutoUpdate) {
+            cleanupAutoUpdate();
+            cleanupAutoUpdate = null;
+          }
+        };
+
+        const eventPairs = [
+          ['mouseenter', show],
+          ['mouseleave', hide],
+          ['focus', show],
+          ['blur', hide]
+        ];
+
+        eventPairs.forEach(([event, handler]) => {
+          trigger.addEventListener(event, handler);
+        });
+      };
+
+      initTooltip('taxa-info-trigger', 'taxa-tooltip');
+      initTooltip('total-info-trigger', 'total-tooltip');
+
+      /* ==========================================================================
+         Modal Controls
+         ========================================================================== */
+      const modal = document.getElementById("leads-modal");
+      const btnSubmitSim = document.getElementById("btn-submit-simulation");
+      const btnCloseModal = document.getElementById("close-modal-btn");
+      
+      const openModal = () => {
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden"; // Prevent scrolling
+      };
+
+      const closeModal = () => {
+        modal.classList.remove("active");
+        document.body.style.overflow = ""; // Restore scrolling
+      };
+
+      btnSubmitSim.addEventListener("click", () => {
+        const config = convenioConfigs[activeConvenio];
+        const valor = parseFloat(valSlider.value);
+        const taxa = config.taxa;
+        const prazo = activePrazo;
+
+        // Repete o cálculo exato para gravar no sessionStorage
+        const taxaPow = Math.pow(1 + taxa, prazo);
+        const parcela = valor * (taxa * taxaPow) / (taxaPow - 1);
+        const totalFinanciado = parcela * prazo;
+
+        const simulacaoData = {
+          convenio: activeConvenio,
+          convenioLabel: activeConvenio === 'inss' ? 'INSS' : activeConvenio === 'mil' ? 'Forças Armadas' : activeConvenio === 'est' ? 'Estadual' : 'Municipal',
+          valor: valor,
+          prazo: prazo,
+          parcela: parcela,
+          taxa: config.labelTaxa,
+          total: totalFinanciado
+        };
+        
+        sessionStorage.setItem("walker_simulacao", JSON.stringify(simulacaoData));
+        
+        // Abre o modal de transição
+        openModal();
+        
+        // Redireciona automaticamente após 2 segundos (2000ms)
+        setTimeout(() => {
+          window.location.href = "proposta.html";
+        }, 2000);
+      });
+
+      /* ==========================================================================
+         Modais de Políticas e Termos
+         ========================================================================== */
+      const politicaModal = document.getElementById("politica-modal");
+      const termosModal = document.getElementById("termos-modal");
+      
+      const openPolitica = (e) => {
+        if(e) e.preventDefault();
+        politicaModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      };
+      
+      const closePolitica = () => {
+        politicaModal.classList.remove("active");
+        document.body.style.overflow = "";
+      };
+      
+      const openTermos = (e) => {
+        if(e) e.preventDefault();
+        termosModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      };
+      
+      const closeTermos = () => {
+        termosModal.classList.remove("active");
+        document.body.style.overflow = "";
+      };
+      
+      document.getElementById("politica-link").addEventListener("click", openPolitica);
+      document.getElementById("close-politica-btn").addEventListener("click", closePolitica);
+      document.getElementById("confirm-politica-btn").addEventListener("click", closePolitica);
+      politicaModal.addEventListener("click", (e) => {
+        if (e.target === politicaModal) closePolitica();
+      });
+      
+      document.getElementById("termos-link").addEventListener("click", openTermos);
+      document.getElementById("close-termos-btn").addEventListener("click", closeTermos);
+      document.getElementById("confirm-termos-btn").addEventListener("click", closeTermos);
+      termosModal.addEventListener("click", (e) => {
+        if (e.target === termosModal) closeTermos();
+      });
+
+      /* ==========================================================================
+         Scroll Suave Premium Animado com Anime.js e Efeito Focus no Simulador
+         ========================================================================== */
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          const hrefValue = this.getAttribute('href');
+          if (hrefValue === "#" || hrefValue.startsWith("#modal")) return;
+          
+          e.preventDefault();
+          const target = document.querySelector(hrefValue);
+          if (target) {
+            const headerEl = document.getElementById("header");
+            const headerHeight = headerEl ? headerEl.offsetHeight : 80;
+            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight + 10;
+
+            anime({
+              targets: [document.documentElement, document.body],
+              scrollTop: targetPosition,
+              duration: 1000,
+              easing: 'easeOutExpo',
+              complete: () => {
+                // Se o target for o simulador, dispara um feedback visual premium de foco no card
+                if (hrefValue === "#simulador") {
+                  const simulatorCard = document.querySelector(".simulator-card");
+                  if (simulatorCard) {
+                    anime.timeline()
+                      .add({
+                        targets: simulatorCard,
+                        scale: [1, 1.02, 1],
+                        borderColor: ['rgba(24, 27, 44, 0.05)', '#d4bc6e', 'rgba(24, 27, 44, 0.05)'],
+                        boxShadow: [
+                          '0 10px 30px rgba(24, 27, 44, 0.08)',
+                          '0 15px 40px rgba(212, 188, 110, 0.35)',
+                          '0 10px 30px rgba(24, 27, 44, 0.08)'
+                        ],
+                        duration: 800,
+                        easing: 'easeOutQuad'
+                      });
+                  }
+                }
+              }
+            });
+          }
+        });
+      });
+
+      // Função para sincronizar configurações do Supabase em tempo real
+      const syncConfigsFromSupabase = async () => {
+        try {
+          const { data, error } = await supabaseClient
+            .from('configs')
+            .select('data')
+            .eq('id', 'default')
+            .single();
+
+          if (error) throw error;
+          if (data && data.data) {
+            localStorage.setItem("walker_configs", JSON.stringify(data.data));
+            const walkerCfg = data.data;
+            const cfgTaxa = walkerCfg.taxa_juros ? parseFloat(walkerCfg.taxa_juros) / 100 : 0.0399;
+            const cfgTaxaLabel = walkerCfg.taxa_juros ? `${parseFloat(walkerCfg.taxa_juros).toFixed(2).replace('.', ',')}% a.m.` : "3,99% a.m.";
+            const cfgValMin = walkerCfg.val_min ? parseFloat(walkerCfg.val_min) : 500;
+
+            convenioConfigs.inss.min = cfgValMin;
+            convenioConfigs.inss.max = walkerCfg.lim_inss ? parseFloat(walkerCfg.lim_inss) : 5000;
+            convenioConfigs.inss.taxa = cfgTaxa;
+            convenioConfigs.inss.labelTaxa = cfgTaxaLabel;
+
+            convenioConfigs.mil.min = cfgValMin;
+            convenioConfigs.mil.max = walkerCfg.lim_mil ? parseFloat(walkerCfg.lim_mil) : 15000;
+            convenioConfigs.mil.taxa = cfgTaxa;
+            convenioConfigs.mil.labelTaxa = cfgTaxaLabel;
+
+            convenioConfigs.est.min = cfgValMin;
+            convenioConfigs.est.max = walkerCfg.lim_est ? parseFloat(walkerCfg.lim_est) : 20000;
+            convenioConfigs.est.taxa = cfgTaxa;
+            convenioConfigs.est.labelTaxa = cfgTaxaLabel;
+
+            convenioConfigs.mun.min = cfgValMin;
+            convenioConfigs.mun.max = walkerCfg.lim_mun ? parseFloat(walkerCfg.lim_mun) : 15000;
+            convenioConfigs.mun.taxa = cfgTaxa;
+            convenioConfigs.mun.labelTaxa = cfgTaxaLabel;
+
+            updateSliderLimits(activeConvenio);
+            calculatePrice();
+          }
+        } catch (err) {
+          console.warn("Erro ao ler configs do Supabase, usando local:", err);
+        }
+      };
+
+      syncConfigsFromSupabase();
+
+    });
+  </script>
+</body>
+</html>

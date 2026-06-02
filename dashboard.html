@@ -1,0 +1,3232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesa de Crédito — Sistema Interno · Walker Bank</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#181b2c">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  
+  <style>
+    /* Custom Fonts declarations */
+    @font-face {
+      font-family: 'Giga Sans';
+      src: url('FONTE/GIGA SANS/Locomotype  GigaSansRegular.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Giga Sans';
+      src: url('FONTE/GIGA SANS/Locomotype  GigaSansMedium.otf') format('opentype');
+      font-weight: 500;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Giga Sans';
+      src: url('FONTE/GIGA SANS/Locomotype  GigaSansBold.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      --navy: #181b2c;
+      --cobalt: #1e2544;
+      --gold: #d4bc6e;
+      --nardo: #cecfd3;
+      --white: #ffffff;
+      --black: #000000;
+      --dark-gold: #a69458;
+      --light-gray: #f5f6fa;
+      --gray-text: #606266;
+      --gray-light-text: #8e9094;
+      --green-success: #2ecc71;
+      --red-error: #e74c3c;
+      --blue-info: #3498db;
+      --sidebar-w: 260px;
+      --font-title: 'Giga Sans', sans-serif;
+      --font-body: 'Giga Sans', sans-serif;
+      --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-fast: all 0.2s ease;
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    body {
+      font-family: var(--font-body);
+      background-color: var(--light-gray);
+      color: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+
+    /* ========================================
+       SIDEBAR — Menu Lateral Fixo
+    ======================================== */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 200;
+      border-right: 1px solid rgba(212, 188, 110, 0.1);
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 32px 20px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid rgba(212, 188, 110, 0.08);
+    }
+
+    .sidebar-logo img {
+      height: 54px;
+      width: auto;
+      max-width: 100%;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 16px 20px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: rgba(255, 255, 255, 0.55);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .nav-item.active {
+      color: var(--gold);
+      background: rgba(212, 188, 110, 0.06);
+      border-left-color: var(--gold);
+      font-weight: 700;
+    }
+
+    .nav-item .nav-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .nav-item .nav-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+    }
+
+    .nav-item .nav-count {
+      margin-left: auto;
+      background: rgba(212, 188, 110, 0.15);
+      color: var(--gold);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(212, 188, 110, 0.08);
+    }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .sidebar-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .sidebar-user-info {
+      flex: 1;
+    }
+
+    .sidebar-user-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .sidebar-user-role {
+      font-size: 0.65rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .btn-logout {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid rgba(212, 188, 110, 0.3);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width: 100%;
+      font-family: var(--font-body);
+    }
+    
+    .btn-logout:hover {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    /* ========================================
+       MAIN CONTENT AREA
+    ======================================== */
+    .main-wrapper {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid rgba(24, 27, 44, 0.06);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .topbar-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .topbar-title small {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--gray-light-text);
+      margin-left: 8px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-date {
+      font-size: 0.8rem;
+      color: var(--gray-text);
+      font-weight: 500;
+    }
+
+    /* Content Pages */
+    .content-area {
+      flex: 1;
+      padding: 32px;
+    }
+
+    .page-section {
+      display: none;
+      animation: pageFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ========================================
+       SHARED COMPONENTS
+    ======================================== */
+
+    /* Métricas Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    
+    @media (max-width: 1200px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    .metric-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid rgba(24, 27, 44, 0.05);
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-smooth);
+    }
+    
+    .metric-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(24, 27, 44, 0.08);
+      border-color: rgba(212, 188, 110, 0.3);
+    }
+
+    .metric-card.highlight {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--cobalt) 100%);
+      border: 1px solid rgba(212, 188, 110, 0.2);
+    }
+
+    .metric-card.highlight .metric-label,
+    .metric-card.highlight .metric-sub { color: rgba(255,255,255,0.6); }
+    .metric-card.highlight .metric-value { color: var(--gold); }
+    
+    .metric-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gray-light-text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .metric-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.1;
+    }
+    
+    .metric-sub {
+      font-size: 0.725rem;
+      color: var(--gray-text);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* Cards / Painel */
+    .panel-card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid rgba(24, 27, 44, 0.05);
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .panel-card-header {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(24, 27, 44, 0.06);
+    }
+
+    .panel-card-header h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .panel-card-body {
+      padding: 24px;
+    }
+
+    /* Filtros e Controles */
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .search-input-wrapper {
+      position: relative;
+      min-width: 240px;
+    }
+    
+    .search-input-wrapper input {
+      width: 100%;
+      padding: 10px 16px 10px 36px;
+      border-radius: 8px;
+      border: 1.5px solid var(--nardo);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition-fast);
+    }
+    
+    .search-input-wrapper input:focus {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(24, 27, 44, 0.05);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-light-text);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+    .search-icon svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+    }
+    
+    .filter-select {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--nardo);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      background-color: var(--white);
+      outline: none;
+      color: var(--navy);
+      cursor: pointer;
+    }
+
+    .filter-input {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--nardo);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      outline: none;
+      color: var(--navy);
+      width: 140px;
+    }
+    
+    .filter-select:focus, .filter-input:focus {
+      border-color: var(--navy);
+    }
+
+    .btn-filter {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      border: 1.5px solid var(--nardo);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .btn-filter:hover {
+      border-color: var(--navy);
+    }
+
+    .btn-export {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      border: none;
+      background: var(--navy);
+      color: var(--gold);
+      margin-left: auto;
+    }
+
+    .btn-export:hover {
+      background: var(--cobalt);
+      transform: translateY(-1px);
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+    
+    th {
+      background: #f8f9fc;
+      color: var(--gray-text);
+      font-weight: 700;
+      padding: 14px 20px;
+      border-bottom: 1.5px solid rgba(24, 27, 44, 0.08);
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    
+    td {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(24, 27, 44, 0.05);
+      vertical-align: middle;
+    }
+    
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(244, 245, 250, 0.5); }
+    
+    .lead-name-cell {
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .lead-sub-cell {
+      font-size: 0.7rem;
+      color: var(--gray-light-text);
+      font-weight: normal;
+      margin-top: 2px;
+    }
+    
+    /* Badge Status */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    
+    .status-badge.aguardando { background: rgba(52, 152, 219, 0.1); color: var(--blue-info); }
+    .status-badge.aprovado { background: rgba(46, 204, 113, 0.1); color: var(--green-success); }
+    .status-badge.recusado { background: rgba(231, 76, 60, 0.1); color: var(--red-error); }
+    .status-badge.pago { background: rgba(212, 188, 110, 0.15); color: var(--dark-gold); border: 1px solid rgba(212, 188, 110, 0.3); }
+    
+    /* Botões de Ação */
+    .btn-action {
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-body);
+    }
+    
+    .btn-action:hover {
+      background: var(--cobalt);
+      color: var(--gold);
+    }
+
+    .btn-action-sm {
+      background: rgba(212, 188, 110, 0.1);
+      color: var(--dark-gold);
+      border: 1px solid rgba(212, 188, 110, 0.3);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-weight: 700;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-body);
+    }
+
+    .btn-action-sm:hover {
+      background: rgba(212, 188, 110, 0.2);
+    }
+
+    /* ========================================
+       MODAL DE DETALHES (Proposta / Ficha)
+    ======================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(24, 27, 44, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .modal-container {
+      background: var(--white);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+      border: 1px solid rgba(212, 188, 110, 0.2);
+    }
+    
+    .modal-overlay.active .modal-container {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(212, 188, 110, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .modal-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .modal-title {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    
+    .close-modal {
+      background: transparent;
+      color: var(--white);
+      border: none;
+      font-size: 1.75rem;
+      cursor: pointer;
+      line-height: 1;
+      opacity: 0.7;
+      transition: var(--transition-fast);
+    }
+    
+    .close-modal:hover {
+      opacity: 1;
+      color: var(--gold);
+    }
+    
+    .modal-body { padding: 32px; }
+    
+    .proposal-section {
+      margin-bottom: 32px;
+      border-bottom: 1px solid rgba(24, 27, 44, 0.08);
+      padding-bottom: 24px;
+    }
+    
+    .proposal-section:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    
+    .section-title-mod {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      background: var(--navy);
+      padding: 4px 12px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    
+    @media (max-width: 768px) { .info-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } }
+    
+    .info-item { display: flex; flex-direction: column; }
+    
+    .info-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gray-light-text);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    
+    .info-val {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    /* Docs Viewer */
+    .docs-viewer-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .doc-preview-box {
+      border: 1px solid var(--nardo);
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--light-gray);
+      text-align: center;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .doc-preview-img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    /* Ações de Gestão de Proposta */
+    .proposal-actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: flex-end;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(24, 27, 44, 0.08);
+    }
+    
+    .btn-action-panel {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-body);
+    }
+    
+    .btn-action-panel.recusar {
+      background: var(--light-gray);
+      color: var(--red-error);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+    .btn-action-panel.recusar:hover { background: rgba(231, 76, 60, 0.08); }
+    
+    .btn-action-panel.aprovar { background: var(--green-success); color: var(--white); }
+    .btn-action-panel.aprovar:hover { background: #27ae60; transform: translateY(-1px); }
+    
+    .btn-action-panel.pagar {
+      background: var(--gold);
+      color: var(--navy);
+      box-shadow: 0 4px 10px rgba(212, 188, 110, 0.2);
+    }
+    .btn-action-panel.pagar:hover { background: var(--dark-gold); transform: translateY(-1px); }
+    
+    /* Empty State */
+    .empty-state {
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--gray-light-text);
+    }
+    
+    .empty-icon {
+      margin-bottom: 16px;
+      color: var(--nardo);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .empty-icon svg {
+      width: 48px;
+      height: 48px;
+      stroke: currentColor;
+    }
+
+    /* ========================================
+       CHARTS AREA
+    ======================================== */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 992px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-box {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid rgba(24, 27, 44, 0.05);
+      box-shadow: var(--shadow-md);
+      padding: 24px;
+    }
+
+    .chart-box h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .chart-canvas-wrapper {
+      position: relative;
+      height: 280px;
+    }
+
+    /* ========================================
+       CONFIGURAÇÕES
+    ======================================== */
+    .config-section {
+      margin-bottom: 32px;
+    }
+
+    .config-section h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--navy);
+      padding: 6px 14px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .config-grid { grid-template-columns: 1fr; }
+    }
+
+    .config-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .config-field label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gray-text);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+
+    .config-field input,
+    .config-field select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1.5px solid var(--nardo);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition-fast);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .config-field input:focus,
+    .config-field select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212, 188, 110, 0.1);
+    }
+
+    .config-field .hint {
+      font-size: 0.65rem;
+      color: var(--gray-light-text);
+      margin-top: 4px;
+    }
+
+    .btn-save-config {
+      padding: 14px 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-body);
+      margin-top: 24px;
+    }
+
+    .btn-save-config:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(212, 188, 110, 0.3);
+    }
+
+    /* Toggle Switch */
+    .toggle-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      background: var(--nardo);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .toggle-switch.active {
+      background: var(--green-success);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      top: 3px;
+      left: 3px;
+      transition: var(--transition-fast);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .toggle-switch.active::after {
+      left: 25px;
+    }
+
+    /* Toast Notification */
+    .toast-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      font-weight: 700;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Client History in modal */
+    .client-history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin-top: 12px;
+    }
+
+    .client-history-table th {
+      background: rgba(24, 27, 44, 0.04);
+      padding: 10px 14px;
+      font-size: 0.65rem;
+    }
+
+    .client-history-table td {
+      padding: 10px 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================
+       SIDEBAR
+  ======================================== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="LOGOTIPO/LOGO WALKER BANK BRANCO.png" alt="Walker Bank">
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Operações</div>
+      <div class="nav-item active" data-page="mesa-analise" id="nav-mesa">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span>
+        <span>Mesa de Análise</span>
+        <span class="nav-count" id="nav-count-mesa">0</span>
+      </div>
+      <div class="nav-item" data-page="dashboard-geral" id="nav-dashboard">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
+        <span>Dashboard Geral</span>
+      </div>
+
+      <div class="sidebar-section-label">Relatórios</div>
+      <div class="nav-item" data-page="relatorio-financeiro" id="nav-fin">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span>
+        <span>Relatório Financeiro</span>
+      </div>
+      <div class="nav-item" data-page="relatorio-leads" id="nav-leads">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></span>
+        <span>Relatório de Leads</span>
+      </div>
+
+      <div class="sidebar-section-label">Gestão</div>
+      <div class="nav-item" data-page="clientes" id="nav-clientes">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+        <span>Clientes</span>
+      </div>
+      <div class="nav-item" data-page="configuracoes" id="nav-config">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
+        <span>Configurações</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">EC</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Equipe Comercial</div>
+          <div class="sidebar-user-role">Administrador</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logout-btn">Sair do Sistema</button>
+    </div>
+  </aside>
+
+  <!-- ========================================
+       MAIN CONTENT
+  ======================================== -->
+  <div class="main-wrapper">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Mesa de Análise <small>Propostas recebidas</small></div>
+      <div class="topbar-actions">
+        <span class="topbar-date" id="topbar-date"></span>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- ========================================
+           PAGE 1: MESA DE ANÁLISE
+      ======================================== -->
+      <section class="page-section active" id="sec-mesa-analise">
+        <!-- Métricas -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Propostas Recebidas</span>
+            <div class="metric-value" id="metric-total-leads">0</div>
+            <div class="metric-sub"><span>✓ Atualizado em tempo real</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Volume de Crédito</span>
+            <div class="metric-value" id="metric-volume">R$ 0,00</div>
+            <div class="metric-sub">
+              <span style="color: var(--gold); font-weight: 700;">3,99% a.m.</span>
+              <span>taxa unificada</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Ticket Médio</span>
+            <div class="metric-value" id="metric-ticket">R$ 0,00</div>
+            <div class="metric-sub"><span>média de solicitação</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Operações Pagas</span>
+            <div class="metric-value" id="metric-pagas">0</div>
+            <div class="metric-sub" id="metric-pagas-pct"><span>0% de taxa de conversão</span></div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="controls-row">
+          <div class="search-input-wrapper">
+            <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+            <input type="text" id="search-input" placeholder="Buscar por nome ou CPF...">
+          </div>
+          <select class="filter-select" id="filter-convenio">
+            <option value="all">Todos os Convênios</option>
+            <option value="inss">Aposentado/Pensionista INSS</option>
+            <option value="mil">Forças Armadas (Militares)</option>
+            <option value="est">Servidor Público Estadual</option>
+            <option value="mun">Servidor Público Municipal</option>
+          </select>
+          <select class="filter-select" id="filter-status">
+            <option value="all">Todos os Status</option>
+            <option value="Aguardando Averbação">Aguardando Averbação</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Recusada">Recusada</option>
+            <option value="Paga">Paga</option>
+          </select>
+          <button class="btn-filter" id="btn-clear-filters">Limpar Filtros</button>
+        </div>
+
+        <!-- Tabela -->
+        <div class="panel-card">
+          <div class="table-container">
+            <table id="leads-table">
+              <thead>
+                <tr>
+                  <th>Lead / CPF</th>
+                  <th>Convênio</th>
+                  <th>Solicitado</th>
+                  <th>Parcela</th>
+                  <th>Data de Cadastro</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="leads-table-body"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="9" y1="14" x2="15" y2="14"></line></svg></div>
+            <h3>Nenhuma proposta encontrada</h3>
+            <p>Ajuste os filtros ou aguarde novas simulações de clientes.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE 2: DASHBOARD GERAL
+      ======================================== -->
+      <section class="page-section" id="sec-dashboard-geral">
+        <div class="metrics-grid">
+          <div class="metric-card highlight">
+            <span class="metric-label">Volume Total Financiado</span>
+            <div class="metric-value" id="dash-volume-total">R$ 0,00</div>
+            <div class="metric-sub"><span>soma de todas as operações pagas</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Ticket Médio Pago</span>
+            <div class="metric-value" id="dash-ticket-pago">R$ 0,00</div>
+            <div class="metric-sub"><span>média de operações pagas</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Taxa de Conversão</span>
+            <div class="metric-value" id="dash-conversao">0%</div>
+            <div class="metric-sub"><span>Propostas pagas vs recebidas</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Comissão Estimada</span>
+            <div class="metric-value" id="dash-comissao">R$ 0,00</div>
+            <div class="metric-sub"><span>6% do volume pago</span></div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-box">
+            <h4 style="display: flex; align-items: center; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+              Volume por Convênio
+            </h4>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-convenio"></canvas>
+            </div>
+          </div>
+          <div class="chart-box">
+            <h4 style="display: flex; align-items: center; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              Funil de Propostas
+            </h4>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-funil"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE 3: RELATÓRIO FINANCEIRO
+      ======================================== -->
+      <section class="page-section" id="sec-relatorio-financeiro">
+        <div class="controls-row">
+          <input type="date" class="filter-input" id="fin-data-inicio" title="Data início">
+          <input type="date" class="filter-input" id="fin-data-fim" title="Data fim">
+          <select class="filter-select" id="fin-convenio">
+            <option value="all">Todos Convênios</option>
+            <option value="inss">INSS</option>
+            <option value="mil">Militares</option>
+            <option value="est">Estadual</option>
+            <option value="mun">Municipal</option>
+          </select>
+          <input type="number" class="filter-input" id="fin-val-min" placeholder="Valor mín." style="width:120px">
+          <input type="number" class="filter-input" id="fin-val-max" placeholder="Valor máx." style="width:120px">
+          <button class="btn-filter" id="fin-limpar">Limpar</button>
+          <button class="btn-export" id="fin-export-csv">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Exportar CSV
+          </button>
+        </div>
+        <div class="panel-card">
+          <div class="table-container">
+            <table id="fin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Cliente</th>
+                  <th>Convênio</th>
+                  <th>Valor Bruto</th>
+                  <th>Total Financiado</th>
+                  <th>Prazo</th>
+                  <th>Parcela</th>
+                  <th>Comissão (6%)</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="fin-table-body"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="fin-empty" style="display: none;">
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+            <h3>Nenhum registro financeiro encontrado</h3>
+            <p>Ajuste os filtros para visualizar registros.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE 4: RELATÓRIO DE LEADS
+      ======================================== -->
+      <section class="page-section" id="sec-relatorio-leads">
+        <div class="controls-row">
+          <select class="filter-select" id="leads-origem">
+            <option value="all">Todas as Origens</option>
+            <option value="google">Google</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="organic">Orgânico</option>
+          </select>
+          <select class="filter-select" id="leads-sms">
+            <option value="all">Status SMS</option>
+            <option value="true">Validada</option>
+            <option value="false">Pendente</option>
+          </select>
+          <select class="filter-select" id="leads-rfb">
+            <option value="all">Situação RFB</option>
+            <option value="regular">Regular</option>
+            <option value="irregular">Irregular</option>
+          </select>
+          <button class="btn-filter" id="leads-limpar">Limpar</button>
+          <button class="btn-export" id="leads-export-csv">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Exportar CSV
+          </button>
+        </div>
+        <div class="panel-card">
+          <div class="table-container">
+            <table id="leads-rep-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>Origem (UTM)</th>
+                  <th>Mídia</th>
+                  <th>Campanha</th>
+                  <th>Data Cadastro</th>
+                  <th>SMS</th>
+                  <th>RFB</th>
+                  <th>SLA</th>
+                </tr>
+              </thead>
+              <tbody id="leads-rep-body"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="leads-rep-empty" style="display: none;">
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
+            <h3>Nenum lead encontrado</h3>
+            <p>Ajuste os filtros para visualizar leads.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE 5: CLIENTES
+      ======================================== -->
+      <section class="page-section" id="sec-clientes">
+        <div class="controls-row">
+          <div class="search-input-wrapper">
+            <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+            <input type="text" id="clientes-search" placeholder="Buscar cliente por nome ou CPF...">
+          </div>
+        </div>
+        <div class="panel-card">
+          <div class="table-container">
+            <table id="clientes-table">
+              <thead>
+                <tr>
+                  <th>Nome Completo</th>
+                  <th>CPF</th>
+                  <th>Celular</th>
+                  <th>E-mail</th>
+                  <th>Gênero</th>
+                  <th>Estado Civil</th>
+                  <th>Propostas</th>
+                  <th style="text-align:right;">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="clientes-table-body"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="clientes-empty" style="display: none;">
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+            <h3>Nenhum cliente encontrado</h3>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE 6: CONFIGURAÇÕES
+      ======================================== -->
+      <section class="page-section" id="sec-configuracoes">
+        <div class="panel-card">
+          <div class="panel-card-body">
+            <div class="config-section">
+              <h4 style="display: inline-flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                Parâmetros da API HBI (Ambiente TREIN)
+              </h4>
+              <div class="config-grid">
+                <div class="config-field">
+                  <label>Base URL da API HBI</label>
+                  <input type="text" id="cfg-hbi-url" placeholder="https://bancarizador-trein.api-hbi.com.br">
+                  <span class="hint">Endpoint principal da integradora HBI</span>
+                </div>
+                <div class="config-field">
+                  <label>Client ID</label>
+                  <input type="text" id="cfg-hbi-client-id" placeholder="Identificador do cliente">
+                </div>
+                <div class="config-field">
+                  <label>Client Secret</label>
+                  <input type="password" id="cfg-hbi-client-secret" placeholder="Chave secreta de autenticação">
+                </div>
+                <div class="config-field">
+                  <label>User UUID (Provider)</label>
+                  <input type="text" id="cfg-hbi-user-uuid" placeholder="UUID do usuário provedor">
+                </div>
+                <div class="config-field" style="grid-column: span 2;">
+                  <label>Modo de Simulação (Mock)</label>
+                  <div class="toggle-wrapper">
+                    <div class="toggle-switch active" id="cfg-hbi-mock"></div>
+                    <span style="font-size:0.8rem; font-weight:500; color:var(--gray-text);" id="cfg-mock-label">Ativado — Simula chamadas localmente</span>
+                  </div>
+                  <span class="hint">Quando ativado, todas as chamadas à API HBI são simuladas com dados fictícios. Desative para fazer requisições HTTP reais.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="config-section" style="margin-top:32px; padding-top:32px; border-top: 1px solid rgba(24,27,44,0.08);">
+              <h4 style="display: inline-flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                Parâmetros Comerciais e Regras de Crédito
+              </h4>
+              <div class="config-grid">
+                <div class="config-field">
+                  <label>Taxa de Juros Mensal (%)</label>
+                  <input type="text" id="cfg-taxa-juros" placeholder="3.99">
+                  <span class="hint">Base para cálculo Tabela Price (padrão: 3,99%)</span>
+                </div>
+                <div class="config-field">
+                  <label>Margem Consignável (%)</label>
+                  <input type="text" id="cfg-margem" placeholder="30">
+                  <span class="hint">% do salário líquido (padrão: 30%)</span>
+                </div>
+                <div class="config-field">
+                  <label>Margem Cartão Consignado (%)</label>
+                  <input type="text" id="cfg-margem-cartao" placeholder="5">
+                  <span class="hint">% do salário líquido (padrão: 5%)</span>
+                </div>
+                <div class="config-field">
+                  <label>Valor Mínimo de Empréstimo</label>
+                  <input type="text" id="cfg-val-min" placeholder="1000">
+                  <span class="hint">Valor mínimo aceito: R$ 1.000,00</span>
+                </div>
+                <div class="config-field">
+                  <label>Limite INSS (R$)</label>
+                  <input type="text" id="cfg-lim-inss" placeholder="80000">
+                </div>
+                <div class="config-field">
+                  <label>Limite Forças Armadas (R$)</label>
+                  <input type="text" id="cfg-lim-mil" placeholder="150000">
+                </div>
+                <div class="config-field">
+                  <label>Limite Estadual (R$)</label>
+                  <input type="text" id="cfg-lim-est" placeholder="100000">
+                </div>
+                <div class="config-field">
+                  <label>Limite Municipal (R$)</label>
+                  <input type="text" id="cfg-lim-mun" placeholder="80000">
+                </div>
+              </div>
+              <button class="btn-save-config" id="btn-save-config" style="display: inline-flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                Salvar Configurações
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content-area -->
+  </div><!-- /main-wrapper -->
+
+  <!-- ========================================
+       MODAL: DETALHES DA PROPOSTA (Mesa de Análise)
+  ======================================== -->
+  <div class="modal-overlay" id="details-modal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-title" id="m-nome">Carregando Lead...</span>
+          <span style="font-size: 0.725rem; color: var(--gold); font-weight: 600; text-transform: uppercase; margin-top: 4px;" id="m-id-status">Aguardando Averbação</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center; margin-left: auto; margin-right: 16px;">
+          <button class="btn-action" id="m-btn-editar" style="background: rgba(212, 188, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; cursor: pointer;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+            Editar Dados
+          </button>
+          <button class="btn-action" id="m-btn-salvar" style="background: var(--green-success); border: none; color: white; font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; display: none; align-items: center; gap: 6px; font-weight: 700; cursor: pointer;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Salvar Alterações
+          </button>
+          <button class="btn-action" id="m-btn-cancelar" style="background: var(--red-error); border: none; color: white; font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; display: none; align-items: center; gap: 6px; font-weight: 700; cursor: pointer;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Cancelar
+          </button>
+        </div>
+        <button class="close-modal" id="close-modal">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Bloco 1: Dados Pessoais -->
+        <div class="proposal-section">
+          <span class="section-title-mod">1. Informações Pessoais</span>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Nome Completo</span>
+              <span class="info-val view-mode" id="m-p-nome">-</span>
+              <input type="text" class="edit-mode" id="edit-p-nome" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item">
+              <span class="info-label">CPF</span>
+              <span class="info-val view-mode" id="m-p-cpf">-</span>
+              <div class="edit-mode" style="display: none;">
+                <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+                  <input type="text" id="edit-p-cpf" style="flex: 1; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none;">
+                  <button type="button" id="btn-puxar-hbi" class="btn-action" style="padding: 6px 10px; font-size: 0.75rem; background: var(--cobalt); color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; height: 32px; font-weight: 700; transition: var(--transition-fast);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Consultar HBI
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Data de Nascimento</span>
+              <span class="info-val view-mode" id="m-p-nascimento">-</span>
+              <input type="text" class="edit-mode" id="edit-p-nascimento" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Celular / WhatsApp</span>
+              <span class="info-val view-mode" id="m-p-celular">-</span>
+              <input type="text" class="edit-mode" id="edit-p-celular" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">E-mail</span>
+              <span class="info-val view-mode" id="m-p-email">-</span>
+              <input type="email" class="edit-mode" id="edit-p-email" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Gênero</span>
+              <span class="info-val view-mode" id="m-p-genero" style="text-transform: capitalize;">-</span>
+              <select class="edit-mode" id="edit-p-genero" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="outro">Outro / Prefiro não declarar</option>
+              </select>
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Estado Civil</span>
+              <span class="info-val view-mode" id="m-p-estado-civil" style="text-transform: capitalize;">-</span>
+              <select class="edit-mode" id="edit-p-estado-civil" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="solteiro">Solteiro(a)</option>
+                <option value="casado">Casado(a)</option>
+                <option value="divorciado">Divorciado(a)</option>
+                <option value="viuvo">Viúvo(a)</option>
+              </select>
+            </div>
+            <div class="info-item" style="margin-top: 12px; grid-column: span 2;">
+              <span class="info-label">Nome Completo da Mãe</span>
+              <span class="info-val view-mode" id="m-p-nome-mae">-</span>
+              <input type="text" class="edit-mode" id="edit-p-nome-mae" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+
+            <!-- Campos obrigatórios da HBI -->
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">RG / Identidade</span>
+              <span class="info-val view-mode" id="m-p-rg">-</span>
+              <input type="text" class="edit-mode" id="edit-p-rg" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;" placeholder="Apenas números">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Órgão Emissor</span>
+              <span class="info-val view-mode" id="m-p-rg-emissor">-</span>
+              <input type="text" class="edit-mode" id="edit-p-rg-emissor" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;" placeholder="Ex: SSP">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Data de Emissão</span>
+              <span class="info-val view-mode" id="m-p-rg-emissao">-</span>
+              <input type="text" class="edit-mode" id="edit-p-rg-emissao" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;" placeholder="DD/MM/AAAA">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">UF do RG</span>
+              <span class="info-val view-mode" id="m-p-rg-uf">-</span>
+              <select class="edit-mode" id="edit-p-rg-uf" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP" selected>SP</option><option value="SE">SE</option><option value="TO">TO</option>
+              </select>
+            </div>
+            <div class="info-item" style="margin-top: 12px; grid-column: span 2;">
+              <span class="info-label">Situação CPF (RFB via HBI)</span>
+              <span class="info-val" id="m-p-rfb-status" style="font-weight: 700; color: var(--green-success); display: inline-flex; align-items: center; gap: 6px; margin-top: 4px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green-success);"></span> REGULAR
+              </span>
+            </div>
+
+            <div class="info-item" style="margin-top: 12px; grid-column: span 3; border-top: 1px solid rgba(24,27,44,0.05); padding-top: 12px;">
+              <span class="info-label">Data de Cadastro no Sistema</span>
+              <span class="info-val" id="m-p-cadastro">-</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bloco 2: Dados Funcionais -->
+        <div class="proposal-section">
+          <span class="section-title-mod">2. Vínculo Profissional</span>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Convênio Atendido</span>
+              <span class="info-val view-mode" id="m-f-convenio">-</span>
+              <select class="edit-mode" id="edit-f-convenio" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="inss">Aposentado/Pensionista INSS</option>
+                <option value="mil">Forças Armadas (Militares)</option>
+                <option value="est">Servidor Público Estadual</option>
+                <option value="mun">Servidor Público Municipal</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Matrícula ou NB</span>
+              <span class="info-val view-mode" id="m-f-matricula">-</span>
+              <input type="text" class="edit-mode" id="edit-f-matricula" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item">
+              <span class="info-label">Salário Líquido</span>
+              <span class="info-val view-mode" id="m-f-salario">-</span>
+              <input type="text" class="edit-mode" id="edit-f-salario" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">UF do Órgão Pagador</span>
+              <span class="info-val view-mode" id="m-f-uf">-</span>
+              <select class="edit-mode" id="edit-f-uf" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bloco 3: Dados Bancários -->
+        <div class="proposal-section">
+          <span class="section-title-mod">3. Conta Bancária de Depósito</span>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Banco</span>
+              <span class="info-val view-mode" id="m-b-banco">-</span>
+              <input type="text" class="edit-mode" id="edit-b-banco" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item">
+              <span class="info-label">Tipo de Conta</span>
+              <span class="info-val view-mode" id="m-b-tipo" style="text-transform: capitalize;">-</span>
+              <select class="edit-mode" id="edit-b-tipo" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="corrente">Conta Corrente</option>
+                <option value="poupança">Conta Poupança</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Agência</span>
+              <span class="info-val view-mode" id="m-b-agencia">-</span>
+              <input type="text" class="edit-mode" id="edit-b-agencia" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Conta com Dígito</span>
+              <span class="info-val view-mode" id="m-b-conta">-</span>
+              <input type="text" class="edit-mode" id="edit-b-conta" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bloco 4: Dados da Simulação de Crédito -->
+        <div class="proposal-section">
+          <span class="section-title-mod">4. Resumo da Simulação Financeira</span>
+          <div class="info-grid" style="background: rgba(24, 27, 44, 0.03); padding: 16px; border-radius: 8px; border: 1px dashed var(--nardo);">
+            <div class="info-item">
+              <span class="info-label">Crédito Solicitado</span>
+              <span class="info-val view-mode" style="color: var(--navy); font-size: 1.15rem;" id="m-c-valor">R$ 0,00</span>
+              <input type="text" class="edit-mode" id="edit-c-valor" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
+            <div class="info-item">
+              <span class="info-label">Prazo Escolhido</span>
+              <span class="info-val view-mode" style="font-size: 1.15rem;" id="m-c-prazo">0 meses</span>
+              <select class="edit-mode" id="edit-c-prazo" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="24">24 meses</option>
+                <option value="36">36 meses</option>
+                <option value="48">48 meses</option>
+                <option value="72">72 meses</option>
+                <option value="96">96 meses</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Valor da Parcela</span>
+              <span class="info-val" style="color: var(--gold); font-size: 1.15rem;" id="m-c-parcela">R$ 0,00</span>
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Taxa de Juros</span>
+              <span class="info-val" id="m-c-taxa">3,99% a.m.</span>
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Custo Efetivo Total (CET)</span>
+              <span class="info-val" id="m-c-cet">0,00% a.a.</span>
+            </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Valor Total Financiado</span>
+              <span class="info-val" id="m-c-total">R$ 0,00</span>
+            </div>
+          </div>
+          <div style="font-size: 0.725rem; color: var(--gray-light-text); display: flex; justify-content: space-between; margin-top: 12px; padding: 0 4px;">
+            <span id="m-c-assinatura">Assinatura Eletrônica SMS Validada</span>
+            <span>🔒 Protegido de acordo com a LGPD</span>
+          </div>
+        </div>
+        
+        <!-- Bloco 5: Documentos Carregados -->
+        <div class="proposal-section">
+          <span class="section-title-mod">5. Documentação em Anexo</span>
+          <div class="docs-viewer-row">
+            <div class="info-item">
+              <span class="info-label" style="margin-bottom: 8px;">Identidade (RG / CNH)</span>
+              <div class="doc-preview-box" id="m-d-rg-box">📄 RG / CNH Carregado</div>
+              <input type="file" class="edit-mode" id="edit-d-rg" accept="image/*,application/pdf" style="display: none; margin-top: 12px; font-family: var(--font-body); font-size: 0.75rem;">
+            </div>
+            <div class="info-item">
+              <span class="info-label" style="margin-bottom: 8px;">Contracheque / Extrato</span>
+              <div class="doc-preview-box" id="m-d-contra-box">💵 Contracheque Carregado</div>
+              <input type="file" class="edit-mode" id="edit-d-contra" accept="image/*,application/pdf" style="display: none; margin-top: 12px; font-family: var(--font-body); font-size: 0.75rem;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco 6: Comunicação via WhatsApp -->
+        <div class="proposal-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+          <span class="section-title-mod" style="background: #25d366; color: white;">6. Comunicação via WhatsApp</span>
+          <div style="margin-top: 12px;">
+            <div class="info-item" style="margin-bottom: 12px;">
+              <span class="info-label">Justificativa / Motivo de Recusa</span>
+              <textarea id="m-wpp-justificativa" placeholder="Se necessário, digite o motivo da recusa ou observações para o cliente..." style="width: 100%; height: 70px; padding: 10px; border-radius: 6px; border: 1.5px solid var(--nardo); font-family: var(--font-body); font-size: 0.85rem; outline: none; resize: vertical; margin-top: 4px;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="btn-action" id="wpp-btn-analise" style="background: #25d366; color: white; border: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: var(--font-body);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
+                Proposta em Análise
+              </button>
+              <button type="button" class="btn-action" id="wpp-btn-aceita" style="background: #25d366; color: white; border: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: var(--font-body);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
+                Proposta Aceita (Passo a Passo)
+              </button>
+              <button type="button" class="btn-action" id="wpp-btn-recusada" style="background: var(--red-error); color: white; border: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: var(--font-body);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
+                Proposta Recusada
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Ações do Modal -->
+        <div class="proposal-actions-row" id="m-actions-panel">
+          <button class="btn-action-panel recusar" id="m-btn-recusar">Recusar Proposta</button>
+          <button class="btn-action-panel aprovar" id="m-btn-aprovar">Aprovar Proposta</button>
+          <button class="btn-action-panel pagar" id="m-btn-pagar">Liberar Recurso (Pagar)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       MODAL: FICHA DO CLIENTE
+  ======================================== -->
+  <div class="modal-overlay" id="client-modal">
+    <div class="modal-container" style="max-width: 800px;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-title" id="cm-nome">Cliente</span>
+          <span style="font-size: 0.725rem; color: var(--gold); font-weight: 600; text-transform: uppercase; margin-top: 4px;" id="cm-cpf">000.000.000-00</span>
+        </div>
+        <button class="close-modal" id="close-client-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Dados Pessoais -->
+        <div class="proposal-section">
+          <span class="section-title-mod">Dados Cadastrais</span>
+          <div class="info-grid" id="cm-dados"></div>
+        </div>
+        <!-- Dados Bancários -->
+        <div class="proposal-section">
+          <span class="section-title-mod">Dados Bancários</span>
+          <div class="info-grid" id="cm-banco"></div>
+        </div>
+        <!-- Histórico de Propostas -->
+        <div class="proposal-section">
+          <span class="section-title-mod">Histórico de Propostas</span>
+          <div class="table-container">
+            <table class="client-history-table" id="cm-history-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Valor</th>
+                  <th>Prazo</th>
+                  <th>Parcela</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody id="cm-history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       JAVASCRIPT — TODA A LÓGICA
+  ======================================== -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      // ==========================================
+      // 0. SUPABASE CLIENT & CACHE GLOBALS
+      // ==========================================
+      const supabaseUrl = "https://jmbolyzmpfnggvoedaiu.supabase.co";
+      const supabaseKey = "sb_publishable_EuvTPlZxoQqG9Owc3Yr9Uw_L1rTcLnP";
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+      let currentLeads = [];
+      let currentConfigs = {};
+
+      // ==========================================
+      // 1. AUTENTICAÇÃO
+      // ==========================================
+      if (sessionStorage.getItem("walker_admin_session") !== "true") {
+        window.location.href = "login.html";
+      }
+
+      document.getElementById("logout-btn").addEventListener("click", () => {
+        sessionStorage.removeItem("walker_admin_session");
+        window.location.href = "login.html";
+      });
+
+      // Data no topbar
+      const now = new Date();
+      document.getElementById("topbar-date").textContent = now.toLocaleDateString("pt-BR", {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+      });
+
+      // ==========================================
+      // 2. MOCK INICIAL DE LEADS
+      // ==========================================
+      const INITIAL_MOCK_LEADS = [
+        {
+          id: "proposta-mock1",
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          status: "Aguardando Averbação",
+          lead: {
+            nome: "Mariano Silva Rezende", cpf: "18945612308", data_nascimento: "12/05/1974",
+            celular: "11988884455", email: "mariano.rezende@gmail.com",
+            genero: "masculino", estado_civil: "casado", nome_mae: "Regina Silva Rezende",
+            rg: "482019845", rg_orgao: "SSP", rg_data_emissao: "10/11/1999", rg_uf: "SP"
+          },
+          dados_funcionais: { convenio: "est", matricula: "3389021-9", salario_liquido: 6200.00, uf_orgao: "SP" },
+          dados_bancarios: { banco: "001 — Banco do Brasil S.A.", tipo_conta: "corrente", agencia: "1890", conta: "44012-9" },
+          proposta: { valor_solicitado: 12000.00, prazo_meses: 48, valor_parcela: 565.04, taxa_juros_mensal: 0.0399, total_financiado: 27121.92, cet_anual: 61.42, assinatura_sms_validada: true, consentimento_consulta_margem: true, consentimento_lgpd: true },
+          arquivos: { identidade_cnh_rg: null, contracheque: null },
+          marketing: { utm_source: "google", utm_medium: "cpc", utm_campaign: "consignado_estado_sp" }
+        },
+        {
+          id: "proposta-mock2",
+          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "Paga",
+          lead: {
+            nome: "Alessandra Maria Ferreira", cpf: "23045698712", data_nascimento: "28/11/1968",
+            celular: "31977771234", email: "alessandra.ferreira@hotmail.com",
+            genero: "feminino", estado_civil: "solteiro", nome_mae: "Maria de Lourdes Ferreira",
+            rg: "298456102", rg_orgao: "SSP", rg_data_emissao: "22/02/1990", rg_uf: "MG"
+          },
+          dados_funcionais: { convenio: "inss", matricula: "NB 189201980", salario_liquido: 3100.00, uf_orgao: "MG" },
+          dados_bancarios: { banco: "104 — Caixa Econômica Federal", tipo_conta: "corrente", agencia: "0089", conta: "123456-7" },
+          proposta: { valor_solicitado: 4500.00, prazo_meses: 36, valor_parcela: 237.66, taxa_juros_mensal: 0.0399, total_financiado: 8555.76, cet_anual: 61.42, assinatura_sms_validada: true, consentimento_consulta_margem: true, consentimento_lgpd: true },
+          arquivos: { identidade_cnh_rg: null, contracheque: null },
+          marketing: { utm_source: "facebook", utm_medium: "ads", utm_campaign: "consignado_aposentados" }
+        },
+        {
+          id: "proposta-mock3",
+          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "Recusada",
+          lead: {
+            nome: "Ricardo Pereira Souza", cpf: "08611627652", data_nascimento: "05/09/1982",
+            celular: "21966554433", email: "ricardopereira.mil@outlook.com",
+            genero: "masculino", estado_civil: "divorciado", nome_mae: "Sônia Pereira Souza",
+            rg: "394850123", rg_orgao: "SSP", rg_data_emissao: "05/09/2005", rg_uf: "RJ"
+          },
+          dados_funcionais: { convenio: "mil", matricula: "77890-EB", salario_liquido: 8500.00, uf_orgao: "RJ" },
+          dados_bancarios: { banco: "237 — Banco Bradesco S.A.", tipo_conta: "corrente", agencia: "3201", conta: "98765-4" },
+          proposta: { valor_solicitado: 15000.00, prazo_meses: 24, valor_parcela: 988.22, taxa_juros_mensal: 0.0399, total_financiado: 23717.28, cet_anual: 61.42, assinatura_sms_validada: true, consentimento_consulta_margem: true, consentimento_lgpd: true },
+          arquivos: { identidade_cnh_rg: null, contracheque: null },
+          marketing: { utm_source: "google", utm_medium: "organic" }
+        },
+        {
+          id: "proposta-mock4",
+          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "Aprovada",
+          lead: {
+            nome: "Conceição Aparecida Lima", cpf: "45201398700", data_nascimento: "14/03/1960",
+            celular: "61991223344", email: "conceicao.lima@yahoo.com.br",
+            genero: "feminino", estado_civil: "viuvo", nome_mae: "Josefa Aparecida Lima",
+            rg: "112038475", rg_orgao: "SSP", rg_data_emissao: "08/07/1985", rg_uf: "DF"
+          },
+          dados_funcionais: { convenio: "inss", matricula: "NB 204551234", salario_liquido: 2800.00, uf_orgao: "DF" },
+          dados_bancarios: { banco: "104 — Caixa Econômica Federal", tipo_conta: "poupança", agencia: "0145", conta: "00987654-3" },
+          proposta: { valor_solicitado: 8000.00, prazo_meses: 72, valor_parcela: 248.98, taxa_juros_mensal: 0.0399, total_financiado: 17926.56, cet_anual: 61.42, assinatura_sms_validada: true, consentimento_consulta_margem: true, consentimento_lgpd: true },
+          arquivos: { identidade_cnh_rg: null, contracheque: null },
+          marketing: { utm_source: "instagram", utm_medium: "ads", utm_campaign: "consignado_inss_df" }
+        },
+        {
+          id: "proposta-mock5",
+          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "Paga",
+          lead: {
+            nome: "Fernando Costa Oliveira", cpf: "67890123456", data_nascimento: "22/07/1975",
+            celular: "11955667788", email: "fernando.costa@gmail.com",
+            genero: "masculino", estado_civil: "casado", nome_mae: "Helena Costa Oliveira",
+            rg: "556012789", rg_orgao: "SSP", rg_data_emissao: "15/03/2000", rg_uf: "SP"
+          },
+          dados_funcionais: { convenio: "mun", matricula: "MUN-12045", salario_liquido: 4500.00, uf_orgao: "SP" },
+          dados_bancarios: { banco: "341 — Itaú Unibanco S.A.", tipo_conta: "corrente", agencia: "4521", conta: "33214-5" },
+          proposta: { valor_solicitado: 20000.00, prazo_meses: 96, valor_parcela: 534.62, taxa_juros_mensal: 0.0399, total_financiado: 51323.52, cet_anual: 61.42, assinatura_sms_validada: true, consentimento_consulta_margem: true, consentimento_lgpd: true },
+          arquivos: { identidade_cnh_rg: null, contracheque: null },
+          marketing: { utm_source: "google", utm_medium: "cpc", utm_campaign: "consignado_servidor_mun" }
+        }
+      ];
+
+      if (!localStorage.getItem("walker_leads")) {
+        localStorage.setItem("walker_leads", JSON.stringify(INITIAL_MOCK_LEADS));
+      }
+
+      // ==========================================
+      // 3. UTILIDADES
+      // ==========================================
+      let activeLeadId = null;
+      let chartConvenio = null;
+      let chartFunil = null;
+
+      const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+      const formatCPF = (v) => { v = (v||'').replace(/\D/g, ""); return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"); };
+
+      const getConvenioLabel = (c) => {
+        const map = { inss: 'INSS', mil: 'Forças Armadas', est: 'Estadual', mun: 'Municipal' };
+        return map[c] || c || '-';
+      };
+      const getConvenioLabelFull = (c) => {
+        const map = { inss: 'Aposentado/Pensionista INSS', mil: 'Forças Armadas (Militares)', est: 'Servidor Público Estadual', mun: 'Servidor Público Municipal' };
+        return map[c] || c || '-';
+      };
+      const getStatusClass = (s) => {
+        if (s === 'Aguardando Averbação') return 'aguardando';
+        if (s === 'Aprovada') return 'aprovado';
+        if (s === 'Recusada') return 'recusado';
+        return 'pago';
+      };
+
+      const applyMask = (input, maskFunc) => { if (!input) return; input.addEventListener("input", (e) => { e.target.value = maskFunc(e.target.value); }); };
+      const maskCPF = (v) => { v = v.replace(/\D/g, ""); if (v.length > 11) v = v.substring(0, 11); v = v.replace(/(\d{3})(\d)/, "$1.$2"); v = v.replace(/(\d{3})(\d)/, "$1.$2"); v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2"); return v; };
+      const maskData = (v) => { v = v.replace(/\D/g, ""); if (v.length > 8) v = v.substring(0, 8); v = v.replace(/(\d{2})(\d)/, "$1/$2"); v = v.replace(/(\d{2})(\d)/, "$1/$2"); return v; };
+      const maskCelular = (v) => { v = v.replace(/\D/g, ""); if (v.length > 11) v = v.substring(0, 11); v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); v = v.replace(/(\d{5})(\d)/, "$1-$2"); return v; };
+      const maskMoeda = (v) => { v = v.replace(/\D/g, ""); v = (v/100).toFixed(2) + ''; v = v.replace(".", ","); v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."); return "R$ " + v; };
+
+      const getLeads = () => {
+        if (currentLeads && currentLeads.length > 0) {
+          return currentLeads;
+        }
+        return JSON.parse(localStorage.getItem("walker_leads") || "[]");
+      };
+      const getConfigs = () => {
+        if (currentConfigs && Object.keys(currentConfigs).length > 0) {
+          return currentConfigs;
+        }
+        return JSON.parse(localStorage.getItem("walker_configs") || "{}");
+      };
+
+      // Funções de sincronização com o Supabase
+      const fetchLeadsFromSupabase = async () => {
+        try {
+          const { data, error } = await supabaseClient
+            .from('leads')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          if (data) {
+            // Mapeamos de volta para o formato de payload esperado pela UI
+            currentLeads = data.map(row => {
+              const item = row.payload || {};
+              return {
+                id: row.id,
+                createdAt: row.created_at,
+                status: row.status,
+                ...item
+              };
+            });
+            localStorage.setItem("walker_leads", JSON.stringify(currentLeads));
+          }
+        } catch (err) {
+          console.warn("Erro ao buscar leads do Supabase, usando local:", err);
+          currentLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+        }
+      };
+
+      const fetchConfigsFromSupabase = async () => {
+        try {
+          const { data, error } = await supabaseClient
+            .from('configs')
+            .select('data')
+            .eq('id', 'default')
+            .single();
+
+          if (error && error.code !== 'PGRST116') throw error; // PGRST116 é row not found
+          if (data && data.data) {
+            currentConfigs = data.data;
+            localStorage.setItem("walker_configs", JSON.stringify(currentConfigs));
+          }
+        } catch (err) {
+          console.warn("Erro ao buscar configs do Supabase, usando local:", err);
+          currentConfigs = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+        }
+      };
+
+
+      const showToast = (message, color) => {
+        const el = document.createElement("div");
+        el.className = "toast-notification";
+        el.style.background = color || "var(--green-success)";
+        el.style.color = "white";
+        el.innerHTML = message;
+        document.body.appendChild(el);
+        setTimeout(() => { el.style.animation = "fadeOut 0.3s ease forwards"; setTimeout(() => el.remove(), 300); }, 3000);
+      };
+
+      const formatDateBR = (iso) => {
+        if (!iso) return '-';
+        return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      };
+
+      const formatCelular = (c) => {
+        if (!c) return '-';
+        c = c.replace(/\D/g, '');
+        return c.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      };
+
+      // ==========================================
+      // 4. NAVEGAÇÃO SPA
+      // ==========================================
+      const pageMap = {
+        'mesa-analise': { title: 'Mesa de Análise', sub: 'Propostas recebidas' },
+        'dashboard-geral': { title: 'Dashboard Geral', sub: 'Visão estratégica' },
+        'relatorio-financeiro': { title: 'Relatório Financeiro', sub: 'Conciliação e rentabilidade' },
+        'relatorio-leads': { title: 'Relatório de Leads', sub: 'Funil de vendas e marketing' },
+        'clientes': { title: 'Clientes', sub: 'Central de atendimento' },
+        'configuracoes': { title: 'Configurações', sub: 'Parâmetros do sistema' }
+      };
+
+      const navigateTo = (page) => {
+        // Desativa todos
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+        // Ativa a seção
+        const sec = document.getElementById(`sec-${page}`);
+        if (sec) {
+          sec.classList.remove('active');
+          // Force reflow for animation
+          void sec.offsetWidth;
+          sec.classList.add('active');
+        }
+
+        // Ativa o nav-item
+        const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+        if (navItem) navItem.classList.add('active');
+
+        // Atualiza topbar
+        const info = pageMap[page];
+        if (info) {
+          document.getElementById('topbar-title').innerHTML = `${info.title} <small>${info.sub}</small>`;
+        }
+
+        // Renderiza conteúdo da página
+        if (page === 'mesa-analise') renderMesaTable();
+        if (page === 'dashboard-geral') renderDashboard();
+        if (page === 'relatorio-financeiro') renderFinanceiro();
+        if (page === 'relatorio-leads') renderLeadsReport();
+        if (page === 'clientes') renderClientes();
+        if (page === 'configuracoes') loadConfigs();
+      };
+
+      // Clicks nos nav-items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          navigateTo(item.dataset.page);
+        });
+      });
+
+      // ==========================================
+      // 5. MESA DE ANÁLISE (PÁGINA 1)
+      // ==========================================
+      const updateMesaMetrics = (leads) => {
+        document.getElementById("metric-total-leads").textContent = leads.length;
+
+        const volume = leads.filter(l => l.status !== "Recusada").reduce((sum, l) => sum + (l.proposta?.valor_solicitado || 0), 0);
+        document.getElementById("metric-volume").textContent = formatBRL(volume);
+
+        const activeLeads = leads.filter(l => l.status !== "Recusada");
+        const ticket = activeLeads.length > 0 ? volume / activeLeads.length : 0;
+        document.getElementById("metric-ticket").textContent = formatBRL(ticket);
+
+        const pagasCount = leads.filter(l => l.status === "Paga").length;
+        document.getElementById("metric-pagas").textContent = pagasCount;
+
+        const rate = leads.length > 0 ? (pagasCount / leads.length) * 100 : 0;
+        document.getElementById("metric-pagas-pct").innerHTML = `<span>✓ <strong>${rate.toFixed(0)}%</strong> de taxa de conversão</span>`;
+
+        // Nav count
+        document.getElementById("nav-count-mesa").textContent = leads.length;
+      };
+
+      const renderMesaTable = () => {
+        const leads = getLeads();
+        const filterConvenio = document.getElementById("filter-convenio").value;
+        const filterStatus = document.getElementById("filter-status").value;
+        const searchVal = document.getElementById("search-input").value.toLowerCase().replace(/\D/g, "");
+        const searchValText = document.getElementById("search-input").value.toLowerCase();
+
+        const filtered = leads.filter(lead => {
+          if (filterConvenio !== "all" && lead.dados_funcionais?.convenio !== filterConvenio) return false;
+          if (filterStatus !== "all" && lead.status !== filterStatus) return false;
+          if (searchValText !== "") {
+            const nomeMatch = lead.lead?.nome?.toLowerCase().includes(searchValText);
+            const cpfMatch = lead.lead?.cpf?.replace(/\D/g, "").includes(searchVal) || lead.lead?.cpf?.includes(searchValText);
+            return nomeMatch || cpfMatch;
+          }
+          return true;
+        });
+
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const tbody = document.getElementById("leads-table-body");
+        const emptyState = document.getElementById("empty-state");
+        const table = document.getElementById("leads-table");
+        tbody.innerHTML = "";
+
+        if (filtered.length === 0) {
+          emptyState.style.display = "block";
+          table.style.display = "none";
+          updateMesaMetrics(leads);
+          return;
+        }
+
+        emptyState.style.display = "none";
+        table.style.display = "table";
+
+        filtered.forEach(lead => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>
+              <div class="lead-name-cell">
+                <span>${lead.lead?.nome || 'Cliente Sem Nome'}</span>
+                <span class="lead-sub-cell">${formatCPF(lead.lead?.cpf || '')}</span>
+              </div>
+            </td>
+            <td>
+              <div class="lead-name-cell">
+                <span>${getConvenioLabel(lead.dados_funcionais?.convenio)}</span>
+                <span class="lead-sub-cell">Mat: ${lead.dados_funcionais?.matricula || '-'}</span>
+              </div>
+            </td>
+            <td style="font-weight: 700;">${formatBRL(lead.proposta?.valor_solicitado || 0)}</td>
+            <td>${formatBRL(lead.proposta?.valor_parcela || 0)} <span style="font-size:0.7rem; color:var(--gray-light-text);">/ ${lead.proposta?.prazo_meses}x</span></td>
+            <td>${formatDateBR(lead.createdAt)}</td>
+            <td><span class="status-badge ${getStatusClass(lead.status)}">${lead.status}</span></td>
+            <td style="text-align: right;">
+              <button class="btn-action" data-id="${lead.id}">Analisar</button>
+            </td>
+          `;
+          tr.querySelector(".btn-action").addEventListener("click", () => openLeadDetails(lead.id));
+          tbody.appendChild(tr);
+        });
+
+        updateMesaMetrics(leads);
+      };
+
+      // Mesa Filtros
+      document.getElementById("filter-convenio").addEventListener("change", renderMesaTable);
+      document.getElementById("filter-status").addEventListener("change", renderMesaTable);
+      document.getElementById("search-input").addEventListener("input", renderMesaTable);
+      document.getElementById("btn-clear-filters").addEventListener("click", () => {
+        document.getElementById("filter-convenio").value = "all";
+        document.getElementById("filter-status").value = "all";
+        document.getElementById("search-input").value = "";
+        renderMesaTable();
+      });
+
+      // ==========================================
+      // 6. MODAL DE DETALHES (PROPOSTA)
+      // ==========================================
+      const modal = document.getElementById("details-modal");
+
+      const openLeadDetails = (id) => {
+        activeLeadId = id;
+        const leads = getLeads();
+        const lead = leads.find(l => l.id === id);
+        if (!lead) return;
+
+        // Modo visualização
+        document.getElementById("m-btn-editar").style.display = "inline-flex";
+        document.getElementById("m-btn-salvar").style.display = "none";
+        document.getElementById("m-btn-cancelar").style.display = "none";
+        document.querySelectorAll(".view-mode").forEach(el => el.style.display = "");
+        document.querySelectorAll(".edit-mode").forEach(el => el.style.display = "none");
+
+        // Pré-preenchimento inputs de edição
+        document.getElementById("edit-p-nome").value = lead.lead?.nome || '';
+        document.getElementById("edit-p-cpf").value = formatCPF(lead.lead?.cpf || '');
+        document.getElementById("edit-p-nascimento").value = lead.lead?.data_nascimento || '';
+        document.getElementById("edit-p-celular").value = formatCelular(lead.lead?.celular);
+        document.getElementById("edit-p-email").value = lead.lead?.email || '';
+        document.getElementById("edit-p-genero").value = lead.lead?.genero || 'masculino';
+        document.getElementById("edit-p-estado-civil").value = lead.lead?.estado_civil || 'solteiro';
+        document.getElementById("edit-p-nome-mae").value = lead.lead?.nome_mae || '';
+        document.getElementById("edit-p-rg").value = lead.lead?.rg || '';
+        document.getElementById("edit-p-rg-emissor").value = lead.lead?.rg_orgao || '';
+        document.getElementById("edit-p-rg-emissao").value = lead.lead?.rg_data_emissao || '';
+        document.getElementById("edit-p-rg-uf").value = lead.lead?.rg_uf || 'SP';
+        document.getElementById("edit-f-convenio").value = lead.dados_funcionais?.convenio || 'inss';
+        document.getElementById("edit-f-matricula").value = lead.dados_funcionais?.matricula || '';
+        document.getElementById("edit-f-salario").value = lead.dados_funcionais?.salario_liquido ? formatBRL(lead.dados_funcionais.salario_liquido) : '';
+        document.getElementById("edit-f-uf").value = lead.dados_funcionais?.uf_orgao || 'SP';
+        document.getElementById("edit-b-banco").value = lead.dados_bancarios?.banco || '';
+        document.getElementById("edit-b-tipo").value = lead.dados_bancarios?.tipo_conta || 'corrente';
+        document.getElementById("edit-b-agencia").value = lead.dados_bancarios?.agencia || '';
+        document.getElementById("edit-b-conta").value = lead.dados_bancarios?.conta || '';
+        document.getElementById("edit-c-valor").value = lead.proposta?.valor_solicitado ? formatBRL(lead.proposta.valor_solicitado) : '';
+        document.getElementById("edit-c-prazo").value = lead.proposta?.prazo_meses || '36';
+
+        // Cabeçalho
+        document.getElementById("m-nome").textContent = lead.lead?.nome || 'Cliente Sem Nome';
+        const statusEl = document.getElementById("m-id-status");
+        statusEl.textContent = lead.status;
+        statusEl.className = getStatusClass(lead.status);
+        statusEl.style.cssText = "font-size:0.725rem; font-weight:700; padding:2px 8px; border-radius:20px; display:inline-block;";
+
+        // Dados pessoais
+        document.getElementById("m-p-nome").textContent = lead.lead?.nome || '-';
+        document.getElementById("m-p-cpf").textContent = formatCPF(lead.lead?.cpf || '');
+        document.getElementById("m-p-nascimento").textContent = lead.lead?.data_nascimento || '-';
+        document.getElementById("m-p-celular").textContent = formatCelular(lead.lead?.celular);
+        document.getElementById("m-p-email").textContent = lead.lead?.email || '-';
+        document.getElementById("m-p-genero").textContent = lead.lead?.genero || '-';
+        document.getElementById("m-p-estado-civil").textContent = lead.lead?.estado_civil || '-';
+        document.getElementById("m-p-nome-mae").textContent = lead.lead?.nome_mae || '-';
+        document.getElementById("m-p-rg").textContent = lead.lead?.rg || '-';
+        document.getElementById("m-p-rg-emissor").textContent = lead.lead?.rg_orgao || '-';
+        document.getElementById("m-p-rg-emissao").textContent = lead.lead?.rg_data_emissao || '-';
+        document.getElementById("m-p-rg-uf").textContent = lead.lead?.rg_uf || '-';
+        document.getElementById("m-p-cadastro").textContent = new Date(lead.createdAt).toLocaleString("pt-BR");
+
+        // Funcionais
+        document.getElementById("m-f-convenio").textContent = getConvenioLabelFull(lead.dados_funcionais?.convenio);
+        document.getElementById("m-f-matricula").textContent = lead.dados_funcionais?.matricula || '-';
+        document.getElementById("m-f-salario").textContent = formatBRL(lead.dados_funcionais?.salario_liquido || 0);
+        document.getElementById("m-f-uf").textContent = lead.dados_funcionais?.uf_orgao || '-';
+
+        // Bancários
+        document.getElementById("m-b-banco").textContent = lead.dados_bancarios?.banco || '-';
+        document.getElementById("m-b-tipo").textContent = lead.dados_bancarios?.tipo_conta || '-';
+        document.getElementById("m-b-agencia").textContent = lead.dados_bancarios?.agencia || '-';
+        document.getElementById("m-b-conta").textContent = lead.dados_bancarios?.conta || '-';
+
+        // Financeiro
+        document.getElementById("m-c-valor").textContent = formatBRL(lead.proposta?.valor_solicitado || 0);
+        document.getElementById("m-c-prazo").textContent = `${lead.proposta?.prazo_meses} meses`;
+        document.getElementById("m-c-parcela").textContent = `${formatBRL(lead.proposta?.valor_parcela || 0)} / mês`;
+        document.getElementById("m-c-taxa").textContent = `${(lead.proposta?.taxa_juros_mensal * 100).toFixed(2).replace('.', ',')}% a.m.`;
+        document.getElementById("m-c-cet").textContent = `${lead.proposta?.cet_anual?.toFixed(2).replace('.', ',') || '0,00'}% a.a.`;
+        document.getElementById("m-c-total").textContent = formatBRL(lead.proposta?.total_financiado || 0);
+        document.getElementById("m-c-assinatura").textContent = lead.proposta?.assinatura_sms_validada ? '✓ Assinatura Eletrônica SMS Validada' : '⚠ Assinatura SMS Pendente';
+
+        // Arquivos
+        const rgBox = document.getElementById("m-d-rg-box");
+        const contraBox = document.getElementById("m-d-contra-box");
+        if (lead.arquivos?.identidade_cnh_rg) {
+          rgBox.innerHTML = `<img src="${lead.arquivos.identidade_cnh_rg}" class="doc-preview-img" alt="RG"><a href="${lead.arquivos.identidade_cnh_rg}" download="identidade_${lead.lead.cpf}.jpg" class="btn-action" style="padding:6px 12px;font-size:0.7rem;text-decoration:none;">Baixar Arquivo</a>`;
+        } else {
+          rgBox.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--nardo); margin-bottom: 8px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span style="font-size:0.75rem;font-weight:700;">Documento de Identidade</span><span style="font-size:0.65rem;color:var(--gray-light-text);margin-top:2px;">Arquivo de homologação</span>`;
+        }
+        if (lead.arquivos?.contracheque) {
+          const isPdf = lead.arquivos.contracheque.startsWith("data:application/pdf");
+          if (isPdf) {
+            contraBox.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold); margin-bottom: 12px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="9" y1="14" x2="15" y2="14"></line></svg><span style="font-size:0.75rem;font-weight:700;margin-bottom:12px;">Contracheque em PDF</span><a href="${lead.arquivos.contracheque}" download="contracheque_${lead.lead.cpf}.pdf" class="btn-action" style="padding:6px 12px;font-size:0.7rem;text-decoration:none;">Baixar PDF</a>`;
+          } else {
+            contraBox.innerHTML = `<img src="${lead.arquivos.contracheque}" class="doc-preview-img" alt="Contracheque"><a href="${lead.arquivos.contracheque}" download="contracheque_${lead.lead.cpf}.jpg" class="btn-action" style="padding:6px 12px;font-size:0.7rem;text-decoration:none;">Baixar Arquivo</a>`;
+          }
+        } else {
+          contraBox.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--nardo); margin-bottom: 8px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg><span style="font-size:0.75rem;font-weight:700;">Contracheque / Extrato</span><span style="font-size:0.65rem;color:var(--gray-light-text);margin-top:2px;">Arquivo de homologação</span>`;
+        }
+
+        // Justificativa / WhatsApp
+        document.getElementById("m-wpp-justificativa").value = lead.justificativa || "";
+
+        // Ações por status
+        const mBtnAprovar = document.getElementById("m-btn-aprovar");
+        const mBtnPagar = document.getElementById("m-btn-pagar");
+        const mBtnRecusar = document.getElementById("m-btn-recusar");
+        mBtnAprovar.style.display = "inline-flex"; mBtnPagar.style.display = "inline-flex"; mBtnRecusar.style.display = "inline-flex";
+        if (lead.status === "Aprovada") { mBtnAprovar.style.display = "none"; }
+        else if (lead.status === "Paga") { mBtnAprovar.style.display = "none"; mBtnPagar.style.display = "none"; mBtnRecusar.style.display = "none"; }
+        else if (lead.status === "Recusada") { mBtnAprovar.style.display = "none"; mBtnPagar.style.display = "none"; mBtnRecusar.style.display = "none"; }
+        else { mBtnPagar.style.display = "none"; }
+
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      };
+
+      const closeLeadDetails = () => {
+        modal.classList.remove("active");
+        document.body.style.overflow = "";
+        activeLeadId = null;
+      };
+
+      document.getElementById("close-modal").addEventListener("click", closeLeadDetails);
+      modal.addEventListener("click", (e) => { if (e.target === modal) closeLeadDetails(); });
+
+      // Editar/Salvar/Cancelar
+      document.getElementById("m-btn-editar").addEventListener("click", () => {
+        document.getElementById("m-btn-editar").style.display = "none";
+        document.getElementById("m-btn-salvar").style.display = "inline-flex";
+        document.getElementById("m-btn-cancelar").style.display = "inline-flex";
+        document.querySelectorAll(".view-mode").forEach(el => el.style.display = "none");
+        document.querySelectorAll(".edit-mode").forEach(el => el.style.display = "block");
+      });
+
+      document.getElementById("m-btn-cancelar").addEventListener("click", () => {
+        document.getElementById("m-btn-editar").style.display = "inline-flex";
+        document.getElementById("m-btn-salvar").style.display = "none";
+        document.getElementById("m-btn-cancelar").style.display = "none";
+        document.querySelectorAll(".view-mode").forEach(el => el.style.display = "");
+        document.querySelectorAll(".edit-mode").forEach(el => el.style.display = "none");
+      });
+
+      // Auxiliar para converter arquivo do operador para Base64
+      const fileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+      };
+
+      document.getElementById("m-btn-salvar").addEventListener("click", async () => {
+        if (!activeLeadId) return;
+        const leads = getLeads();
+        const configs = getConfigs();
+        const taxaMensal = configs.taxa_juros ? parseFloat(configs.taxa_juros) / 100 : 0.0399;
+
+        const rgInput = document.getElementById("edit-d-rg");
+        const contraInput = document.getElementById("edit-d-contra");
+        let newRgBase64 = null;
+        let newContraBase64 = null;
+
+        if (rgInput.files && rgInput.files[0]) {
+          try { newRgBase64 = await fileToBase64(rgInput.files[0]); } catch(e) { console.error(e); }
+        }
+        if (contraInput.files && contraInput.files[0]) {
+          try { newContraBase64 = await fileToBase64(contraInput.files[0]); } catch(e) { console.error(e); }
+        }
+
+        let targetLead = null;
+        const updated = leads.map(lead => {
+          if (lead.id === activeLeadId) {
+            const valorSolicitadoVal = parseFloat(document.getElementById("edit-c-valor").value.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+            const prazoVal = parseInt(document.getElementById("edit-c-prazo").value);
+            const taxaPow = Math.pow(1 + taxaMensal, prazoVal);
+            const valorParcelaVal = valorSolicitadoVal * (taxaMensal * taxaPow) / (taxaPow - 1);
+            const totalFinanciadoVal = valorParcelaVal * prazoVal;
+            const cetAnualVal = (Math.pow(1 + taxaMensal, 12) - 1) * 100 + 1.8;
+
+            targetLead = {
+              ...lead,
+              lead: { ...lead.lead, nome: document.getElementById("edit-p-nome").value.trim(), cpf: document.getElementById("edit-p-cpf").value.replace(/\D/g, ""), data_nascimento: document.getElementById("edit-p-nascimento").value.trim(), celular: document.getElementById("edit-p-celular").value.replace(/\D/g, ""), email: document.getElementById("edit-p-email").value.trim(), genero: document.getElementById("edit-p-genero").value, estado_civil: document.getElementById("edit-p-estado-civil").value, nome_mae: document.getElementById("edit-p-nome-mae").value.trim(), rg: document.getElementById("edit-p-rg").value.replace(/\D/g, ""), rg_orgao: document.getElementById("edit-p-rg-emissor").value.trim().toUpperCase(), rg_data_emissao: document.getElementById("edit-p-rg-emissao").value.trim(), rg_uf: document.getElementById("edit-p-rg-uf").value },
+              dados_funcionais: { ...lead.dados_funcionais, convenio: document.getElementById("edit-f-convenio").value, matricula: document.getElementById("edit-f-matricula").value.trim(), salario_liquido: parseFloat(document.getElementById("edit-f-salario").value.replace(/[^\d,]/g, "").replace(",", ".")) || 0, uf_orgao: document.getElementById("edit-f-uf").value },
+              dados_bancarios: { ...lead.dados_bancarios, banco: document.getElementById("edit-b-banco").value.trim(), tipo_conta: document.getElementById("edit-b-tipo").value, agencia: document.getElementById("edit-b-agencia").value.trim(), conta: document.getElementById("edit-b-conta").value.trim() },
+              proposta: { ...lead.proposta, valor_solicitado: valorSolicitadoVal, prazo_meses: prazoVal, valor_parcela: valorParcelaVal, taxa_juros_mensal: taxaMensal, total_financiado: totalFinanciadoVal, cet_anual: cetAnualVal },
+              arquivos: {
+                identidade_cnh_rg: newRgBase64 || lead.arquivos?.identidade_cnh_rg || null,
+                contracheque: newContraBase64 || lead.arquivos?.contracheque || null
+              }
+            };
+            return targetLead;
+          }
+          return lead;
+        });
+
+        // Limpa inputs de arquivos
+        rgInput.value = "";
+        contraInput.value = "";
+
+        currentLeads = updated;
+        localStorage.setItem("walker_leads", JSON.stringify(updated));
+
+        // Salva no Supabase
+        if (targetLead) {
+          try {
+            const { error: dbError } = await supabaseClient
+              .from('leads')
+              .upsert({
+                id: targetLead.id,
+                created_at: targetLead.createdAt,
+                nome: targetLead.lead?.nome,
+                cpf: targetLead.lead?.cpf,
+                status: targetLead.status,
+                convenio: targetLead.dados_funcionais?.convenio,
+                valor_solicitado: targetLead.proposta?.valor_solicitado,
+                payload: targetLead
+              });
+
+            if (dbError) throw dbError;
+            console.log("[Walker Bank] Lead atualizado no Supabase com sucesso.");
+          } catch(dbErr) {
+            console.error("[Walker Bank] Erro ao salvar edição no Supabase:", dbErr);
+          }
+        }
+
+        openLeadDetails(activeLeadId);
+        renderMesaTable();
+        showToast("✓ Alterações salvas com sucesso!", "var(--green-success)");
+      });
+
+
+      // Máscaras
+      applyMask(document.getElementById("edit-p-cpf"), maskCPF);
+      applyMask(document.getElementById("edit-p-nascimento"), maskData);
+      applyMask(document.getElementById("edit-p-celular"), maskCelular);
+      applyMask(document.getElementById("edit-p-rg-emissao"), maskData);
+      applyMask(document.getElementById("edit-f-salario"), maskMoeda);
+      applyMask(document.getElementById("edit-c-valor"), maskMoeda);
+
+      // Consultar HBI
+      document.getElementById("btn-puxar-hbi").addEventListener("click", async () => {
+        const cpfVal = document.getElementById("edit-p-cpf").value.replace(/\D/g, "");
+        if (cpfVal.length !== 11) { alert("Por favor, digite um CPF completo com 11 dígitos."); return; }
+        const btn = document.getElementById("btn-puxar-hbi");
+        const originalText = btn.innerHTML;
+        btn.disabled = true; btn.style.opacity = "0.7";
+        const steps = ["Conectando ao gateway HBI (TREIN)...", "Consultando CPF na RFB (BasicData)...", "CPF REGULAR. Verificando cadastro Person...", "Buscando histórico e dados de emissão...", "Importação concluída!"];
+        let i = 0;
+        const interval = setInterval(() => { if (i < steps.length) { btn.innerHTML = `⏳ ${steps[i]}`; i++; } }, 350);
+        await new Promise(r => setTimeout(r, 1800));
+        clearInterval(interval);
+        btn.innerHTML = originalText; btn.disabled = false; btn.style.opacity = "";
+
+        let hbiData = { nome: "Paulo Henrique Santos Resende", genero: "masculino", estado_civil: "casado", nascimento: "12/08/1981", nome_mae: "Eliana Santos Resende", rg: "492018274", rg_orgao: "SSP", rg_emissao: "14/05/2006", rg_uf: "SP" };
+        if (cpfVal === "18945612308") hbiData = { nome: "Mariano Silva Rezende", genero: "masculino", estado_civil: "casado", nascimento: "12/05/1974", nome_mae: "Regina Silva Rezende", rg: "482019845", rg_orgao: "SSP", rg_emissao: "10/11/1999", rg_uf: "SP" };
+        else if (cpfVal === "23045698712") hbiData = { nome: "Alessandra Maria Ferreira", genero: "feminino", estado_civil: "solteiro", nascimento: "28/11/1968", nome_mae: "Maria de Lourdes Ferreira", rg: "298456102", rg_orgao: "SSP", rg_emissao: "22/02/1990", rg_uf: "MG" };
+        else if (cpfVal === "08611627652") hbiData = { nome: "Ricardo Pereira Souza", genero: "masculino", estado_civil: "divorciado", nascimento: "05/09/1982", nome_mae: "Sônia Pereira Souza", rg: "394850123", rg_orgao: "SSP", rg_emissao: "05/09/2005", rg_uf: "RJ" };
+
+        document.getElementById("edit-p-nome").value = hbiData.nome;
+        document.getElementById("edit-p-nascimento").value = hbiData.nascimento;
+        document.getElementById("edit-p-genero").value = hbiData.genero;
+        document.getElementById("edit-p-estado-civil").value = hbiData.estado_civil;
+        document.getElementById("edit-p-nome-mae").value = hbiData.nome_mae;
+        document.getElementById("edit-p-rg").value = hbiData.rg;
+        document.getElementById("edit-p-rg-emissor").value = hbiData.rg_orgao;
+        document.getElementById("edit-p-rg-emissao").value = hbiData.rg_emissao;
+        document.getElementById("edit-p-rg-uf").value = hbiData.rg_uf;
+        showToast("✓ Cadastro HBI importado com sucesso!", "var(--green-success)");
+      });
+
+      // Alterar Status
+      const changeStatus = async (newStatus) => {
+        if (!activeLeadId) return;
+        const leads = getLeads();
+        const justificativaVal = document.getElementById("m-wpp-justificativa").value.trim();
+        let targetLead = null;
+        const updated = leads.map(l => {
+          if (l.id === activeLeadId) {
+            targetLead = {
+              ...l,
+              status: newStatus,
+              justificativa: justificativaVal || l.justificativa || ""
+            };
+            return targetLead;
+          }
+          return l;
+        });
+
+        currentLeads = updated;
+        localStorage.setItem("walker_leads", JSON.stringify(updated));
+
+        // Envia para o Supabase
+        if (targetLead) {
+          try {
+            const { error: dbError } = await supabaseClient
+              .from('leads')
+              .upsert({
+                id: targetLead.id,
+                created_at: targetLead.createdAt,
+                nome: targetLead.lead?.nome,
+                cpf: targetLead.lead?.cpf,
+                status: targetLead.status,
+                convenio: targetLead.dados_funcionais?.convenio,
+                valor_solicitado: targetLead.proposta?.valor_solicitado,
+                payload: targetLead
+              });
+
+            if (dbError) throw dbError;
+            console.log("[Walker Bank] Status do lead atualizado no Supabase.");
+          } catch(err) {
+            console.error("[Walker Bank] Erro ao salvar alteração de status no Supabase:", err);
+          }
+        }
+
+        closeLeadDetails();
+        renderMesaTable();
+      };
+      document.getElementById("m-btn-recusar").addEventListener("click", () => changeStatus("Recusada"));
+      document.getElementById("m-btn-aprovar").addEventListener("click", () => changeStatus("Aprovada"));
+      document.getElementById("m-btn-pagar").addEventListener("click", () => changeStatus("Paga"));
+
+      // Ações do WhatsApp
+      const sendWhatsAppMessage = async (templateType) => {
+        if (!activeLeadId) return;
+        const leads = getLeads();
+        const lead = leads.find(l => l.id === activeLeadId);
+        if (!lead) return;
+
+        const celular = (lead.lead?.celular || "").replace(/\D/g, "");
+        if (celular.length < 10) {
+          alert("Celular do cliente não cadastrado ou incompleto.");
+          return;
+        }
+
+        const nome = lead.lead?.nome ? lead.lead.nome.trim().split(" ")[0] : "Cliente";
+        const valor = formatBRL(lead.proposta?.valor_solicitado || 0);
+        const justificativa = document.getElementById("m-wpp-justificativa").value.trim() || "(não informada)";
+        const signatureUrl = lead.proposta?.signature_url || "https://walkerbank.site/assinar-proposta";
+
+        let text = "";
+        if (templateType === "analise") {
+          text = `*Walker Bank* 🏦\n\nOlá, *${nome}*! Sou a equipe de análise do Walker Bank.\n\nPassando para avisar que a sua proposta de crédito consignado no valor de *${valor}* já está em análise.\n\nRetornaremos em breve!`;
+        } else if (templateType === "aceita") {
+          text = `*Walker Bank* 🏦\n\nOlá, *${nome}*! Excelente notícia: sua proposta de crédito consignado no valor de *${valor}* foi *APROVADA*! 🎉\n\nPara seguirmos com o pagamento, realize a assinatura digital do seu contrato no link a seguir:\n🔗 *${signatureUrl}*\n\nAssim que assinado, o valor será depositado em sua conta em poucas horas!`;
+        } else if (templateType === "recusada") {
+          text = `*Walker Bank* 🏦\n\nOlá, *${nome}*.\n\nAgradecemos seu interesse no Walker Bank.\n\nInformamos que, após análise de nossa mesa de crédito, infelizmente a sua proposta não pôde ser aprovada neste momento.\n\n*Motivo:* ${justificativa}\n\nQualquer dúvida, estamos à disposição.`;
+        }
+
+        // Salvar justificativa localmente e no Supabase antes de disparar
+        const justificativaText = document.getElementById("m-wpp-justificativa").value.trim();
+        let targetLead = null;
+        const updated = leads.map(l => {
+          if (l.id === activeLeadId) {
+            targetLead = { ...l, justificativa: justificativaText };
+            return targetLead;
+          }
+          return l;
+        });
+
+        currentLeads = updated;
+        localStorage.setItem("walker_leads", JSON.stringify(updated));
+
+        if (targetLead) {
+          try {
+            await supabaseClient
+              .from('leads')
+              .upsert({
+                id: targetLead.id,
+                created_at: targetLead.createdAt,
+                nome: targetLead.lead?.nome,
+                cpf: targetLead.lead?.cpf,
+                status: targetLead.status,
+                convenio: targetLead.dados_funcionais?.convenio,
+                valor_solicitado: targetLead.proposta?.valor_solicitado,
+                payload: targetLead
+              });
+          } catch(err) {
+            console.error("[Walker Bank] Erro ao salvar justificativa no Supabase:", err);
+          }
+        }
+
+        const wppUrl = `https://wa.me/55${celular}?text=${encodeURIComponent(text)}`;
+        window.open(wppUrl, "_blank");
+      };
+
+
+      document.getElementById("wpp-btn-analise").addEventListener("click", () => sendWhatsAppMessage("analise"));
+      document.getElementById("wpp-btn-aceita").addEventListener("click", () => sendWhatsAppMessage("aceita"));
+      document.getElementById("wpp-btn-recusada").addEventListener("click", () => sendWhatsAppMessage("recusada"));
+
+      // ==========================================
+      // 7. DASHBOARD GERAL (PÁGINA 2)
+      // ==========================================
+      const renderDashboard = () => {
+        const leads = getLeads();
+        const pagas = leads.filter(l => l.status === "Paga");
+
+        const volumeTotal = pagas.reduce((s, l) => s + (l.proposta?.total_financiado || 0), 0);
+        const ticketPago = pagas.length > 0 ? pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0) / pagas.length : 0;
+        const conversao = leads.length > 0 ? (pagas.length / leads.length * 100) : 0;
+        const comissao = pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0) * 0.06, 0);
+
+        document.getElementById("dash-volume-total").textContent = formatBRL(volumeTotal);
+        document.getElementById("dash-ticket-pago").textContent = formatBRL(ticketPago);
+        document.getElementById("dash-conversao").textContent = `${conversao.toFixed(1)}%`;
+        document.getElementById("dash-comissao").textContent = formatBRL(comissao);
+
+        // Gráfico de Rosca — Volume por Convênio
+        const convenios = { inss: 0, mil: 0, est: 0, mun: 0 };
+        leads.filter(l => l.status !== "Recusada").forEach(l => {
+          const c = l.dados_funcionais?.convenio;
+          if (convenios[c] !== undefined) convenios[c] += (l.proposta?.valor_solicitado || 0);
+        });
+
+        if (chartConvenio) chartConvenio.destroy();
+        const ctxConvenio = document.getElementById("chart-convenio").getContext("2d");
+        chartConvenio = new Chart(ctxConvenio, {
+          type: 'doughnut',
+          data: {
+            labels: ['INSS', 'Forças Armadas', 'Estadual', 'Municipal'],
+            datasets: [{
+              data: [convenios.inss, convenios.mil, convenios.est, convenios.mun],
+              backgroundColor: ['#3498db', '#e74c3c', '#d4bc6e', '#2ecc71'],
+              borderWidth: 0,
+              hoverOffset: 8
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { padding: 16, font: { size: 12, weight: '600' }, color: '#606266' } },
+              tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${formatBRL(ctx.raw)}` } }
+            },
+            cutout: '65%'
+          }
+        });
+
+        // Gráfico de Barras — Funil de Propostas
+        const statusCounts = { 'Aguardando Averbação': 0, 'Aprovada': 0, 'Recusada': 0, 'Paga': 0 };
+        leads.forEach(l => { if (statusCounts[l.status] !== undefined) statusCounts[l.status]++; });
+
+        if (chartFunil) chartFunil.destroy();
+        const ctxFunil = document.getElementById("chart-funil").getContext("2d");
+        chartFunil = new Chart(ctxFunil, {
+          type: 'bar',
+          data: {
+            labels: ['Aguardando', 'Aprovada', 'Recusada', 'Paga'],
+            datasets: [{
+              label: 'Propostas',
+              data: [statusCounts['Aguardando Averbação'], statusCounts['Aprovada'], statusCounts['Recusada'], statusCounts['Paga']],
+              backgroundColor: ['rgba(52, 152, 219, 0.8)', 'rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)', 'rgba(212, 188, 110, 0.9)'],
+              borderRadius: 6,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: (ctx) => `${ctx.raw} proposta(s)` } }
+            },
+            scales: {
+              x: { beginAtZero: true, grid: { display: false }, ticks: { font: { weight: '600' } } },
+              y: { grid: { display: false }, ticks: { font: { size: 12, weight: '700' }, color: '#181b2c' } }
+            }
+          }
+        });
+      };
+
+      // ==========================================
+      // 8. RELATÓRIO FINANCEIRO (PÁGINA 3)
+      // ==========================================
+      const renderFinanceiro = () => {
+        const leads = getLeads();
+        const dataInicio = document.getElementById("fin-data-inicio").value;
+        const dataFim = document.getElementById("fin-data-fim").value;
+        const convenio = document.getElementById("fin-convenio").value;
+        const valMin = parseFloat(document.getElementById("fin-val-min").value) || 0;
+        const valMax = parseFloat(document.getElementById("fin-val-max").value) || Infinity;
+
+        const filtered = leads.filter(l => {
+          if (convenio !== 'all' && l.dados_funcionais?.convenio !== convenio) return false;
+          const val = l.proposta?.valor_solicitado || 0;
+          if (val < valMin || val > valMax) return false;
+          if (dataInicio && new Date(l.createdAt) < new Date(dataInicio)) return false;
+          if (dataFim) { const end = new Date(dataFim); end.setHours(23,59,59); if (new Date(l.createdAt) > end) return false; }
+          return true;
+        });
+
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const tbody = document.getElementById("fin-table-body");
+        const empty = document.getElementById("fin-empty");
+        const table = document.getElementById("fin-table");
+        tbody.innerHTML = "";
+
+        if (filtered.length === 0) { empty.style.display = "block"; table.style.display = "none"; return; }
+        empty.style.display = "none"; table.style.display = "table";
+
+        filtered.forEach((l, idx) => {
+          const comissao = (l.proposta?.valor_solicitado || 0) * 0.06;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td style="font-size:0.75rem;color:var(--gray-light-text);">${l.id.substring(0, 12)}</td>
+            <td><div class="lead-name-cell"><span>${l.lead?.nome || '-'}</span></div></td>
+            <td>${getConvenioLabel(l.dados_funcionais?.convenio)}</td>
+            <td style="font-weight:700;">${formatBRL(l.proposta?.valor_solicitado || 0)}</td>
+            <td>${formatBRL(l.proposta?.total_financiado || 0)}</td>
+            <td>${l.proposta?.prazo_meses || 0}x</td>
+            <td>${formatBRL(l.proposta?.valor_parcela || 0)}</td>
+            <td style="color:var(--green-success);font-weight:700;">${formatBRL(comissao)}</td>
+            <td>${formatDateBR(l.createdAt)}</td>
+            <td><span class="status-badge ${getStatusClass(l.status)}">${l.status}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+
+      // Filtros Financeiro
+      ['fin-data-inicio', 'fin-data-fim', 'fin-convenio', 'fin-val-min', 'fin-val-max'].forEach(id => {
+        document.getElementById(id).addEventListener("change", renderFinanceiro);
+        document.getElementById(id).addEventListener("input", renderFinanceiro);
+      });
+      document.getElementById("fin-limpar").addEventListener("click", () => {
+        document.getElementById("fin-data-inicio").value = "";
+        document.getElementById("fin-data-fim").value = "";
+        document.getElementById("fin-convenio").value = "all";
+        document.getElementById("fin-val-min").value = "";
+        document.getElementById("fin-val-max").value = "";
+        renderFinanceiro();
+      });
+
+      // Exportar CSV Financeiro
+      document.getElementById("fin-export-csv").addEventListener("click", () => {
+        const rows = document.querySelectorAll("#fin-table tr");
+        let csv = "sep=;\n";
+        rows.forEach(row => {
+          const cols = row.querySelectorAll("th, td");
+          const line = Array.from(cols).map(c => `"${c.textContent.trim().replace(/"/g, '""')}"`).join(";");
+          csv += line + "\n";
+        });
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `relatorio_financeiro_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+        showToast("📥 Relatório financeiro exportado!", "var(--navy)");
+      });
+
+      // ==========================================
+      // 9. RELATÓRIO DE LEADS (PÁGINA 4)
+      // ==========================================
+      const renderLeadsReport = () => {
+        const leads = getLeads();
+        const origem = document.getElementById("leads-origem").value;
+        const sms = document.getElementById("leads-sms").value;
+        const rfb = document.getElementById("leads-rfb").value;
+
+        const filtered = leads.filter(l => {
+          if (origem !== 'all' && (l.marketing?.utm_source || '').toLowerCase() !== origem) return false;
+          if (sms !== 'all') {
+            const smsVal = l.proposta?.assinatura_sms_validada ? 'true' : 'false';
+            if (smsVal !== sms) return false;
+          }
+          if (rfb !== 'all') {
+            // Todos são regulares no mock — implementar lógica real
+            if (rfb === 'irregular') return false;
+          }
+          return true;
+        });
+
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const tbody = document.getElementById("leads-rep-body");
+        const empty = document.getElementById("leads-rep-empty");
+        const table = document.getElementById("leads-rep-table");
+        tbody.innerHTML = "";
+
+        if (filtered.length === 0) { empty.style.display = "block"; table.style.display = "none"; return; }
+        empty.style.display = "none"; table.style.display = "table";
+
+        filtered.forEach(l => {
+          const slaMs = Date.now() - new Date(l.createdAt).getTime();
+          const slaHours = Math.floor(slaMs / (1000 * 60 * 60));
+          const slaDays = Math.floor(slaHours / 24);
+          const slaLabel = slaDays > 0 ? `${slaDays}d ${slaHours % 24}h` : `${slaHours}h`;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><div class="lead-name-cell"><span>${l.lead?.nome || '-'}</span></div></td>
+            <td>${formatCPF(l.lead?.cpf || '')}</td>
+            <td style="text-transform:capitalize;">${l.marketing?.utm_source || 'Direto'}</td>
+            <td style="text-transform:capitalize;">${l.marketing?.utm_medium || '-'}</td>
+            <td style="font-size:0.75rem;">${l.marketing?.utm_campaign || '-'}</td>
+            <td>${formatDateBR(l.createdAt)}</td>
+            <td><span class="status-badge ${l.proposta?.assinatura_sms_validada ? 'aprovado' : 'aguardando'}">${l.proposta?.assinatura_sms_validada ? 'Validada' : 'Pendente'}</span></td>
+            <td><span class="status-badge aprovado">Regular</span></td>
+            <td style="font-weight:700;color:${slaHours > 48 ? 'var(--red-error)' : 'var(--navy)'};">${slaLabel}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+
+      // Filtros Leads
+      ['leads-origem', 'leads-sms', 'leads-rfb'].forEach(id => {
+        document.getElementById(id).addEventListener("change", renderLeadsReport);
+      });
+      document.getElementById("leads-limpar").addEventListener("click", () => {
+        document.getElementById("leads-origem").value = "all";
+        document.getElementById("leads-sms").value = "all";
+        document.getElementById("leads-rfb").value = "all";
+        renderLeadsReport();
+      });
+
+      // Exportar CSV Leads
+      document.getElementById("leads-export-csv").addEventListener("click", () => {
+        const rows = document.querySelectorAll("#leads-rep-table tr");
+        let csv = "sep=;\n";
+        rows.forEach(row => {
+          const cols = row.querySelectorAll("th, td");
+          const line = Array.from(cols).map(c => `"${c.textContent.trim().replace(/"/g, '""')}"`).join(";");
+          csv += line + "\n";
+        });
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `relatorio_leads_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+        showToast("📥 Relatório de leads exportado!", "var(--navy)");
+      });
+
+      // ==========================================
+      // 10. CLIENTES (PÁGINA 5)
+      // ==========================================
+      const clientModal = document.getElementById("client-modal");
+
+      const renderClientes = () => {
+        const leads = getLeads();
+        const search = document.getElementById("clientes-search").value.toLowerCase();
+
+        // Agrupar por CPF
+        const cpfMap = {};
+        leads.forEach(l => {
+          const cpf = l.lead?.cpf?.replace(/\D/g, "") || '';
+          if (!cpf) return;
+          if (!cpfMap[cpf]) cpfMap[cpf] = { lead: l.lead, dados_bancarios: l.dados_bancarios, proposals: [] };
+          cpfMap[cpf].proposals.push(l);
+        });
+
+        let clients = Object.entries(cpfMap).map(([cpf, data]) => ({ cpf, ...data }));
+
+        // Filtro
+        if (search) {
+          clients = clients.filter(c => {
+            return (c.lead?.nome || '').toLowerCase().includes(search) || c.cpf.includes(search.replace(/\D/g, ''));
+          });
+        }
+
+        const tbody = document.getElementById("clientes-table-body");
+        const empty = document.getElementById("clientes-empty");
+        const table = document.getElementById("clientes-table");
+        tbody.innerHTML = "";
+
+        if (clients.length === 0) { empty.style.display = "block"; table.style.display = "none"; return; }
+        empty.style.display = "none"; table.style.display = "table";
+
+        clients.forEach(c => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><div class="lead-name-cell"><span>${c.lead?.nome || '-'}</span><span class="lead-sub-cell">${c.lead?.nome_mae || ''}</span></div></td>
+            <td>${formatCPF(c.cpf)}</td>
+            <td>${formatCelular(c.lead?.celular)}</td>
+            <td>${c.lead?.email || '-'}</td>
+            <td style="text-transform:capitalize;">${c.lead?.genero || '-'}</td>
+            <td style="text-transform:capitalize;">${c.lead?.estado_civil || '-'}</td>
+            <td style="font-weight:700;text-align:center;">${c.proposals.length}</td>
+            <td style="text-align:right;">
+              <button class="btn-action-sm" data-cpf="${c.cpf}">Ficha Completa</button>
+            </td>
+          `;
+          tr.querySelector(".btn-action-sm").addEventListener("click", () => openClientFicha(c.cpf));
+          tbody.appendChild(tr);
+        });
+      };
+
+      document.getElementById("clientes-search").addEventListener("input", renderClientes);
+
+      // Ficha do Cliente
+      const openClientFicha = (cpf) => {
+        const leads = getLeads();
+        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === cpf);
+        if (clientLeads.length === 0) return;
+
+        const first = clientLeads[0];
+        document.getElementById("cm-nome").textContent = first.lead?.nome || 'Cliente';
+        document.getElementById("cm-cpf").textContent = formatCPF(cpf);
+
+        // Dados cadastrais
+        const dadosEl = document.getElementById("cm-dados");
+        dadosEl.innerHTML = `
+          <div class="info-item"><span class="info-label">Celular</span><span class="info-val">${formatCelular(first.lead?.celular)}</span></div>
+          <div class="info-item"><span class="info-label">E-mail</span><span class="info-val">${first.lead?.email || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Nascimento</span><span class="info-val">${first.lead?.data_nascimento || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Gênero</span><span class="info-val" style="text-transform:capitalize;">${first.lead?.genero || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Estado Civil</span><span class="info-val" style="text-transform:capitalize;">${first.lead?.estado_civil || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Nome da Mãe</span><span class="info-val">${first.lead?.nome_mae || '-'}</span></div>
+          <div class="info-item"><span class="info-label">RG</span><span class="info-val">${first.lead?.rg || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Órgão / UF</span><span class="info-val">${(first.lead?.rg_orgao || '-')} / ${(first.lead?.rg_uf || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Emissão RG</span><span class="info-val">${first.lead?.rg_data_emissao || '-'}</span></div>
+        `;
+
+        // Dados bancários
+        const bancoEl = document.getElementById("cm-banco");
+        bancoEl.innerHTML = `
+          <div class="info-item"><span class="info-label">Banco</span><span class="info-val">${first.dados_bancarios?.banco || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Tipo</span><span class="info-val" style="text-transform:capitalize;">${first.dados_bancarios?.tipo_conta || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Agência / Conta</span><span class="info-val">${first.dados_bancarios?.agencia || '-'} / ${first.dados_bancarios?.conta || '-'}</span></div>
+        `;
+
+        // Histórico de propostas
+        const histBody = document.getElementById("cm-history-body");
+        histBody.innerHTML = "";
+        clientLeads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(l => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td style="font-size:0.72rem;color:var(--gray-light-text);">${l.id.substring(0, 14)}</td>
+            <td style="font-weight:700;">${formatBRL(l.proposta?.valor_solicitado || 0)}</td>
+            <td>${l.proposta?.prazo_meses || 0}x</td>
+            <td>${formatBRL(l.proposta?.valor_parcela || 0)}</td>
+            <td><span class="status-badge ${getStatusClass(l.status)}">${l.status}</span></td>
+            <td>${formatDateBR(l.createdAt)}</td>
+          `;
+          histBody.appendChild(tr);
+        });
+
+        clientModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      };
+
+      document.getElementById("close-client-modal").addEventListener("click", () => {
+        clientModal.classList.remove("active");
+        document.body.style.overflow = "";
+      });
+      clientModal.addEventListener("click", (e) => {
+        if (e.target === clientModal) { clientModal.classList.remove("active"); document.body.style.overflow = ""; }
+      });
+
+      // ==========================================
+      // 11. CONFIGURAÇÕES (PÁGINA 6)
+      // ==========================================
+      const loadConfigs = () => {
+        const cfg = getConfigs();
+        document.getElementById("cfg-hbi-url").value = cfg.hbi_url || 'https://bancarizador-trein.api-hbi.com.br';
+        document.getElementById("cfg-hbi-client-id").value = cfg.hbi_client_id || '';
+        document.getElementById("cfg-hbi-client-secret").value = cfg.hbi_client_secret || '';
+        document.getElementById("cfg-hbi-user-uuid").value = cfg.hbi_user_uuid || '';
+        
+        const mockToggle = document.getElementById("cfg-hbi-mock");
+        const mockLabel = document.getElementById("cfg-mock-label");
+        const isMock = cfg.use_hbi_mock !== false; // default true
+        mockToggle.classList.toggle("active", isMock);
+        mockLabel.textContent = isMock ? "Ativado — Simula chamadas localmente" : "Desativado — Requisições HTTP reais";
+
+        document.getElementById("cfg-taxa-juros").value = cfg.taxa_juros || '3.99';
+        document.getElementById("cfg-margem").value = cfg.margem || '30';
+        document.getElementById("cfg-margem-cartao").value = cfg.margem_cartao || '5';
+        document.getElementById("cfg-val-min").value = cfg.val_min || '1000';
+        document.getElementById("cfg-lim-inss").value = cfg.lim_inss || '80000';
+        document.getElementById("cfg-lim-mil").value = cfg.lim_mil || '150000';
+        document.getElementById("cfg-lim-est").value = cfg.lim_est || '100000';
+        document.getElementById("cfg-lim-mun").value = cfg.lim_mun || '80000';
+      };
+
+      // Mock toggle
+      document.getElementById("cfg-hbi-mock").addEventListener("click", () => {
+        const el = document.getElementById("cfg-hbi-mock");
+        el.classList.toggle("active");
+        const isActive = el.classList.contains("active");
+        document.getElementById("cfg-mock-label").textContent = isActive ? "Ativado — Simula chamadas localmente" : "Desativado — Requisições HTTP reais";
+      });
+
+      // Salvar config
+      document.getElementById("btn-save-config").addEventListener("click", async () => {
+        const cfg = {
+          hbi_url: document.getElementById("cfg-hbi-url").value.trim(),
+          hbi_client_id: document.getElementById("cfg-hbi-client-id").value.trim(),
+          hbi_client_secret: document.getElementById("cfg-hbi-client-secret").value.trim(),
+          hbi_user_uuid: document.getElementById("cfg-hbi-user-uuid").value.trim(),
+          use_hbi_mock: document.getElementById("cfg-hbi-mock").classList.contains("active"),
+          taxa_juros: document.getElementById("cfg-taxa-juros").value.trim(),
+          margem: document.getElementById("cfg-margem").value.trim(),
+          margem_cartao: document.getElementById("cfg-margem-cartao").value.trim(),
+          val_min: document.getElementById("cfg-val-min").value.trim(),
+          lim_inss: document.getElementById("cfg-lim-inss").value.trim(),
+          lim_mil: document.getElementById("cfg-lim-mil").value.trim(),
+          lim_est: document.getElementById("cfg-lim-est").value.trim(),
+          lim_mun: document.getElementById("cfg-lim-mun").value.trim()
+        };
+        currentConfigs = cfg;
+        localStorage.setItem("walker_configs", JSON.stringify(cfg));
+
+        // Envia para o Supabase
+        try {
+          const { error } = await supabaseClient
+            .from('configs')
+            .upsert({
+              id: 'default',
+              data: cfg
+            });
+
+          if (error) throw error;
+          showToast("💾 Configurações salvas no Supabase!", "var(--green-success)");
+        } catch(err) {
+          console.error("[Walker Bank] Erro ao salvar configs no Supabase:", err);
+          showToast("💾 Configurações salvas localmente!", "var(--green-success)");
+        }
+      });
+
+
+      // ==========================================
+      // MONITORAMENTO E NOTIFICAÇÕES EM TEMPO REAL
+      // ==========================================
+      let knownLeadIds = new Set(getLeads().map(l => l.id));
+
+      const playNotificationSound = () => {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          
+          // Primeiro tom (D5)
+          const osc1 = ctx.createOscillator();
+          const gain1 = ctx.createGain();
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
+          gain1.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+          osc1.connect(gain1);
+          gain1.connect(ctx.destination);
+          osc1.start();
+          osc1.stop(ctx.currentTime + 0.15);
+          
+          // Segundo tom (A5)
+          setTimeout(() => {
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(880.00, ctx.currentTime);
+            gain2.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start();
+            osc2.stop(ctx.currentTime + 0.35);
+          }, 120);
+        } catch (e) {
+          console.error("AudioContext bloqueado ou não suportado:", e);
+        }
+      };
+
+      const requestNotificationPermission = () => {
+        if ("Notification" in window) {
+          if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+          }
+        }
+      };
+
+      const triggerNativeNotification = (title, body, leadId) => {
+        if ("Notification" in window && Notification.permission === "granted") {
+          const notification = new Notification(title, {
+            body: body,
+            icon: "LOGOTIPO/LOGO WALKER BANK BRANCO.png"
+          });
+          notification.onclick = () => {
+            window.focus();
+            if (leadId) openLeadDetails(leadId);
+          };
+        }
+      };
+
+      const showNewProposalAlert = (lead) => {
+        // Toca som
+        playNotificationSound();
+
+        // Dispara notificação nativa
+        triggerNativeNotification(
+          "Nova Proposta de Crédito!",
+          `Cliente: ${lead.lead?.nome}\nValor: ${formatBRL(lead.proposta?.valor_solicitado || 0)}`,
+          lead.id
+        );
+
+        // Cria o Toast especial
+        const toast = document.createElement("div");
+        toast.className = "toast-notification";
+        toast.style.cssText = "position:fixed; top:20px; right:20px; background:linear-gradient(135deg, var(--navy) 0%, var(--cobalt) 100%); color:white; border:1.5px solid var(--gold); padding:20px; border-radius:12px; box-shadow:var(--shadow-lg); z-index:99999; display:flex; flex-direction:column; gap:10px; min-width:320px; animation:slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; font-family:var(--font-body);";
+        
+        toast.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span style="font-weight:700; color:var(--gold); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">Nova Proposta Recebida!</span>
+          </div>
+          <div style="font-size:0.8rem; color:rgba(255,255,255,0.9); line-height:1.4;">
+            O cliente <strong>${lead.lead?.nome || 'Sem Nome'}</strong> acaba de solicitar um empréstimo de <strong>${formatBRL(lead.proposta?.valor_solicitado || 0)}</strong>.
+          </div>
+          <button class="btn-action" style="padding:6px 12px; font-size:0.725rem; background:var(--gold); color:var(--navy); font-weight:700; border-radius:6px; border:none; cursor:pointer; align-self:flex-end;" id="toast-btn-ver-${lead.id}">
+            Analisar Proposta
+          </button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        toast.querySelector(`#toast-btn-ver-${lead.id}`).addEventListener("click", () => {
+          openLeadDetails(lead.id);
+          toast.remove();
+        });
+
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.style.animation = "fadeOut 0.3s ease forwards";
+            setTimeout(() => toast.remove(), 300);
+          }
+        }, 12000);
+      };
+
+      const checkNewProposals = async () => {
+        try {
+          await fetchLeadsFromSupabase();
+          const leads = getLeads();
+          let hasNew = false;
+
+          leads.forEach(lead => {
+            if (!knownLeadIds.has(lead.id)) {
+              knownLeadIds.add(lead.id);
+              hasNew = true;
+
+              // Notifica apenas propostas recém-criadas (últimos 45 segundos)
+              const createdTime = new Date(lead.createdAt).getTime();
+              if (Date.now() - createdTime < 45000) {
+                showNewProposalAlert(lead);
+              }
+            }
+          });
+
+          if (hasNew) {
+            renderActivePage();
+          }
+        } catch(e) {
+          console.error("[Walker Bank] Falha no checkNewProposals de fallback:", e);
+        }
+      };
+
+      const renderActivePage = () => {
+        if (document.getElementById("sec-mesa-analise").classList.contains("active")) renderMesaTable();
+        if (document.getElementById("sec-dashboard-geral").classList.contains("active")) renderDashboard();
+        if (document.getElementById("sec-relatorio-financeiro").classList.contains("active")) renderFinanceiro();
+        if (document.getElementById("sec-relatorio-leads").classList.contains("active")) renderLeadsReport();
+        if (document.getElementById("sec-clientes").classList.contains("active")) renderClientes();
+      };
+
+      const setupRealtime = () => {
+        try {
+          supabaseClient
+            .channel('leads-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, async (payload) => {
+              console.log('[Walker Bank] Alteração no Supabase detectada:', payload);
+              await fetchLeadsFromSupabase();
+              
+              if (payload.eventType === 'INSERT') {
+                const newRow = payload.new;
+                if (!knownLeadIds.has(newRow.id)) {
+                  knownLeadIds.add(newRow.id);
+                  const leadData = {
+                    id: newRow.id,
+                    createdAt: newRow.created_at,
+                    status: newRow.status,
+                    ...(newRow.payload || {})
+                  };
+                  showNewProposalAlert(leadData);
+                }
+              }
+              
+              renderActivePage();
+            })
+            .subscribe((status) => {
+              console.log("[Walker Bank] Status do Canal Realtime:", status);
+            });
+        } catch (e) {
+          console.error("[Walker Bank] Falha ao iniciar canal Realtime:", e);
+        }
+      };
+
+      // ==========================================
+      // INICIALIZAÇÃO
+      // ==========================================
+      (async () => {
+        // Renderiza local cache primeiro
+        renderMesaTable();
+
+        // Carrega configurações
+        await fetchConfigsFromSupabase();
+
+        // Carrega leads reais do Supabase
+        await fetchLeadsFromSupabase();
+
+        // Inicializa conhecidos
+        knownLeadIds = new Set(getLeads().map(l => l.id));
+
+        // Renderiza a mesa e páginas com dados do Supabase
+        renderMesaTable();
+
+        // Inicializa Realtime e fallback polling
+        setupRealtime();
+        setInterval(checkNewProposals, 10000); // Polling de fallback a cada 10s
+        requestNotificationPermission();
+      })();
+    });
+  </script>
+
+</body>
+</html>
