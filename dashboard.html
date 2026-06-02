@@ -1857,6 +1857,29 @@
       let currentLeads = [];
       let currentConfigs = {};
 
+      const safeSaveLeads = (leads) => {
+        try {
+          localStorage.setItem("walker_leads", JSON.stringify(leads));
+        } catch (err) {
+          console.warn("[Walker Bank] Erro ao gravar leads no LocalStorage (cota cheia). Gravando versão sem anexos binários:", err);
+          try {
+            const lightweight = leads.map(l => {
+              const item = { ...l };
+              if (item.arquivos) {
+                item.arquivos = {
+                  identidade_cnh_rg: item.arquivos.identidade_cnh_rg ? "anexo_presente_no_banco" : null,
+                  contracheque: item.arquivos.contracheque ? "anexo_presente_no_banco" : null
+                };
+              }
+              return item;
+            });
+            localStorage.setItem("walker_leads", JSON.stringify(lightweight));
+          } catch (e) {
+            console.error("[Walker Bank] Falha crítica ao salvar no LocalStorage:", e);
+          }
+        }
+      };
+
       // ==========================================
       // 1. AUTENTICAÇÃO
       // ==========================================
@@ -1962,14 +1985,14 @@
       ];
 
       if (!localStorage.getItem("walker_leads")) {
-        localStorage.setItem("walker_leads", JSON.stringify(INITIAL_MOCK_LEADS));
+        safeSaveLeads(INITIAL_MOCK_LEADS);
       }
 
       // Migração: converte status legado "Aguardando Averbação" → "Recebida"
       const rawLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
       const migrated = rawLeads.map(l => l.status === "Aguardando Averbação" ? { ...l, status: "Recebida" } : l);
       if (migrated.some((l, i) => l.status !== rawLeads[i].status)) {
-        localStorage.setItem("walker_leads", JSON.stringify(migrated));
+        safeSaveLeads(migrated);
       }
 
       // ==========================================
@@ -2033,18 +2056,26 @@
             // Mapeamos de volta para o formato de payload esperado pela UI
             currentLeads = data.map(row => {
               const item = row.payload || {};
+              let statusMapped = row.status;
+              if (statusMapped === "Aguardando Averbação") {
+                statusMapped = "Recebida";
+              }
               return {
                 id: row.id,
                 createdAt: row.created_at,
-                status: row.status,
+                status: statusMapped,
                 ...item
               };
             });
-            localStorage.setItem("walker_leads", JSON.stringify(currentLeads));
+            safeSaveLeads(currentLeads);
           }
         } catch (err) {
           console.warn("Erro ao buscar leads do Supabase, usando local:", err);
-          currentLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+          try {
+            currentLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+          } catch (e) {
+            currentLeads = [];
+          }
         }
       };
 
@@ -2485,7 +2516,7 @@
         contraInput.value = "";
 
         currentLeads = updated;
-        localStorage.setItem("walker_leads", JSON.stringify(updated));
+        safeSaveLeads(updated);
 
         // Salva no Supabase
         if (targetLead) {
@@ -2574,7 +2605,7 @@
         });
 
         currentLeads = updated;
-        localStorage.setItem("walker_leads", JSON.stringify(updated));
+        safeSaveLeads(updated);
 
         // Envia para o Supabase
         if (targetLead) {
@@ -2683,7 +2714,7 @@
         });
 
         currentLeads = updated;
-        localStorage.setItem("walker_leads", JSON.stringify(updated));
+        safeSaveLeads(updated);
 
         if (targetLead) {
           try {
@@ -2713,7 +2744,7 @@
             l.id === activeLeadId ? { ...l, status: "Aguardando Assinatura" } : l
           );
           currentLeads = statusAtualizado;
-          localStorage.setItem("walker_leads", JSON.stringify(statusAtualizado));
+          safeSaveLeads(statusAtualizado);
           try {
             const updLead = statusAtualizado.find(l => l.id === activeLeadId);
             if (updLead) await supabaseClient.from('leads').upsert({ id: updLead.id, created_at: updLead.createdAt, nome: updLead.lead?.nome, cpf: updLead.lead?.cpf, status: "Aguardando Assinatura", convenio: updLead.dados_funcionais?.convenio, valor_solicitado: updLead.proposta?.valor_solicitado, payload: updLead });
@@ -2777,8 +2808,10 @@
         });
 
         // Gráfico de Barras — Funil de Propostas
-        const statusCounts = { 'Aguardando Averbação': 0, 'Aprovada': 0, 'Recusada': 0, 'Paga': 0 };
+        const statusCounts = { 'Recebida': 0, 'Aguardando Averbação': 0, 'Em Análise': 0, 'Aguardando Assinatura': 0, 'Aprovada': 0, 'Recusada': 0, 'Paga': 0 };
         leads.forEach(l => { if (statusCounts[l.status] !== undefined) statusCounts[l.status]++; });
+
+        const aguardandoTotal = (statusCounts['Recebida'] || 0) + (statusCounts['Aguardando Averbação'] || 0) + (statusCounts['Em Análise'] || 0) + (statusCounts['Aguardando Assinatura'] || 0);
 
         if (chartFunil) chartFunil.destroy();
         const ctxFunil = document.getElementById("chart-funil").getContext("2d");
@@ -2788,7 +2821,7 @@
             labels: ['Aguardando', 'Aprovada', 'Recusada', 'Paga'],
             datasets: [{
               label: 'Propostas',
-              data: [statusCounts['Aguardando Averbação'], statusCounts['Aprovada'], statusCounts['Recusada'], statusCounts['Paga']],
+              data: [aguardandoTotal, statusCounts['Aprovada'] || 0, statusCounts['Recusada'] || 0, statusCounts['Paga'] || 0],
               backgroundColor: ['rgba(52, 152, 219, 0.8)', 'rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)', 'rgba(212, 188, 110, 0.9)'],
               borderRadius: 6,
               borderSkipped: false
