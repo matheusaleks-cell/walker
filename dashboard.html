@@ -1908,11 +1908,17 @@
       // ==========================================
       // 1. AUTENTICAÇÃO
       // ==========================================
+      // Filtro síncrono rápido local para evitar flash de conteúdo
       if (sessionStorage.getItem("walker_admin_session") !== "true") {
         window.location.href = "login.html";
       }
 
-      document.getElementById("logout-btn").addEventListener("click", () => {
+      document.getElementById("logout-btn").addEventListener("click", async () => {
+        try {
+          await supabaseClient.auth.signOut();
+        } catch (e) {
+          console.warn("Erro ao fazer logout no Supabase:", e);
+        }
         sessionStorage.removeItem("walker_admin_session");
         window.location.href = "login.html";
       });
@@ -3655,6 +3661,14 @@
       // INICIALIZAÇÃO
       // ==========================================
       (async () => {
+        // Valida se há uma sessão ativa de verdade no Supabase Auth
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+          sessionStorage.removeItem("walker_admin_session");
+          window.location.href = "login.html";
+          return; // Aborta a inicialização caso não esteja autenticado
+        }
+
         // Renderiza local cache primeiro
         renderMesaTable();
 
