@@ -1708,15 +1708,47 @@
           };
 
           // Salva localmente no localStorage para o Painel do Sistema Interno ler
-          const localLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
           const newLead = {
             id: `proposta-${Math.random().toString(36).substr(2, 9)}`,
             createdAt: new Date().toISOString(),
             status: "Aguardando Averbação",
             ...payload
           };
-          localLeads.push(newLead);
-          localStorage.setItem("walker_leads", JSON.stringify(localLeads));
+
+          try {
+            const localLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+            localLeads.push(newLead);
+            
+            try {
+              localStorage.setItem("walker_leads", JSON.stringify(localLeads));
+            } catch (quotaError) {
+              console.warn("[Walker Bank] Limite de armazenamento do localStorage excedido. Removendo leads antigos...");
+              // Remove leads antigos um a um até que caiba ou reste apenas o atual
+              while (localLeads.length > 1) {
+                localLeads.shift();
+                try {
+                  localStorage.setItem("walker_leads", JSON.stringify(localLeads));
+                  console.log("[Walker Bank] Leads antigos limpos do localStorage com sucesso.");
+                  break;
+                } catch (e) {
+                  // continua limpando
+                }
+              }
+              // Caso o único lead (atual com base64) ainda exceda a cota (~5MB),
+              // salvamos no localStorage removendo os arquivos pesados de imagem
+              if (localLeads.length === 1) {
+                try {
+                  const lightweightLead = { ...newLead, arquivos: { identidade_cnh_rg: null, contracheque: null } };
+                  localStorage.setItem("walker_leads", JSON.stringify([lightweightLead]));
+                  console.log("[Walker Bank] Salvo no localStorage sem anexos pesados para evitar estouro de cota.");
+                } catch (errBackup) {
+                  console.error("[Walker Bank] Falha ao salvar lead simplificado no localStorage:", errBackup);
+                }
+              }
+            }
+          } catch (storageError) {
+            console.error("[Walker Bank] Erro ao manipular localStorage:", storageError);
+          }
 
           // Salva no Supabase
           try {
