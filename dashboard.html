@@ -580,6 +580,9 @@
     .status-badge.aprovado { background: rgba(46, 204, 113, 0.1); color: var(--green-success); }
     .status-badge.recusado { background: rgba(231, 76, 60, 0.1); color: var(--red-error); }
     .status-badge.pago { background: rgba(212, 188, 110, 0.15); color: var(--dark-gold); border: 1px solid rgba(212, 188, 110, 0.3); }
+    .status-badge.recebida { background: rgba(149, 165, 166, 0.15); color: #7f8c8d; }
+    .status-badge.em-analise { background: rgba(230, 126, 34, 0.1); color: #e67e22; }
+    .status-badge.aguard-assinatura { background: rgba(155, 89, 182, 0.1); color: #9b59b6; }
     
     /* Botões de Ação */
     .btn-action {
@@ -821,6 +824,16 @@
       box-shadow: 0 4px 10px rgba(212, 188, 110, 0.2);
     }
     .btn-action-panel.pagar:hover { background: var(--dark-gold); transform: translateY(-1px); }
+
+    .btn-action-panel.iniciar { background: var(--blue-info); color: var(--white); }
+    .btn-action-panel.iniciar:hover { background: #2980b9; transform: translateY(-1px); }
+
+    .btn-action-panel.reabrir {
+      background: var(--light-gray);
+      color: var(--gray-text);
+      border: 1px solid var(--nardo);
+    }
+    .btn-action-panel.reabrir:hover { background: var(--nardo); color: var(--navy); }
     
     /* Empty State */
     .empty-state {
@@ -1166,8 +1179,10 @@
           </select>
           <select class="filter-select" id="filter-status">
             <option value="all">Todos os Status</option>
-            <option value="Aguardando Averbação">Aguardando Averbação</option>
+            <option value="Recebida">Recebida</option>
+            <option value="Em Análise">Em Análise</option>
             <option value="Aprovada">Aprovada</option>
+            <option value="Aguardando Assinatura">Aguardando Assinatura</option>
             <option value="Recusada">Recusada</option>
             <option value="Paga">Paga</option>
           </select>
@@ -1348,7 +1363,7 @@
           </div>
           <div class="empty-state" id="leads-rep-empty" style="display: none;">
             <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
-            <h3>Nenum lead encontrado</h3>
+            <h3>Nenhum lead encontrado</h3>
             <p>Ajuste os filtros para visualizar leads.</p>
           </div>
         </div>
@@ -1524,6 +1539,10 @@
             <div class="info-item">
               <span class="info-label">CPF</span>
               <span class="info-val view-mode" id="m-p-cpf">-</span>
+              <button type="button" class="view-mode" id="btn-hbi-view" style="margin-top:6px; background:rgba(30,37,68,0.06); border:1px solid rgba(212,188,110,0.35); color:var(--dark-gold); font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer; font-family:var(--font-body); display:inline-flex; align-items:center; gap:5px; transition:var(--transition-fast);" title="Consultar dados cadastrais na HBI">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Consultar HBI
+              </button>
               <div class="edit-mode" style="display: none;">
                 <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
                   <input type="text" id="edit-p-cpf" style="flex: 1; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none;">
@@ -1711,6 +1730,10 @@
               <span class="info-label">Valor Total Financiado</span>
               <span class="info-val" id="m-c-total">R$ 0,00</span>
             </div>
+            <div class="info-item" style="margin-top: 12px; grid-column: span 3; padding-top:10px; border-top: 1px dashed rgba(24,27,44,0.1);">
+              <span class="info-label">Análise de Margem Consignável (limite: 30% do salário líquido)</span>
+              <span id="m-c-margem-status" style="font-size:0.85rem; font-weight:700; margin-top:4px; display:block;">—</span>
+            </div>
           </div>
           <div style="font-size: 0.725rem; color: var(--gray-light-text); display: flex; justify-content: space-between; margin-top: 12px; padding: 0 4px;">
             <span id="m-c-assinatura">Assinatura Eletrônica SMS Validada</span>
@@ -1762,9 +1785,11 @@
         
         <!-- Ações do Modal -->
         <div class="proposal-actions-row" id="m-actions-panel">
-          <button class="btn-action-panel recusar" id="m-btn-recusar">Recusar Proposta</button>
-          <button class="btn-action-panel aprovar" id="m-btn-aprovar">Aprovar Proposta</button>
-          <button class="btn-action-panel pagar" id="m-btn-pagar">Liberar Recurso (Pagar)</button>
+          <button class="btn-action-panel reabrir" id="m-btn-reabrir">↩ Reabrir Proposta</button>
+          <button class="btn-action-panel recusar" id="m-btn-recusar">✕ Recusar Proposta</button>
+          <button class="btn-action-panel iniciar" id="m-btn-iniciar">▶ Iniciar Análise</button>
+          <button class="btn-action-panel aprovar" id="m-btn-aprovar">✓ Aprovar Proposta</button>
+          <button class="btn-action-panel pagar" id="m-btn-pagar">💰 Liberar Recurso</button>
         </div>
       </div>
     </div>
@@ -1857,7 +1882,7 @@
         {
           id: "proposta-mock1",
           createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          status: "Aguardando Averbação",
+          status: "Recebida",
           lead: {
             nome: "Mariano Silva Rezende", cpf: "18945612308", data_nascimento: "12/05/1974",
             celular: "11988884455", email: "mariano.rezende@gmail.com",
@@ -1940,6 +1965,13 @@
         localStorage.setItem("walker_leads", JSON.stringify(INITIAL_MOCK_LEADS));
       }
 
+      // Migração: converte status legado "Aguardando Averbação" → "Recebida"
+      const rawLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+      const migrated = rawLeads.map(l => l.status === "Aguardando Averbação" ? { ...l, status: "Recebida" } : l);
+      if (migrated.some((l, i) => l.status !== rawLeads[i].status)) {
+        localStorage.setItem("walker_leads", JSON.stringify(migrated));
+      }
+
       // ==========================================
       // 3. UTILIDADES
       // ==========================================
@@ -1959,10 +1991,14 @@
         return map[c] || c || '-';
       };
       const getStatusClass = (s) => {
-        if (s === 'Aguardando Averbação') return 'aguardando';
+        if (s === 'Recebida') return 'recebida';
+        if (s === 'Em Análise') return 'em-analise';
         if (s === 'Aprovada') return 'aprovado';
+        if (s === 'Aguardando Assinatura') return 'aguard-assinatura';
         if (s === 'Recusada') return 'recusado';
-        return 'pago';
+        if (s === 'Paga') return 'pago';
+        if (s === 'Aguardando Averbação') return 'recebida'; // compat
+        return 'recebida';
       };
 
       const applyMask = (input, maskFunc) => { if (!input) return; input.addEventListener("input", (e) => { e.target.value = maskFunc(e.target.value); }); };
@@ -2193,10 +2229,13 @@
         updateMesaMetrics(leads);
       };
 
+      // Debounce utilitário
+      const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
       // Mesa Filtros
       document.getElementById("filter-convenio").addEventListener("change", renderMesaTable);
       document.getElementById("filter-status").addEventListener("change", renderMesaTable);
-      document.getElementById("search-input").addEventListener("input", renderMesaTable);
+      document.getElementById("search-input").addEventListener("input", debounce(renderMesaTable, 280));
       document.getElementById("btn-clear-filters").addEventListener("click", () => {
         document.getElementById("filter-convenio").value = "all";
         document.getElementById("filter-status").value = "all";
@@ -2250,7 +2289,7 @@
         document.getElementById("m-nome").textContent = lead.lead?.nome || 'Cliente Sem Nome';
         const statusEl = document.getElementById("m-id-status");
         statusEl.textContent = lead.status;
-        statusEl.className = getStatusClass(lead.status);
+        statusEl.className = 'status-badge ' + getStatusClass(lead.status);
         statusEl.style.cssText = "font-size:0.725rem; font-weight:700; padding:2px 8px; border-radius:20px; display:inline-block;";
 
         // Dados pessoais
@@ -2311,15 +2350,41 @@
         // Justificativa / WhatsApp
         document.getElementById("m-wpp-justificativa").value = lead.justificativa || "";
 
-        // Ações por status
+        // Margem consignável
+        const salarioLiq = lead.dados_funcionais?.salario_liquido || 0;
+        const parcelaVal = lead.proposta?.valor_parcela || 0;
+        const margemEl = document.getElementById("m-c-margem-status");
+        if (salarioLiq > 0) {
+          const margemDisp = salarioLiq * 0.30;
+          const ok = parcelaVal <= margemDisp;
+          margemEl.innerHTML = ok
+            ? `<span style="color:var(--green-success);">✓ Dentro da margem — ${formatBRL(parcelaVal)} ≤ 30% do salário (limite: ${formatBRL(margemDisp)})</span>`
+            : `<span style="color:var(--red-error);">✗ Excede a margem — ${formatBRL(parcelaVal)} > 30% do salário (limite: ${formatBRL(margemDisp)}) — revisar valor ou prazo</span>`;
+        } else {
+          margemEl.innerHTML = `<span style="color:var(--gray-light-text);">Salário líquido não informado</span>`;
+        }
+
+        // Ações por status — oculta todos, mostra conforme o fluxo
         const mBtnAprovar = document.getElementById("m-btn-aprovar");
         const mBtnPagar = document.getElementById("m-btn-pagar");
         const mBtnRecusar = document.getElementById("m-btn-recusar");
-        mBtnAprovar.style.display = "inline-flex"; mBtnPagar.style.display = "inline-flex"; mBtnRecusar.style.display = "inline-flex";
-        if (lead.status === "Aprovada") { mBtnAprovar.style.display = "none"; }
-        else if (lead.status === "Paga") { mBtnAprovar.style.display = "none"; mBtnPagar.style.display = "none"; mBtnRecusar.style.display = "none"; }
-        else if (lead.status === "Recusada") { mBtnAprovar.style.display = "none"; mBtnPagar.style.display = "none"; mBtnRecusar.style.display = "none"; }
-        else { mBtnPagar.style.display = "none"; }
+        const mBtnIniciar = document.getElementById("m-btn-iniciar");
+        const mBtnReabrir = document.getElementById("m-btn-reabrir");
+        [mBtnAprovar, mBtnPagar, mBtnRecusar, mBtnIniciar, mBtnReabrir].forEach(b => b.style.display = "none");
+        const s = lead.status;
+        if (s === "Recebida" || s === "Aguardando Averbação") {
+          mBtnIniciar.style.display = "inline-flex";
+          mBtnRecusar.style.display = "inline-flex";
+        } else if (s === "Em Análise") {
+          mBtnAprovar.style.display = "inline-flex";
+          mBtnRecusar.style.display = "inline-flex";
+        } else if (s === "Aprovada" || s === "Aguardando Assinatura") {
+          mBtnPagar.style.display = "inline-flex";
+          mBtnRecusar.style.display = "inline-flex";
+        } else if (s === "Recusada") {
+          mBtnReabrir.style.display = "inline-flex";
+        }
+        // "Paga" → sem botões
 
         modal.classList.add("active");
         document.body.style.overflow = "hidden";
@@ -2333,6 +2398,16 @@
 
       document.getElementById("close-modal").addEventListener("click", closeLeadDetails);
       modal.addEventListener("click", (e) => { if (e.target === modal) closeLeadDetails(); });
+
+      // Fechar modais com Escape
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (modal.classList.contains("active")) { closeLeadDetails(); return; }
+        if (clientModal.classList.contains("active")) {
+          clientModal.classList.remove("active");
+          document.body.style.overflow = "";
+        }
+      });
 
       // Editar/Salvar/Cancelar
       document.getElementById("m-btn-editar").addEventListener("click", () => {
@@ -2526,10 +2601,48 @@
 
         closeLeadDetails();
         renderMesaTable();
+        const msgs = {
+          "Recebida": "Proposta reaberta — status Recebida.",
+          "Em Análise": "Análise iniciada!",
+          "Aprovada": "Proposta aprovada com sucesso!",
+          "Aguardando Assinatura": "Aguardando assinatura do cliente.",
+          "Recusada": "Proposta marcada como recusada.",
+          "Paga": "Recursos liberados! Operação marcada como paga."
+        };
+        const colors = {
+          "Recebida": "#7f8c8d", "Em Análise": "#e67e22",
+          "Aprovada": "var(--green-success)", "Aguardando Assinatura": "#9b59b6",
+          "Recusada": "var(--red-error)", "Paga": "var(--dark-gold)"
+        };
+        showToast(msgs[newStatus] || "Status atualizado.", colors[newStatus] || "var(--navy)");
       };
-      document.getElementById("m-btn-recusar").addEventListener("click", () => changeStatus("Recusada"));
-      document.getElementById("m-btn-aprovar").addEventListener("click", () => changeStatus("Aprovada"));
-      document.getElementById("m-btn-pagar").addEventListener("click", () => changeStatus("Paga"));
+
+      // Confirmação antes de mudar status
+      const confirmAction = (message, color, onConfirm) => {
+        if (window.confirm(message)) onConfirm();
+      };
+
+      document.getElementById("m-btn-iniciar").addEventListener("click", () => {
+        confirmAction("Confirmar início da análise desta proposta?", "var(--blue-info)", () => changeStatus("Em Análise"));
+      });
+      document.getElementById("m-btn-recusar").addEventListener("click", () => {
+        confirmAction("Tem certeza que deseja RECUSAR esta proposta?", "var(--red-error)", () => changeStatus("Recusada"));
+      });
+      document.getElementById("m-btn-aprovar").addEventListener("click", () => {
+        confirmAction("Confirmar APROVAÇÃO desta proposta?", "var(--green-success)", () => changeStatus("Aprovada"));
+      });
+      document.getElementById("m-btn-pagar").addEventListener("click", () => {
+        confirmAction("Confirmar LIBERAÇÃO DE RECURSOS (marcar como Paga)?", "var(--dark-gold)", () => changeStatus("Paga"));
+      });
+      document.getElementById("m-btn-reabrir").addEventListener("click", () => {
+        confirmAction("Reabrir proposta? O status voltará para Recebida.", "#7f8c8d", () => changeStatus("Recebida"));
+      });
+
+      // HBI acessível no modo visualização — ativa edição + dispara consulta
+      document.getElementById("btn-hbi-view").addEventListener("click", () => {
+        document.getElementById("m-btn-editar").click();
+        setTimeout(() => document.getElementById("btn-puxar-hbi").click(), 150);
+      });
 
       // Ações do WhatsApp
       const sendWhatsAppMessage = async (templateType) => {
@@ -2593,6 +2706,22 @@
 
         const wppUrl = `https://wa.me/55${celular}?text=${encodeURIComponent(text)}`;
         window.open(wppUrl, "_blank");
+
+        // Ao enviar link de assinatura, avança status para Aguardando Assinatura
+        if (templateType === "aceita") {
+          const statusAtualizado = getLeads().map(l =>
+            l.id === activeLeadId ? { ...l, status: "Aguardando Assinatura" } : l
+          );
+          currentLeads = statusAtualizado;
+          localStorage.setItem("walker_leads", JSON.stringify(statusAtualizado));
+          try {
+            const updLead = statusAtualizado.find(l => l.id === activeLeadId);
+            if (updLead) await supabaseClient.from('leads').upsert({ id: updLead.id, created_at: updLead.createdAt, nome: updLead.lead?.nome, cpf: updLead.lead?.cpf, status: "Aguardando Assinatura", convenio: updLead.dados_funcionais?.convenio, valor_solicitado: updLead.proposta?.valor_solicitado, payload: updLead });
+          } catch(e) {}
+          renderMesaTable();
+          if (modal.classList.contains("active")) setTimeout(() => openLeadDetails(activeLeadId), 200);
+          showToast("Link de assinatura enviado! Status → Aguardando Assinatura", "#9b59b6");
+        }
       };
 
 

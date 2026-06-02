@@ -242,6 +242,35 @@
       font-size: 0.7rem;
       color: rgba(255, 255, 255, 0.35);
     }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      padding-right: 48px !important;
+    }
+
+    .btn-toggle-pass {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.1rem;
+      padding: 0;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s ease;
+    }
+
+    .btn-toggle-pass:hover {
+      color: var(--gold);
+    }
   </style>
 </head>
 <body>
@@ -264,7 +293,10 @@
         
         <div class="form-group" style="margin-bottom: 30px;">
           <label for="password">Senha</label>
-          <input type="password" id="password" placeholder="Digite sua senha" required autocomplete="current-password">
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Digite sua senha" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-pass" id="toggle-password" aria-label="Mostrar senha" title="Mostrar / ocultar senha">👁</button>
+          </div>
         </div>
         
         <button type="submit" class="btn-login" id="btn-submit">
@@ -309,12 +341,27 @@
             sessionStorage.setItem("walker_admin_session", "true");
             window.location.href = "dashboard.html";
           } else {
-            errorMsg.textContent = "Usuário ou senha inválidos. Tente admin / admin.";
+            errorMsg.textContent = "Usuário ou senha inválidos. Verifique suas credenciais e tente novamente.";
             errorMsg.style.display = "block";
             btnSubmit.textContent = "Entrar no Sistema";
             btnSubmit.disabled = false;
           }
         }, 800);
+      });
+
+      // Toggle show/hide senha
+      document.getElementById("toggle-password").addEventListener("click", () => {
+        const pwInput = document.getElementById("password");
+        const btn = document.getElementById("toggle-password");
+        if (pwInput.type === "password") {
+          pwInput.type = "text";
+          btn.textContent = "🙈";
+          btn.setAttribute("aria-label", "Ocultar senha");
+        } else {
+          pwInput.type = "password";
+          btn.textContent = "👁";
+          btn.setAttribute("aria-label", "Mostrar senha");
+        }
       });
     });
   </script>
