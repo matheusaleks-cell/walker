@@ -849,11 +849,8 @@
               <div class="form-control">
                 <label for="convenio">Tipo de Convênio</label>
                 <select id="convenio" name="convenio" required>
-                  <option value="" disabled>Selecione seu convênio</option>
-                  <option value="inss">Aposentado/Pensionista INSS</option>
-                  <option value="mil">Forças Armadas (Militares)</option>
-                  <option value="est">Servidor Público Estadual</option>
-                  <option value="mun">Servidor Público Municipal</option>
+                  <option value="" disabled selected>Selecione seu convênio</option>
+                  <!-- Opções carregadas dinamicamente -->
                 </select>
                 <span class="error-msg">Selecione o convênio</span>
               </div>
@@ -1144,11 +1141,71 @@
       const cetEstimadoAnual = (Math.pow(1 + (taxaNum/100), 12) - 1) * 100 + 1.8; // adicionado taxas fixas estimadas
       document.getElementById("sum-cet").textContent = `${cetEstimadoAnual.toFixed(2).replace('.', ',')}% a.a.`;
 
-      // Pré-seleciona convênio no formulário se estiver disponível
-      const convenioSelect = document.getElementById("convenio");
-      if (convenioSelect && simulacaoData.convenio) {
-        convenioSelect.value = simulacaoData.convenio;
-      }
+      // Pré-seleciona convênio no formulário se estiver disponível e carrega dinamicamente do Supabase
+      const populateConvenios = async () => {
+        const convenioSelect = document.getElementById("convenio");
+        if (!convenioSelect) return;
+
+        // Lista padrão de convênios (de fábrica) para fallback rápido
+        const defaultConvenios = {
+          inss: { nome: "INSS", tipo: "Aposentado/Pensionista INSS" },
+          mil: { nome: "Forças Armadas", tipo: "Forças Armadas (Militares)" },
+          est: { nome: "Estadual", tipo: "Servidor Público Estadual" },
+          mun: { nome: "Municipal", tipo: "Servidor Público Municipal" },
+          clt: { nome: "CLT Privado", tipo: "Trabalhador CLT de Empresa Privada" }
+        };
+
+        let activeConvenios = { ...defaultConvenios };
+
+        // Tenta buscar as configurações ativas do Supabase
+        try {
+          const { data, error } = await supabaseClient
+            .from('configs')
+            .select('data')
+            .eq('id', 'default')
+            .single();
+
+          if (!error && data && data.data && data.data.convenios) {
+            activeConvenios = data.data.convenios;
+            // Atualiza no localStorage também para consistência
+            try {
+              localStorage.setItem("walker_configs", JSON.stringify(data.data));
+            } catch (e) {}
+          } else {
+            // Tenta pegar do cache local se o Supabase falhar
+            try {
+              const localCfg = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+              if (localCfg.convenios) {
+                activeConvenios = localCfg.convenios;
+              }
+            } catch (e) {}
+          }
+        } catch (err) {
+          console.warn("Erro ao sincronizar convênios do Supabase, usando fallback:", err);
+          try {
+            const localCfg = JSON.parse(localStorage.getItem("walker_configs") || "{}");
+            if (localCfg.convenios) {
+              activeConvenios = localCfg.convenios;
+            }
+          } catch (e) {}
+        }
+
+        // Popula as opções do select
+        convenioSelect.innerHTML = '<option value="" disabled selected>Selecione seu convênio</option>';
+        Object.keys(activeConvenios).forEach(key => {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = activeConvenios[key].tipo || activeConvenios[key].nome;
+          convenioSelect.appendChild(opt);
+        });
+
+        // Pré-seleciona a simulação atual
+        if (simulacaoData.convenio && activeConvenios[simulacaoData.convenio]) {
+          convenioSelect.value = simulacaoData.convenio;
+        }
+      };
+
+      populateConvenios();
 
       /* ==========================================================================
          Controle de Multi-Etapas do Formulário

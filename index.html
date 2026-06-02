@@ -1056,18 +1056,24 @@
 
     .convenios-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
       text-align: left;
     }
 
-    @media (max-width: 991px) {
+    @media (max-width: 1199px) {
+      .convenios-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
       .convenios-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    @media (max-width: 576px) {
+    @media (max-width: 480px) {
       .convenios-grid {
         grid-template-columns: 1fr;
       }
@@ -1692,10 +1698,7 @@
             <div class="form-group">
               <label class="form-label">Seu convênio</label>
               <div class="pill-grid" id="convenio-selector">
-                <button type="button" class="pill-btn active" data-convenio="inss">INSS</button>
-                <button type="button" class="pill-btn" data-convenio="mil">Forças Armadas</button>
-                <button type="button" class="pill-btn" data-convenio="est">Estadual</button>
-                <button type="button" class="pill-btn" data-convenio="mun">Municipal</button>
+                <!-- Populado dinamicamente -->
               </div>
             </div>
             
@@ -1875,7 +1878,7 @@
           <h3 class="convenio-title">INSS</h3>
           <p class="convenio-type">Aposentados e Pensionistas</p>
           <ul class="convenio-features">
-            <li>Taxa padrão de 3,99% a.m.</li>
+            <li>Desconto direto no benefício</li>
             <li>Aprovação para negativados</li>
             <li>Parcelamento em até 84 meses</li>
           </ul>
@@ -1891,7 +1894,7 @@
           <h3 class="convenio-title">Forças Armadas</h3>
           <p class="convenio-type">Marinha, Exército e Aeronáutica</p>
           <ul class="convenio-features">
-            <li>Taxa de 3,99% a.m.</li>
+            <li>Débito em folha simplificado</li>
             <li>Opções de carência estendida</li>
             <li>Crédito pré-aprovado imediato</li>
           </ul>
@@ -1907,7 +1910,7 @@
           <h3 class="convenio-title">Estadual</h3>
           <p class="convenio-type">Servidores Públicos Estaduais</p>
           <ul class="convenio-features">
-            <li>Taxa atrativa de 3,99% a.m.</li>
+            <li>Sem burocracia ou intermediários</li>
             <li>Amortização direta em folha</li>
             <li>Prazo estendido em até 96 meses</li>
           </ul>
@@ -1924,9 +1927,29 @@
           <h3 class="convenio-title">Municipal</h3>
           <p class="convenio-type">Servidores Públicos Municipais</p>
           <ul class="convenio-features">
-            <li>Taxa de 3,99% a.m.</li>
+            <li>Desconto consignado em folha</li>
             <li>Sem necessidade de avalista</li>
             <li>Simulação simples pelo celular</li>
+          </ul>
+        </div>
+
+        <!-- Card 5: Crédito CLT -->
+        <div class="convenio-card" data-aos="fade-up" data-aos-delay="400">
+          <div class="convenio-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <h3 class="convenio-title">CLT Privado</h3>
+          <p class="convenio-type">Trabalhadores CLT de Empresas Privadas</p>
+          <ul class="convenio-features">
+            <li>Consignado com desconto em folha</li>
+            <li>Aprovação rápida e sem burocracia</li>
+            <li>Prazos flexíveis conforme sua empresa</li>
           </ul>
         </div>
       </div>
@@ -1949,7 +1972,7 @@
             <span class="faq-icon" aria-hidden="true">+</span>
           </button>
           <div class="faq-content">
-            <p>Não. Qualquer servidor público elegível pode simular e contratar nosso crédito consignado. O depósito das parcelas aprovadas pode ser realizado em qualquer conta bancária de sua titularidade.</p>
+            <p>Não. Qualquer servidor público elegível pode simular e contratar nosso crédito consignado. O desconto das parcelas aprovadas será realizado por meio de desconto em folha.</p>
           </div>
         </div>
         
@@ -1960,7 +1983,7 @@
             <span class="faq-icon" aria-hidden="true">+</span>
           </button>
           <div class="faq-content">
-            <p>Sim. O desconto em folha respeita o limite legal de até 35% de margem consignável para empréstimo bruto da sua remuneração, conforme a legislação vigente do seu respectivo convênio.</p>
+            <p>Sim. O desconto em folha respeita os limites estabelecidos na sua instituição e as margens consignáveis a ele disponíveis, conforme a legislação vigente do seu respectivo convênio.</p>
           </div>
         </div>
         
@@ -2020,7 +2043,7 @@
           </div>
           <div class="cta-badge-item">
             <span class="cta-badge-icon">✓</span>
-            <span>Banco autorizado pelo Banco Central</span>
+            <span>Correspondente Bancário Autorizado</span>
           </div>
         </div>
       </div>
@@ -2204,6 +2227,15 @@
       const supabaseKey = "sb_publishable_EuvTPlZxoQqG9Owc3Yr9Uw_L1rTcLnP";
       const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+      // Lista padrão de convênios (de fábrica)
+      const defaultConvenios = {
+        inss: { nome: "INSS", tipo: "Aposentado/Pensionista INSS", min: 500, max: 5000, default: 3500, taxa: 0.0180, labelTaxa: "1,80% a.m.", margem: 35, margem_cartao: 5 },
+        mil: { nome: "Forças Armadas", tipo: "Forças Armadas (Militares)", min: 500, max: 15000, default: 7500, taxa: 0.0150, labelTaxa: "1,50% a.m.", margem: 30, margem_cartao: 5 },
+        est: { nome: "Estadual", tipo: "Servidor Público Estadual", min: 500, max: 20000, default: 10000, taxa: 0.0165, labelTaxa: "1,65% a.m.", margem: 30, margem_cartao: 5 },
+        mun: { nome: "Municipal", tipo: "Servidor Público Municipal", min: 500, max: 15000, default: 7500, taxa: 0.0170, labelTaxa: "1,70% a.m.", margem: 30, margem_cartao: 5 },
+        clt: { nome: "CLT Privado", tipo: "Trabalhador CLT", min: 500, max: 10000, default: 5000, taxa: 0.0250, labelTaxa: "2,50% a.m.", margem: 30, margem_cartao: 5 }
+      };
+
       // Leitura dinâmica de parâmetros comerciais configurados no Sistema Interno
       let walkerCfg = {};
       try {
@@ -2211,44 +2243,35 @@
       } catch (e) {
         console.warn("Erro ao ler walker_configs do localStorage:", e);
       }
-      const cfgTaxa = walkerCfg.taxa_juros ? parseFloat(walkerCfg.taxa_juros) / 100 : 0.0399;
-      const cfgTaxaLabel = walkerCfg.taxa_juros ? `${parseFloat(walkerCfg.taxa_juros).toFixed(2).replace('.', ',')}% a.m.` : "3,99% a.m.";
-      const cfgValMin = walkerCfg.val_min ? parseFloat(walkerCfg.val_min) : 500;
 
-      // Configurações por convênio (Parâmetros lidos do walker_configs ou padrão 3,99% a.m.)
-      const convenioConfigs = {
-        inss: {
-          min: cfgValMin,
-          max: walkerCfg.lim_inss ? parseFloat(walkerCfg.lim_inss) : 5000,
-          default: 3500,
-          taxa: cfgTaxa,
-          labelTaxa: cfgTaxaLabel
-        },
-        mil: {
-          min: cfgValMin,
-          max: walkerCfg.lim_mil ? parseFloat(walkerCfg.lim_mil) : 15000,
-          default: 7500,
-          taxa: cfgTaxa,
-          labelTaxa: cfgTaxaLabel
-        },
-        est: {
-          min: cfgValMin,
-          max: walkerCfg.lim_est ? parseFloat(walkerCfg.lim_est) : 20000,
-          default: 10000,
-          taxa: cfgTaxa,
-          labelTaxa: cfgTaxaLabel
-        },
-        mun: {
-          min: cfgValMin,
-          max: walkerCfg.lim_mun ? parseFloat(walkerCfg.lim_mun) : 15000,
-          default: 7500,
-          taxa: cfgTaxa,
-          labelTaxa: cfgTaxaLabel
+      // Inicializa com convênios salvos ou os padrões
+      let convenioConfigs = {};
+      const loadConvenioConfigsFromStorage = () => {
+        if (walkerCfg.convenios && Object.keys(walkerCfg.convenios).length > 0) {
+          convenioConfigs = {};
+          Object.keys(walkerCfg.convenios).forEach(key => {
+            const c = walkerCfg.convenios[key];
+            const tFloat = parseFloat(c.taxa) / 100;
+            convenioConfigs[key] = {
+              nome: c.nome,
+              tipo: c.tipo || c.nome,
+              min: parseFloat(c.min) || 500,
+              max: parseFloat(c.max) || 10000,
+              default: c.default || Math.round((parseFloat(c.min) + parseFloat(c.max)) / 2),
+              taxa: tFloat,
+              labelTaxa: `${parseFloat(c.taxa).toFixed(2).replace('.', ',')}% a.m.`,
+              margem: parseFloat(c.margem) || 30,
+              margem_cartao: parseFloat(c.margem_cartao) || 5
+            };
+          });
+        } else {
+          convenioConfigs = { ...defaultConvenios };
         }
       };
+      loadConvenioConfigsFromStorage();
 
       // Estado interno da simulação
-      let activeConvenio = "inss";
+      let activeConvenio = Object.keys(convenioConfigs)[0] || "inss";
       let activePrazo = 36;
       
       // Estado para transição numérica reativa com Anime.js
@@ -2258,7 +2281,32 @@
         valorSlider: 0
       };
       
-      const convButtons = document.querySelectorAll("#convenio-selector [data-convenio]");
+      // Função para renderizar os botões do seletor de convênio dinamicamente
+      const renderConvenioSelector = () => {
+        const selector = document.getElementById("convenio-selector");
+        if (!selector) return;
+        selector.innerHTML = "";
+
+        Object.keys(convenioConfigs).forEach((key, index) => {
+          const c = convenioConfigs[key];
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = key === activeConvenio ? "pill-btn active" : "pill-btn";
+          btn.setAttribute("data-convenio", key);
+          btn.textContent = c.nome;
+
+          btn.addEventListener("click", () => {
+            document.querySelectorAll("#convenio-selector .pill-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            activeConvenio = key;
+            updateSliderLimits(activeConvenio);
+            calculatePrice();
+          });
+
+          selector.appendChild(btn);
+        });
+      };
+
       const prazoButtons = document.querySelectorAll("#prazo-selector [data-prazo]");
       const valSlider = document.getElementById("val-slider");
       const valDisplay = document.getElementById("val-display");
@@ -2333,17 +2381,8 @@
         valDisplay.textContent = formatBRL(valAtual);
       };
 
-      // Event Listener para botões de convênio
-      convButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-          convButtons.forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          
-          activeConvenio = btn.dataset.convenio;
-          updateSliderLimits(activeConvenio);
-          calculatePrice();
-        });
-      });
+      // Renderização inicial do seletor
+      renderConvenioSelector();
 
       // Event Listener para Slider
       valSlider.addEventListener("input", () => {
@@ -2476,7 +2515,7 @@
 
         const simulacaoData = {
           convenio: activeConvenio,
-          convenioLabel: activeConvenio === 'inss' ? 'INSS' : activeConvenio === 'mil' ? 'Forças Armadas' : activeConvenio === 'est' ? 'Estadual' : 'Municipal',
+          convenioLabel: config.nome,
           valor: valor,
           prazo: prazo,
           parcela: parcela,
@@ -2599,31 +2638,15 @@
             } catch (e) {
               console.warn("Erro ao gravar walker_configs no localStorage:", e);
             }
-            const walkerCfg = data.data;
-            const cfgTaxa = walkerCfg.taxa_juros ? parseFloat(walkerCfg.taxa_juros) / 100 : 0.0399;
-            const cfgTaxaLabel = walkerCfg.taxa_juros ? `${parseFloat(walkerCfg.taxa_juros).toFixed(2).replace('.', ',')}% a.m.` : "3,99% a.m.";
-            const cfgValMin = walkerCfg.val_min ? parseFloat(walkerCfg.val_min) : 500;
+            walkerCfg = data.data;
+            loadConvenioConfigsFromStorage();
 
-            convenioConfigs.inss.min = cfgValMin;
-            convenioConfigs.inss.max = walkerCfg.lim_inss ? parseFloat(walkerCfg.lim_inss) : 5000;
-            convenioConfigs.inss.taxa = cfgTaxa;
-            convenioConfigs.inss.labelTaxa = cfgTaxaLabel;
+            // Garante que o convênio ativo exista na nova lista
+            if (!convenioConfigs[activeConvenio]) {
+              activeConvenio = Object.keys(convenioConfigs)[0] || "inss";
+            }
 
-            convenioConfigs.mil.min = cfgValMin;
-            convenioConfigs.mil.max = walkerCfg.lim_mil ? parseFloat(walkerCfg.lim_mil) : 15000;
-            convenioConfigs.mil.taxa = cfgTaxa;
-            convenioConfigs.mil.labelTaxa = cfgTaxaLabel;
-
-            convenioConfigs.est.min = cfgValMin;
-            convenioConfigs.est.max = walkerCfg.lim_est ? parseFloat(walkerCfg.lim_est) : 20000;
-            convenioConfigs.est.taxa = cfgTaxa;
-            convenioConfigs.est.labelTaxa = cfgTaxaLabel;
-
-            convenioConfigs.mun.min = cfgValMin;
-            convenioConfigs.mun.max = walkerCfg.lim_mun ? parseFloat(walkerCfg.lim_mun) : 15000;
-            convenioConfigs.mun.taxa = cfgTaxa;
-            convenioConfigs.mun.labelTaxa = cfgTaxaLabel;
-
+            renderConvenioSelector();
             updateSliderLimits(activeConvenio);
             calculatePrice();
           }
