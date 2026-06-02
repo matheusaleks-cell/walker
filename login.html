@@ -312,10 +312,19 @@
     
   </div>
 
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS Client (Local) -->
+  <script src="supabase.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      const errorMsg = document.getElementById("error-msg");
+
+      // Verifica se o SDK do Supabase foi carregado corretamente
+      if (typeof supabase === "undefined") {
+        errorMsg.textContent = "Erro crítico: Não foi possível carregar a biblioteca do banco de dados local (supabase.js). Por favor, atualize a página.";
+        errorMsg.style.display = "block";
+        return;
+      }
+
       // Configuração do Supabase Client
       const supabaseUrl = "https://jmbolyzmpfnggvoedaiu.supabase.co";
       const supabaseKey = "sb_publishable_EuvTPlZxoQqG9Owc3Yr9Uw_L1rTcLnP";

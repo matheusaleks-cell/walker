@@ -17,8 +17,8 @@
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS Client (Local) -->
+  <script src="supabase.js"></script>
 
   
   <style>
@@ -1871,6 +1871,11 @@
   ======================================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Verifica se a biblioteca local do Supabase carregou
+      if (typeof supabase === "undefined") {
+        alert("Erro crítico: A biblioteca de banco de dados (supabase.js) não foi carregada. Por favor, atualize a página.");
+        return;
+      }
       
       // ==========================================
       // 0. SUPABASE CLIENT & CACHE GLOBALS

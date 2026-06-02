@@ -2147,10 +2147,15 @@
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.6.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.3"></script>
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS Client (Local) -->
+  <script src="supabase.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Verifica se a biblioteca local do Supabase carregou
+      if (typeof supabase === "undefined") {
+        console.error("Erro crítico: A biblioteca de banco de dados (supabase.js) não foi carregada.");
+        return;
+      }
       
       /* ==========================================================================
          UTM Parameters Preservation Logic

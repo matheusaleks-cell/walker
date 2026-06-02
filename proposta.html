@@ -1102,10 +1102,15 @@
     </div>
   </main>
 
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS Client (Local) -->
+  <script src="supabase.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Verifica se a biblioteca local do Supabase carregou
+      if (typeof supabase === "undefined") {
+        alert("Erro crítico: A biblioteca de banco de dados (supabase.js) não foi carregada. Por favor, recarregue a página.");
+        return;
+      }
       
       // CONFIGURAÇÃO: URL do Webhook do sistema interno (ex: n8n, API backend)
       // Se deixado em branco, o sistema funciona em modo de simulação local exibindo os dados no console.
