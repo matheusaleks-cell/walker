@@ -2129,17 +2129,46 @@
           if (data) {
             // Mapeamos de volta para o formato de payload esperado pela UI
             currentLeads = data.map(row => {
-              const item = row.payload || {};
+              let parsedPayload = {};
+              if (row.payload) {
+                if (typeof row.payload === 'string') {
+                  try {
+                    parsedPayload = JSON.parse(row.payload);
+                  } catch (e) {
+                    console.error("[Walker Bank] Erro ao parsear row.payload em fetchLeadsFromSupabase:", e);
+                  }
+                } else if (typeof row.payload === 'object') {
+                  parsedPayload = row.payload;
+                }
+              }
+
               let statusMapped = row.status;
               if (statusMapped === "Aguardando Averbação") {
                 statusMapped = "Recebida";
               }
-              return {
+
+              const item = {
                 id: row.id,
                 createdAt: row.created_at,
                 status: statusMapped,
-                ...item
+                ...parsedPayload
               };
+
+              // Garantir estruturas e aplicar fallbacks a partir das colunas principais do banco
+              if (!item.lead) item.lead = {};
+              if (!item.lead.nome && row.nome) item.lead.nome = row.nome;
+              if (!item.lead.cpf && row.cpf) item.lead.cpf = row.cpf;
+
+              if (!item.dados_funcionais) item.dados_funcionais = {};
+              if (!item.dados_funcionais.convenio && row.convenio) item.dados_funcionais.convenio = row.convenio;
+              if (!item.dados_funcionais.profissao && row.profissao) item.dados_funcionais.profissao = row.profissao;
+
+              if (!item.proposta) item.proposta = {};
+              if (!item.proposta.valor_solicitado && row.valor_solicitado) {
+                item.proposta.valor_solicitado = row.valor_solicitado;
+              }
+
+              return item;
             });
             safeSaveLeads(currentLeads);
           }
@@ -3129,9 +3158,41 @@
         // Agrupar por CPF
         const cpfMap = {};
         leads.forEach(l => {
-          const cpf = l.lead?.cpf?.replace(/\D/g, "") || '';
+          let cpf = l.lead?.cpf?.replace(/\D/g, "") || l.cpf?.replace(/\D/g, "") || '';
           if (!cpf) return;
-          if (!cpfMap[cpf]) cpfMap[cpf] = { lead: l.lead, dados_bancarios: l.dados_bancarios, proposals: [] };
+          
+          if (!cpfMap[cpf]) {
+            // Mesclar dados do lead caso existam de fallback
+            const leadNome = l.lead?.nome || l.nome || '-';
+            const leadNomeMae = l.lead?.nome_mae || '-';
+            const leadCelular = l.lead?.celular || l.celular || '-';
+            const leadEmail = l.lead?.email || l.email || '-';
+            const leadGenero = l.lead?.genero || '-';
+            const leadEstadoCivil = l.lead?.estado_civil || '-';
+            const leadNascimento = l.lead?.data_nascimento || '-';
+            const leadRg = l.lead?.rg || '-';
+            const leadRgOrgao = l.lead?.rg_orgao || '-';
+            const leadRgUf = l.lead?.rg_uf || '-';
+            const leadRgData = l.lead?.rg_data_emissao || '-';
+
+            cpfMap[cpf] = {
+              lead: {
+                nome: leadNome,
+                nome_mae: leadNomeMae,
+                celular: leadCelular,
+                email: leadEmail,
+                genero: leadGenero,
+                estado_civil: leadEstadoCivil,
+                data_nascimento: leadNascimento,
+                rg: leadRg,
+                rg_orgao: leadRgOrgao,
+                rg_uf: leadRgUf,
+                rg_data_emissao: leadRgData
+              },
+              dados_bancarios: l.dados_bancarios || {},
+              proposals: []
+            };
+          }
           cpfMap[cpf].proposals.push(l);
         });
 

@@ -157,8 +157,12 @@
     }
 
     @media (max-width: 991px) {
+      .proposta-container {
+        margin: 20px auto 40px auto;
+      }
       .proposta-grid {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 24px;
       }
       .form-column {
@@ -167,6 +171,31 @@
       .summary-column {
         order: 1;
         position: static;
+      }
+      .summary-card {
+        padding: 20px;
+      }
+      .summary-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .summary-header h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+      }
+      .summary-row {
+        margin-bottom: 12px;
+        font-size: 0.85rem;
+      }
+      .summary-row.total-row {
+        margin-top: 6px;
+        padding-top: 12px;
+      }
+      .summary-row.total-row .summary-val {
+        font-size: 1.2rem;
       }
     }
 
@@ -722,20 +751,31 @@
       color: var(--green-success);
     }
 
-    @media (max-width: 375px) {
+    @media (max-width: 480px) {
       .google-sms-char {
-        width: 34px;
-        height: 42px;
-        font-size: 1.25rem;
+        width: 28px;
+        height: 38px;
+        font-size: 1.15rem;
+        border-radius: 6px;
       }
       .google-sms-prefix {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+        margin-right: 2px;
       }
       .google-sms-input-row {
         gap: 4px;
       }
       .google-sms-inputs {
         gap: 4px;
+      }
+      .button-group {
+        flex-direction: column-reverse;
+        gap: 12px;
+      }
+      .btn-nav {
+        width: 100%;
+        justify-content: center;
+        margin-left: 0 !important;
       }
     }
 
