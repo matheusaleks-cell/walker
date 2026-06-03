@@ -1069,6 +1069,24 @@
               </div>
 
               <div class="form-control">
+                <label for="profissao">Profissão / Cargo</label>
+                <select id="profissao" name="profissao" required>
+                  <option value="" disabled selected>Selecione sua profissão</option>
+                  <option value="Aposentado/Pensionista INSS">Aposentado ou Pensionista INSS</option>
+                  <option value="Servidor Público Federal">Servidor Público Federal</option>
+                  <option value="Servidor Público Estadual">Servidor Público Estadual</option>
+                  <option value="Servidor Público Municipal">Servidor Público Municipal</option>
+                  <option value="Militar das Forças Armadas">Militar das Forças Armadas</option>
+                  <option value="Policial/Bombeiro Militar">Policial ou Bombeiro Militar</option>
+                  <option value="Professor da Rede Pública">Professor / Profissional da Educação</option>
+                  <option value="Profissional da Saúde Pública">Profissional da Saúde Pública</option>
+                  <option value="Trabalhador CLT Privado">Trabalhador CLT (Iniciativa Privada)</option>
+                  <option value="Outro">Outro Cargo / Profissão</option>
+                </select>
+                <span class="error-msg">Selecione sua profissão</span>
+              </div>
+
+              <div class="form-control">
                 <label for="matricula">Matrícula ou Número do Benefício (NB)</label>
                 <input type="text" id="matricula" name="matricula" placeholder="Digite apenas os números" required>
                 <span class="error-msg">Campo obrigatório</span>
@@ -1695,6 +1713,7 @@
 
         if (step === 2) {
           const convenio = document.getElementById("convenio");
+          const profissao = document.getElementById("profissao");
           const matricula = document.getElementById("matricula");
           const salario = document.getElementById("salario");
           const ufOrgao = document.getElementById("uf-orgao");
@@ -1702,6 +1721,11 @@
           if (convenio.value === "") {
             convenio.classList.add("error");
             convenio.nextElementSibling.style.display = "block";
+            isValid = false;
+          }
+          if (profissao.value === "") {
+            profissao.classList.add("error");
+            profissao.nextElementSibling.style.display = "block";
             isValid = false;
           }
           if (matricula.value.trim().length < 4) {
@@ -2466,6 +2490,7 @@
             },
             dados_funcionais: {
               convenio: document.getElementById("convenio").value,
+              profissao: document.getElementById("profissao").value,
               matricula: document.getElementById("matricula").value,
               salario_liquido: parseFloat(document.getElementById("salario").value.replace(/[^\d,]/g, "").replace(",", ".")),
               uf_orgao: document.getElementById("uf-orgao").value

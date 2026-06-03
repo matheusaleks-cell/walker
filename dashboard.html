@@ -1667,6 +1667,22 @@
               </select>
             </div>
             <div class="info-item">
+              <span class="info-label">Profissão / Cargo</span>
+              <span class="info-val view-mode" id="m-f-profissao">-</span>
+              <select class="edit-mode" id="edit-f-profissao" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="Aposentado/Pensionista INSS">Aposentado ou Pensionista INSS</option>
+                <option value="Servidor Público Federal">Servidor Público Federal</option>
+                <option value="Servidor Público Estadual">Servidor Público Estadual</option>
+                <option value="Servidor Público Municipal">Servidor Público Municipal</option>
+                <option value="Militar das Forças Armadas">Militar das Forças Armadas</option>
+                <option value="Policial/Bombeiro Militar">Policial ou Bombeiro Militar</option>
+                <option value="Professor da Rede Pública">Professor / Profissional da Educação</option>
+                <option value="Profissional da Saúde Pública">Profissional da Saúde Pública</option>
+                <option value="Trabalhador CLT Privado">Trabalhador CLT (Iniciativa Privada)</option>
+                <option value="Outro">Outro Cargo / Profissão</option>
+              </select>
+            </div>
+            <div class="info-item">
               <span class="info-label">Matrícula ou NB</span>
               <span class="info-val view-mode" id="m-f-matricula">-</span>
               <input type="text" class="edit-mode" id="edit-f-matricula" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
@@ -2372,6 +2388,7 @@
         document.getElementById("edit-p-rg-emissao").value = lead.lead?.rg_data_emissao || '';
         document.getElementById("edit-p-rg-uf").value = lead.lead?.rg_uf || 'SP';
         document.getElementById("edit-f-convenio").value = lead.dados_funcionais?.convenio || 'inss';
+        document.getElementById("edit-f-profissao").value = lead.dados_funcionais?.profissao || '';
         document.getElementById("edit-f-matricula").value = lead.dados_funcionais?.matricula || '';
         document.getElementById("edit-f-salario").value = lead.dados_funcionais?.salario_liquido ? formatBRL(lead.dados_funcionais.salario_liquido) : '';
         document.getElementById("edit-f-uf").value = lead.dados_funcionais?.uf_orgao || 'SP';
@@ -2406,6 +2423,7 @@
 
         // Funcionais
         document.getElementById("m-f-convenio").textContent = getConvenioLabelFull(lead.dados_funcionais?.convenio);
+        document.getElementById("m-f-profissao").textContent = lead.dados_funcionais?.profissao || '-';
         document.getElementById("m-f-matricula").textContent = lead.dados_funcionais?.matricula || '-';
         document.getElementById("m-f-salario").textContent = formatBRL(lead.dados_funcionais?.salario_liquido || 0);
         document.getElementById("m-f-uf").textContent = lead.dados_funcionais?.uf_orgao || '-';
@@ -2592,7 +2610,7 @@
             targetLead = {
               ...lead,
               lead: { ...lead.lead, nome: document.getElementById("edit-p-nome").value.trim(), cpf: document.getElementById("edit-p-cpf").value.replace(/\D/g, ""), data_nascimento: document.getElementById("edit-p-nascimento").value.trim(), celular: document.getElementById("edit-p-celular").value.replace(/\D/g, ""), email: document.getElementById("edit-p-email").value.trim(), genero: document.getElementById("edit-p-genero").value, estado_civil: document.getElementById("edit-p-estado-civil").value, nome_mae: document.getElementById("edit-p-nome-mae").value.trim(), rg: document.getElementById("edit-p-rg").value.replace(/\D/g, ""), rg_orgao: document.getElementById("edit-p-rg-emissor").value.trim().toUpperCase(), rg_data_emissao: document.getElementById("edit-p-rg-emissao").value.trim(), rg_uf: document.getElementById("edit-p-rg-uf").value },
-              dados_funcionais: { ...lead.dados_funcionais, convenio: document.getElementById("edit-f-convenio").value, matricula: document.getElementById("edit-f-matricula").value.trim(), salario_liquido: parseFloat(document.getElementById("edit-f-salario").value.replace(/[^\d,]/g, "").replace(",", ".")) || 0, uf_orgao: document.getElementById("edit-f-uf").value },
+              dados_funcionais: { ...lead.dados_funcionais, convenio: document.getElementById("edit-f-convenio").value, profissao: document.getElementById("edit-f-profissao").value, matricula: document.getElementById("edit-f-matricula").value.trim(), salario_liquido: parseFloat(document.getElementById("edit-f-salario").value.replace(/[^\d,]/g, "").replace(",", ".")) || 0, uf_orgao: document.getElementById("edit-f-uf").value },
               dados_bancarios: { ...lead.dados_bancarios, banco: document.getElementById("edit-b-banco").value.trim(), tipo_conta: document.getElementById("edit-b-tipo").value, agencia: document.getElementById("edit-b-agencia").value.trim(), conta: document.getElementById("edit-b-conta").value.trim() },
               proposta: { ...lead.proposta, valor_solicitado: valorSolicitadoVal, prazo_meses: prazoVal, valor_parcela: valorParcelaVal, taxa_juros_mensal: taxaDoLead, total_financiado: totalFinanciadoVal, cet_anual: cetAnualVal },
               arquivos: {
