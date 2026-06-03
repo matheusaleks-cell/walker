@@ -14,6 +14,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet">
   
+  <!-- Assinatura Digital via SMS Estilo Google -->
+  
   <style>
     /* Custom Fonts declarations */
     @font-face {
@@ -597,56 +599,104 @@
       background: transparent;
     }
 
-    /* Step 5: Assinatura SMS */
+    /* Step 5: Assinatura Google SMS */
     .sms-container {
-      background: var(--light-gray);
-      border-radius: 8px;
-      padding: 24px;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px 24px;
       border: 1px solid var(--nardo);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
       text-align: center;
       margin-bottom: 24px;
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 280px;
+      justify-content: center;
+    }
+
+    .google-sms-icon-wrapper {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 64px;
+      height: 64px;
+      background: rgba(26, 115, 232, 0.08);
+      border-radius: 50%;
+      color: #1a73e8;
+    }
+
+    .google-sms-icon-wrapper svg {
+      width: 32px;
+      height: 32px;
     }
 
     .sms-title {
+      font-family: 'DM Sans', sans-serif;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 1.25rem;
       margin-bottom: 8px;
       color: var(--navy);
     }
 
     .sms-desc {
-      font-size: 0.875rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
       color: var(--gray-text);
-      margin-bottom: 16px;
+      max-width: 420px;
+      margin-bottom: 24px;
     }
 
     .btn-sms-trigger {
-      display: inline-block;
-      background: var(--navy);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a73e8;
       color: var(--white);
-      padding: 10px 20px;
+      padding: 12px 28px;
       border-radius: 30px;
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       border: none;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(26, 122, 232, 0.2);
       transition: var(--transition-fast);
+      gap: 8px;
     }
 
     .btn-sms-trigger:hover {
-      background: var(--cobalt);
+      background: #1557b0;
+      box-shadow: 0 6px 16px rgba(26, 122, 232, 0.3);
     }
 
-    .sms-input-row {
+    /* Google SMS Inputs Styling */
+    .google-sms-input-row {
       display: flex;
       justify-content: center;
-      gap: 12px;
-      margin-top: 20px;
-      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      margin-bottom: 20px;
     }
 
-    .sms-code-char {
-      width: 48px;
+    .google-sms-prefix {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-right: 4px;
+      font-family: monospace;
+    }
+
+    .google-sms-inputs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .google-sms-char {
+      width: 42px;
       height: 48px;
       border-radius: 8px;
       border: 2px solid var(--nardo);
@@ -655,18 +705,180 @@
       font-weight: 700;
       outline: none;
       color: var(--navy);
+      transition: all 0.2s ease;
+      background: #fdfdfd;
     }
 
-    .sms-code-char:focus {
-      border-color: var(--gold);
+    .google-sms-char:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26, 122, 232, 0.15);
+      background: var(--white);
+    }
+
+    .google-sms-char.success {
+      border-color: var(--green-success);
+      background: rgba(46, 204, 113, 0.05);
+      color: var(--green-success);
+    }
+
+    @media (max-width: 375px) {
+      .google-sms-char {
+        width: 34px;
+        height: 42px;
+        font-size: 1.25rem;
+      }
+      .google-sms-prefix {
+        font-size: 1.5rem;
+      }
+      .google-sms-input-row {
+        gap: 4px;
+      }
+      .google-sms-inputs {
+        gap: 4px;
+      }
+    }
+
+    /* Resend and timer */
+    .sms-resend-wrapper {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--gray-text);
+    }
+
+    .sms-resend-wrapper button {
+      background: none;
+      border: none;
+      color: #1a73e8;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      font-size: 0.85rem;
+      text-decoration: underline;
+    }
+
+    .sms-resend-wrapper button:hover {
+      color: #1557b0;
     }
 
     .sms-success-msg {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
       color: var(--green-success);
-      font-size: 0.875rem;
+      font-size: 0.95rem;
       font-weight: 700;
       margin-top: 12px;
-      display: none;
+    }
+
+    .success-badge-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--green-success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    /* Google SMS Spinner */
+    .google-spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Toast Notification styles */
+    .sms-toast {
+      position: fixed;
+      top: -120px;
+      right: 24px;
+      width: 320px;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      z-index: 10000;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .sms-toast.show {
+      top: 24px;
+    }
+
+    .sms-toast-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #f1f3f4;
+      font-size: 0.75rem;
+      color: #5f6368;
+    }
+
+    .sms-toast-app-icon {
+      color: #1a73e8;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .sms-toast-app-name {
+      font-weight: 500;
+      flex-grow: 1;
+    }
+
+    .sms-toast-time {
+      color: #80868b;
+    }
+
+    .sms-toast-body {
+      padding: 12px 14px;
+      text-align: left;
+    }
+
+    .sms-toast-title {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .sms-toast-message {
+      font-size: 0.85rem;
+      color: #3c4043;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .code-highlight {
+      font-family: monospace;
+      font-size: 0.95rem;
+      background: #f1f3f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      color: #1a73e8;
+      letter-spacing: 0.5px;
     }
 
     .lgpd-consent-box {
@@ -998,18 +1210,61 @@
             <p class="step-desc">Revise as informações finais e confirme com a assinatura digital segura via celular para liberação.</p>
             
             <div class="sms-container">
-              <div class="sms-title">Código de Confirmação Obrigatório</div>
-              <div class="sms-desc" id="sms-phone-desc">Enviaremos um código SMS/WhatsApp de 4 dígitos para validar sua identidade.</div>
-              <button type="button" class="btn-sms-trigger" id="btn-sms-send">Solicitar Código por SMS</button>
-              
-              <div class="sms-input-row" id="sms-fields">
-                <input type="text" class="sms-code-char" maxlength="1" pattern="[0-9]*" inputmode="numeric">
-                <input type="text" class="sms-code-char" maxlength="1" pattern="[0-9]*" inputmode="numeric">
-                <input type="text" class="sms-code-char" maxlength="1" pattern="[0-9]*" inputmode="numeric">
-                <input type="text" class="sms-code-char" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+              <!-- Estado Inicial: Solicitar Envio -->
+              <div id="sms-initial-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <div class="google-sms-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14zm-5 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+                  </svg>
+                </div>
+                <div class="sms-title">Confirmar identidade via SMS</div>
+                <div class="sms-desc">Para sua segurança e conformidade com as regras bancárias, enviaremos um código de verificação de 6 dígitos por SMS para o celular cadastrado: <br><strong id="sms-phone-display">(00) 9••••-0000</strong>.</div>
+                <button type="button" class="btn-sms-trigger" id="btn-sms-send">
+                  <div class="google-spinner" id="sms-send-loader" style="display: none;"></div>
+                  <span id="sms-btn-text">Solicitar Código por SMS</span>
+                </button>
               </div>
-              <div class="sms-success-msg" id="sms-sent-notice">✓ Código enviado! Preencha os campos com qualquer código de 4 dígitos (ex: 1234).</div>
+
+              <!-- Estado de Verificação: Digitar Código -->
+              <div id="sms-verification-state" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <div class="google-sms-icon-wrapper" style="background: rgba(26, 115, 232, 0.05);">
+                  <svg viewBox="0 0 24 24" fill="currentColor" style="color: #1a73e8;">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                  </svg>
+                </div>
+                <div class="sms-title">Insira o código de verificação</div>
+                <div class="sms-desc">Digite o código de 6 dígitos enviado para <br><strong id="sms-phone-display-active">(00) 9••••-0000</strong>.</div>
+                
+                <div class="google-sms-input-row">
+                  <span class="google-sms-prefix">G-</span>
+                  <div class="google-sms-inputs">
+                    <input type="text" class="google-sms-char" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="0">
+                    <input type="text" class="google-sms-char" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="1">
+                    <input type="text" class="google-sms-char" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="2">
+                    <input type="text" class="google-sms-char" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="3">
+                    <input type="text" class="google-sms-char" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="4">
+                    <input type="text" class="google-sms-char" maxlength="1" pattern="[0-9]*" inputmode="numeric" data-index="5">
+                  </div>
+                </div>
+
+                <div class="sms-resend-wrapper">
+                  <span id="sms-timer-text">Reenviar código em <strong id="sms-countdown">60</strong>s</span>
+                  <button type="button" id="btn-sms-resend" style="display: none;">Reenviar código</button>
+                </div>
+              </div>
+
+              <!-- Estado de Sucesso: Código Validado -->
+              <div id="sms-verification-success" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <div class="success-badge-icon">✓</div>
+                <div class="sms-success-msg">
+                  <span>Assinatura Eletrônica Validada!</span>
+                  <span style="font-size: 0.85rem; color: var(--gray-text); font-weight: normal; margin-top: 4px;">Sua proposta já pode ser enviada com segurança.</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Firebase Invisible reCAPTCHA Container -->
+            <div id="recaptcha-container"></div>
 
             <!-- LGPD Consent check -->
             <div class="lgpd-consent-box">
@@ -1101,6 +1356,27 @@
 
     </div>
   </main>
+
+  <!-- Toast de Notificação de SMS (Simulado em Modo Demo) -->
+  <div class="sms-toast" id="sms-toast">
+    <div class="sms-toast-header">
+      <div class="sms-toast-app-icon">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+          <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+        </svg>
+      </div>
+      <span class="sms-toast-app-name">Mensagens</span>
+      <span class="sms-toast-time">agora</span>
+    </div>
+    <div class="sms-toast-body">
+      <strong class="sms-toast-title">Walker Bank (Demo)</strong>
+      <p class="sms-toast-message">Código de assinatura: <span id="sms-toast-code" class="code-highlight">G-000000</span>. Não compartilhe.</p>
+    </div>
+  </div>
+
+  <!-- Firebase SDK Compat (Para envio de SMS gratuito via Phone Auth) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <!-- Supabase JS Client (Local) -->
   <script src="supabase.js"></script>
@@ -1275,8 +1551,11 @@
 
         if (currentStep === totalSteps) {
           btnNext.innerHTML = 'Finalizar e Enviar &rarr;';
+          btnNext.disabled = !smsAssinado;
+          initSmsVerification(); // Inicializa interface de verificação do Google SMS
         } else {
           btnNext.innerHTML = 'Continuar &rarr;';
+          btnNext.disabled = false;
         }
 
         // Rolagem automática suave para o topo do formulário
@@ -1477,14 +1756,12 @@
         }
 
         if (step === 5) {
-          // SMS assinado e termos de consentimento
+          // Captcha resolvido e termos de consentimento
           const checkConsulta = document.getElementById("check-consulta");
           const checkLgpd = document.getElementById("check-lgpd");
           
           if (!smsAssinado) {
-            document.getElementById("sms-sent-notice").textContent = "⚠ Você precisa solicitar e preencher o código de assinatura digital.";
-            document.getElementById("sms-sent-notice").style.color = "#e74c3c";
-            document.getElementById("sms-sent-notice").style.display = "block";
+            alert("Por favor, realize a assinatura via SMS para validar sua identidade.");
             isValid = false;
           }
           if (!checkConsulta.checked || !checkLgpd.checked) {
@@ -1707,43 +1984,372 @@
       initOutrosUploadZone();
 
       /* ==========================================================================
-         Simulação de Envio de Código SMS (Assinatura Digital)
+         Verificação de Segurança (Google SMS Verification / Assinatura Digital)
          ========================================================================== */
       let smsAssinado = false;
-      const btnSmsSend = document.getElementById("btn-sms-send");
-      const smsFields = document.getElementById("sms-fields");
-      const smsSentNotice = document.getElementById("sms-sent-notice");
-      const smsChars = document.querySelectorAll(".sms-code-char");
+      let smsCodeGenerated = "";
+      let countdownInterval = null;
+      let isFirebaseActive = false;
 
-      btnSmsSend.addEventListener("click", () => {
-        const celularVal = document.getElementById("celular").value;
-        document.getElementById("sms-phone-desc").textContent = `Código de verificação enviado para o número ${celularVal}.`;
+      // CONFIGURAÇÃO: Insira suas chaves do Firebase Console abaixo para ativar o envio de SMS real
+      const firebaseConfig = {
+        apiKey: "AIzaSyCixgpmAOGLsHmMlzYUva5aSBRY714_2VY",
+        authDomain: "walkerbank-ad9f7.firebaseapp.com",
+        projectId: "walkerbank-ad9f7",
+        storageBucket: "walkerbank-ad9f7.firebasestorage.app",
+        messagingSenderId: "955169886474",
+        appId: "1:955169886474:web:44fb3687cd1f18d443eaf3",
+        measurementId: "G-J5KFPQEYCC"
+      };
+
+      // Inicializa o Firebase apenas se configurado
+      if (typeof firebase !== "undefined" && firebaseConfig.apiKey && firebaseConfig.apiKey !== "SUA_API_KEY_AQUI") {
+        try {
+          firebase.initializeApp(firebaseConfig);
+          isFirebaseActive = true;
+          console.log("[Walker Bank] Firebase Phone Auth inicializado com sucesso.");
+        } catch (e) {
+          console.error("[Walker Bank] Falha ao inicializar o Firebase:", e);
+        }
+      }
+
+      // Mascarar o número de celular
+      const formatPhoneMask = (phone) => {
+        const cleanPhone = phone.replace(/\D/g, "");
+        if (cleanPhone.length >= 11) {
+          const ddd = cleanPhone.substring(0, 2);
+          const firstDigit = cleanPhone.substring(2, 3);
+          const lastDigits = cleanPhone.substring(7);
+          return `(${ddd}) ${firstDigit}••••-${lastDigits}`;
+        } else if (cleanPhone.length === 10) {
+          const ddd = cleanPhone.substring(0, 2);
+          const lastDigits = cleanPhone.substring(6);
+          return `(${ddd}) ••••-${lastDigits}`;
+        }
+        return phone;
+      };
+
+      // Inicialização da assinatura por SMS na Etapa 5
+      const initSmsVerification = () => {
+        const celular = document.getElementById("celular").value;
+        const phoneMasked = formatPhoneMask(celular);
         
-        btnSmsSend.style.display = "none";
-        smsFields.style.display = "flex";
-        smsSentNotice.style.display = "block";
-        smsChars[0].focus();
-      });
+        // Atualiza os displays de telefone
+        const phoneDisplay = document.getElementById("sms-phone-display");
+        const phoneDisplayActive = document.getElementById("sms-phone-display-active");
+        if (phoneDisplay) phoneDisplay.textContent = phoneMasked;
+        if (phoneDisplayActive) phoneDisplayActive.textContent = phoneMasked;
+        
+        // Se já tiver assinado antes, mantém o estado de sucesso
+        if (smsAssinado) {
+          showSmsSuccess();
+        } else {
+          document.getElementById("sms-initial-state").style.display = "flex";
+          document.getElementById("sms-verification-state").style.display = "none";
+          document.getElementById("sms-verification-success").style.display = "none";
+        }
+      };
 
-      // Lógica de digitação de SMS sequencial de 4 campos
-      smsChars.forEach((input, index) => {
-        input.addEventListener("input", (e) => {
-          if (e.target.value.length === 1) {
-            if (index < smsChars.length - 1) {
-              smsChars[index + 1].focus();
+      const generateVerificationCode = () => {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+      };
+
+      const triggerSmsToast = (code, isDemo = true) => {
+        const toast = document.getElementById("sms-toast");
+        const toastCode = document.getElementById("sms-toast-code");
+        const toastTitle = toast?.querySelector(".sms-toast-title");
+        const toastMsg = toast?.querySelector(".sms-toast-message");
+        
+        if (toast && toastCode) {
+          if (isDemo) {
+            if (toastTitle) toastTitle.textContent = "Walker Bank (Demo)";
+            if (toastMsg) toastMsg.innerHTML = `Modo Demo: Use o código <span id="sms-toast-code" class="code-highlight">G-${code}</span> para testar.`;
+          } else {
+            if (toastTitle) toastTitle.textContent = "Walker Bank";
+            if (toastMsg) toastMsg.innerHTML = `Código de assinatura: <span id="sms-toast-code" class="code-highlight">G-${code}</span>. Não compartilhe.`;
+          }
+          
+          toast.classList.add("show");
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 8000);
+        }
+      };
+
+      const startResendTimer = () => {
+        const timerText = document.getElementById("sms-timer-text");
+        const btnResend = document.getElementById("btn-sms-resend");
+        const countdownSpan = document.getElementById("sms-countdown");
+        
+        if (!timerText || !btnResend || !countdownSpan) return;
+
+        let timeLeft = 60;
+        timerText.style.display = "block";
+        btnResend.style.display = "none";
+        countdownSpan.textContent = timeLeft;
+
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        countdownInterval = setInterval(() => {
+          timeLeft--;
+          countdownSpan.textContent = timeLeft;
+
+          if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            timerText.style.display = "none";
+            btnResend.style.display = "inline-block";
+          }
+        }, 1000);
+      };
+
+      const verifySmsCode = () => {
+        const smsInputs = document.querySelectorAll(".google-sms-char");
+        let typedCode = "";
+        smsInputs.forEach(input => {
+          typedCode += input.value;
+        });
+
+        if (isFirebaseActive && window.confirmationResult) {
+          // Validação real usando Firebase
+          window.confirmationResult.confirm(typedCode)
+            .then((result) => {
+              // Sucesso no Firebase Auth
+              smsInputs.forEach(input => {
+                input.classList.add("success");
+                input.disabled = true;
+              });
+              setTimeout(() => {
+                showSmsSuccess();
+              }, 600);
+            })
+            .catch((error) => {
+              console.error("[Walker Bank] Erro na verificação do SMS real:", error);
+              handleVerificationError(smsInputs);
+            });
+        } else {
+          // Validação simulada (Demo)
+          if (typedCode === smsCodeGenerated) {
+            smsInputs.forEach(input => {
+              input.classList.add("success");
+              input.disabled = true;
+            });
+            setTimeout(() => {
+              showSmsSuccess();
+            }, 600);
+          } else {
+            handleVerificationError(smsInputs);
+          }
+        }
+      };
+
+      const handleVerificationError = (inputs) => {
+        inputs.forEach(input => {
+          input.style.borderColor = "#e74c3c";
+          input.style.boxShadow = "0 0 0 3px rgba(231, 76, 60, 0.15)";
+        });
+        
+        const container = document.querySelector(".google-sms-input-row");
+        if (container) {
+          container.style.animation = "shake 0.4s ease";
+          setTimeout(() => {
+            container.style.animation = "";
+          }, 400);
+        }
+
+        setTimeout(() => {
+          inputs.forEach(input => {
+            input.value = "";
+            input.style.borderColor = "";
+            input.style.boxShadow = "";
+          });
+          inputs[0].focus();
+        }, 1000);
+      };
+
+      const showSmsSuccess = () => {
+        smsAssinado = true;
+        document.getElementById("sms-initial-state").style.display = "none";
+        document.getElementById("sms-verification-state").style.display = "none";
+        document.getElementById("sms-verification-success").style.display = "flex";
+        
+        btnNext.disabled = false;
+      };
+
+      // Inicializa o reCAPTCHA invisible do Firebase se ativo
+      const initFirebaseRecaptcha = () => {
+        if (isFirebaseActive && !window.recaptchaVerifier) {
+          try {
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+              'size': 'invisible',
+              'callback': (response) => {
+                // reCAPTCHA resolvido
+              }
+            });
+          } catch (e) {
+            console.error("[Walker Bank] Erro ao instanciar o RecaptchaVerifier:", e);
+          }
+        }
+      };
+
+      // Event Listeners para o fluxo de SMS
+      const btnSmsSend = document.getElementById("btn-sms-send");
+      if (btnSmsSend) {
+        btnSmsSend.addEventListener("click", () => {
+          const loader = document.getElementById("sms-send-loader");
+          const btnText = document.getElementById("sms-btn-text");
+
+          btnSmsSend.disabled = true;
+          if (loader) loader.style.display = "block";
+          if (btnText) btnText.textContent = "Enviando...";
+
+          const triggerSmsSending = () => {
+            const celularVal = document.getElementById("celular").value;
+            const cleanCelular = celularVal.replace(/\D/g, "");
+            const formattedPhoneNumber = `+55${cleanCelular}`; // DDI Brasil
+
+            if (isFirebaseActive) {
+              // Fluxo real do Firebase Phone Auth
+              initFirebaseRecaptcha();
+              
+              firebase.auth().signInWithPhoneNumber(formattedPhoneNumber, window.recaptchaVerifier)
+                .then((confirmationResult) => {
+                  window.confirmationResult = confirmationResult;
+                  
+                  // Sucesso
+                  document.getElementById("sms-initial-state").style.display = "none";
+                  document.getElementById("sms-verification-state").style.display = "flex";
+                  
+                  btnSmsSend.disabled = false;
+                  if (loader) loader.style.display = "none";
+                  if (btnText) btnText.textContent = "Solicitar Código por SMS";
+
+                  startResendTimer();
+                  
+                  console.log(`[Walker Bank] SMS real do Google enviado via Firebase para o telefone: ${formattedPhoneNumber}`);
+
+                  const firstInput = document.querySelector(".google-sms-char[data-index='0']");
+                  if (firstInput) {
+                    firstInput.value = "";
+                    firstInput.focus();
+                  }
+                })
+                .catch((error) => {
+                  console.error("[Walker Bank] Erro ao enviar SMS real do Firebase:", error);
+                  alert(`Falha ao enviar SMS real: ${error.message || "Verifique as configurações do Firebase ou o limite de requisições."}`);
+                  
+                  btnSmsSend.disabled = false;
+                  if (loader) loader.style.display = "none";
+                  if (btnText) btnText.textContent = "Solicitar Código por SMS";
+                  
+                  // Se o Firebase falhar por chaves erradas ou não ativadas, ativa o modo de demonstração local de segurança para não travar a página
+                  console.warn("[Walker Bank] Executando fallback em modo de demonstração local devido a erro do Firebase.");
+                  isFirebaseActive = false;
+                  btnSmsSend.click();
+                });
             } else {
-              // Quando preenche o último caractere, valida
-              smsAssinado = true;
-              smsSentNotice.textContent = "✓ Assinatura eletrônica autenticada e validada com sucesso!";
-              smsSentNotice.style.color = "var(--green-success)";
+              // Modo de Demonstração (Fallback local)
+              setTimeout(() => {
+                smsCodeGenerated = generateVerificationCode();
+                
+                document.getElementById("sms-initial-state").style.display = "none";
+                document.getElementById("sms-verification-state").style.display = "flex";
+                
+                btnSmsSend.disabled = false;
+                if (loader) loader.style.display = "none";
+                if (btnText) btnText.textContent = "Solicitar Código por SMS";
+
+                triggerSmsToast(smsCodeGenerated, true);
+                startResendTimer();
+
+                const firstInput = document.querySelector(".google-sms-char[data-index='0']");
+                if (firstInput) {
+                  firstInput.value = "";
+                  firstInput.focus();
+                }
+              }, 1500);
+            }
+          };
+
+          triggerSmsSending();
+        });
+      }
+
+      const btnSmsResend = document.getElementById("btn-sms-resend");
+      if (btnSmsResend) {
+        btnSmsResend.addEventListener("click", () => {
+          const celularVal = document.getElementById("celular").value;
+          const cleanCelular = celularVal.replace(/\D/g, "");
+          const formattedPhoneNumber = `+55${cleanCelular}`;
+
+          if (isFirebaseActive) {
+            initFirebaseRecaptcha();
+            firebase.auth().signInWithPhoneNumber(formattedPhoneNumber, window.recaptchaVerifier)
+              .then((confirmationResult) => {
+                window.confirmationResult = confirmationResult;
+                startResendTimer();
+                
+                const smsInputs = document.querySelectorAll(".google-sms-char");
+                smsInputs.forEach(input => {
+                  input.value = "";
+                  input.classList.remove("success");
+                  input.disabled = false;
+                  input.style.borderColor = "";
+                  input.style.boxShadow = "";
+                });
+                smsInputs[0].focus();
+              })
+              .catch((error) => {
+                console.error("[Walker Bank] Erro ao reenviar SMS real:", error);
+                alert(`Erro ao reenviar SMS: ${error.message}`);
+              });
+          } else {
+            smsCodeGenerated = generateVerificationCode();
+            triggerSmsToast(smsCodeGenerated, true);
+            startResendTimer();
+            
+            const smsInputs = document.querySelectorAll(".google-sms-char");
+            smsInputs.forEach(input => {
+              input.value = "";
+              input.classList.remove("success");
+              input.disabled = false;
+              input.style.borderColor = "";
+              input.style.boxShadow = "";
+            });
+            smsInputs[0].focus();
+          }
+        });
+      }
+
+      // Configuração dos inputs individuais de código
+      const smsInputs = document.querySelectorAll(".google-sms-char");
+      smsInputs.forEach((input, index) => {
+        input.addEventListener("input", (e) => {
+          e.target.value = e.target.value.replace(/[^0-9]/g, "");
+          
+          if (e.target.value.length === 1) {
+            if (index < smsInputs.length - 1) {
+              smsInputs[index + 1].focus();
+            } else {
+              verifySmsCode();
             }
           }
         });
 
         input.addEventListener("keydown", (e) => {
-          if (e.key === "Backspace" && e.target.value.length === 0) {
-            if (index > 0) {
-              smsChars[index - 1].focus();
+          if (e.key === "Backspace") {
+            if (e.target.value.length === 0 && index > 0) {
+              smsInputs[index - 1].focus();
+            } else {
+              e.target.value = "";
+            }
+          }
+        });
+        
+        input.addEventListener("click", () => {
+          for (let i = 0; i < index; i++) {
+            if (smsInputs[i].value === "") {
+              smsInputs[i].focus();
+              return;
             }
           }
         });
