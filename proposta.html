@@ -1136,6 +1136,8 @@
                 <label for="salario">Salário Líquido (R$)</label>
                 <input type="text" id="salario" name="salario" placeholder="Ex: R$ 4.500,00" required>
                 <span class="error-msg">Digite um valor válido</span>
+                <div id="salario-margem-warning" style="display: none; font-size: 0.75rem; font-weight: 600; margin-top: 6px; color: var(--red-error);"></div>
+                <div id="salario-margem-success" style="display: none; font-size: 0.75rem; font-weight: 600; margin-top: 6px; color: var(--green-success);"></div>
               </div>
 
               <div class="form-control">
@@ -1403,6 +1405,11 @@
             <span class="summary-val" id="sum-cet">23,4% a.a.</span>
           </div>
 
+          <div class="summary-row" id="sum-margem-row" style="display: none;">
+            <span class="summary-label" id="sum-margem-label" style="font-size: 0.8rem;">Margem limite</span>
+            <span class="summary-val" id="sum-margem" style="font-size: 0.8rem; font-weight: 700;">R$ 0,00</span>
+          </div>
+
           <div class="summary-row total-row">
             <span class="summary-label" style="color: var(--white);">Sua parcela estimada</span>
             <div style="text-align: right;">
@@ -1480,6 +1487,9 @@
         simulacaoData = JSON.parse(simulacaoDataStr);
       }
 
+      // Configurações globais de convênios para cálculo e validação reativa de margem
+      let globalConvenioConfigs = {};
+
       // Preenche dados do resumo da simulação
       document.getElementById("sum-convenio").textContent = simulacaoData.convenioLabel;
       document.getElementById("sum-credito").textContent = formatBRL(simulacaoData.valor);
@@ -1497,13 +1507,13 @@
         const convenioSelect = document.getElementById("convenio");
         if (!convenioSelect) return;
 
-        // Lista padrão de convênios (de fábrica) para fallback rápido
+        // Lista padrão de convênios (de fábrica) para fallback rápido com margens consignáveis
         const defaultConvenios = {
-          inss: { nome: "INSS", tipo: "Aposentado/Pensionista INSS" },
-          mil: { nome: "Forças Armadas", tipo: "Forças Armadas (Militares)" },
-          est: { nome: "Estadual", tipo: "Servidor Público Estadual" },
-          mun: { nome: "Municipal", tipo: "Servidor Público Municipal" },
-          clt: { nome: "CLT Privado", tipo: "Trabalhador CLT de Empresa Privada" }
+          inss: { nome: "INSS", tipo: "Aposentado/Pensionista INSS", margem: 35, margem_cartao: 5 },
+          mil: { nome: "Forças Armadas", tipo: "Forças Armadas (Militares)", margem: 30, margem_cartao: 5 },
+          est: { nome: "Estadual", tipo: "Servidor Público Estadual", margem: 30, margem_cartao: 5 },
+          mun: { nome: "Municipal", tipo: "Servidor Público Municipal", margem: 30, margem_cartao: 5 },
+          clt: { nome: "CLT Privado", tipo: "Trabalhador CLT de Empresa Privada", margem: 30, margem_cartao: 5 }
         };
 
         let activeConvenios = { ...defaultConvenios };
@@ -1554,9 +1564,69 @@
         if (simulacaoData.convenio && activeConvenios[simulacaoData.convenio]) {
           convenioSelect.value = simulacaoData.convenio;
         }
+
+        // Salva as configurações de convênios no escopo global
+        globalConvenioConfigs = activeConvenios;
       };
 
-      populateConvenios();
+      // Função para validar a margem do cliente em tempo real no formulário
+      const validateClientMargem = () => {
+        const salarioInput = document.getElementById("salario");
+        const convenioSelect = document.getElementById("convenio");
+        const warningEl = document.getElementById("salario-margem-warning");
+        const successEl = document.getElementById("salario-margem-success");
+        const sumMargemRow = document.getElementById("sum-margem-row");
+        const sumMargemLabel = document.getElementById("sum-margem-label");
+        const sumMargemVal = document.getElementById("sum-margem");
+
+        if (!salarioInput || !convenioSelect || !warningEl || !successEl) return;
+
+        // Limpa estado anterior
+        warningEl.style.display = "none";
+        successEl.style.display = "none";
+        if (sumMargemRow) sumMargemRow.style.display = "none";
+
+        const salarioText = salarioInput.value;
+        const salarioLiq = parseFloat(salarioText.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+        const convenioKey = convenioSelect.value;
+
+        if (salarioLiq <= 0 || !convenioKey) return;
+
+        // Recupera configuração do convênio
+        const convCfg = globalConvenioConfigs[convenioKey] || { margem: 30 };
+        const margemPorcentagem = parseFloat(convCfg.margem) || 30;
+        
+        // Calcula limites
+        const margemDisp = salarioLiq * (margemPorcentagem / 100);
+        const parcelaVal = simulacaoData.parcela || 0;
+        const ok = parcelaVal <= margemDisp;
+
+        // Atualiza UI de avisos
+        if (ok) {
+          successEl.textContent = `✓ Parcela dentro da margem de ${margemPorcentagem}% do seu salário (limite: ${formatBRL(margemDisp)}).`;
+          successEl.style.display = "block";
+        } else {
+          warningEl.textContent = `✗ Parcela excede a margem de ${margemPorcentagem}% do seu salário (limite: ${formatBRL(margemDisp)}).`;
+          warningEl.style.display = "block";
+        }
+
+        // Atualiza resumo lateral
+        if (sumMargemRow && sumMargemLabel && sumMargemVal) {
+          sumMargemLabel.textContent = `Margem limite (${margemPorcentagem}%)`;
+          sumMargemVal.textContent = formatBRL(margemDisp);
+          sumMargemVal.style.color = ok ? "var(--green-success)" : "var(--red-error)";
+          sumMargemRow.style.display = "flex";
+        }
+      };
+
+      // Executa o carregamento dos convênios e depois roda a validação de margem inicial
+      populateConvenios().then(() => {
+        validateClientMargem();
+      });
+
+      // Adiciona listeners para atualizar margem ao digitar salário ou mudar convênio
+      document.getElementById("salario").addEventListener("input", validateClientMargem);
+      document.getElementById("convenio").addEventListener("change", validateClientMargem);
 
       /* ==========================================================================
          Controle de Multi-Etapas do Formulário
@@ -1913,10 +1983,27 @@
         const removeBtn = preview.querySelector(".file-remove");
         const nameSpan = preview.querySelector(".file-name");
 
+        const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+        const TAMANHO_MAXIMO = 10 * 1024 * 1024; // 10MB
+
         fileInput.addEventListener("change", (e) => {
           if (e.target.files.length > 0) {
             const file = e.target.files[0];
             
+            // Valida tipo do arquivo (MIME-type no navegador)
+            if (!TIPOS_PERMITIDOS.includes(file.type)) {
+              alert(`Arquivo "${file.name}" inválido. Permitido apenas imagens (JPG/PNG) ou PDF.`);
+              fileInput.value = "";
+              return;
+            }
+            
+            // Valida tamanho do arquivo (10MB)
+            if (file.size > TAMANHO_MAXIMO) {
+              alert(`Arquivo "${file.name}" excede o limite máximo de 10MB.`);
+              fileInput.value = "";
+              return;
+            }
+
             // Exibe preview do arquivo carregado
             zone.style.display = "none";
             preview.style.display = "flex";
@@ -2313,6 +2400,15 @@
                 });
             } else {
               // Modo de Demonstração (Fallback local)
+              const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+              if (!isLocalhost) {
+                alert("Ocorreu uma falha no serviço de verificação por SMS. Por favor, tente novamente em alguns instantes.");
+                btnSmsSend.disabled = false;
+                if (loader) loader.style.display = "none";
+                if (btnText) btnText.textContent = "Solicitar Código por SMS";
+                return;
+              }
+
               setTimeout(() => {
                 smsCodeGenerated = generateVerificationCode();
                 
@@ -2368,6 +2464,12 @@
                 alert(`Erro ao reenviar SMS: ${error.message}`);
               });
           } else {
+            const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+            if (!isLocalhost) {
+              alert("Não foi possível reenviar o SMS. Conexão indisponível.");
+              return;
+            }
+
             smsCodeGenerated = generateVerificationCode();
             triggerSmsToast(smsCodeGenerated, true);
             startResendTimer();
@@ -2568,9 +2670,19 @@
             ...payload
           };
 
+          // Salva localmente no localStorage (versão simplificada sem binários base64 pesados para evitar estouro de limite de 5MB)
+          const newLeadLocal = {
+            ...newLead,
+            arquivos: {
+              identidade_cnh_rg: newLead.arquivos.identidade_cnh_rg ? "presente" : null,
+              contracheque: newLead.arquivos.contracheque ? "presente" : null,
+              outros: newLead.arquivos.outros ? newLead.arquivos.outros.map(o => ({ nome: o.nome, tipo: o.tipo, base64: "presente" })) : []
+            }
+          };
+
           try {
             const localLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
-            localLeads.push(newLead);
+            localLeads.push(newLeadLocal);
             
             try {
               localStorage.setItem("walker_leads", JSON.stringify(localLeads));
@@ -2585,17 +2697,6 @@
                   break;
                 } catch (e) {
                   // continua limpando
-                }
-              }
-              // Caso o único lead (atual com base64) ainda exceda a cota (~5MB),
-              // salvamos no localStorage removendo os arquivos pesados de imagem
-              if (localLeads.length === 1) {
-                try {
-                  const lightweightLead = { ...newLead, arquivos: { identidade_cnh_rg: null, contracheque: null, outros: null } };
-                  localStorage.setItem("walker_leads", JSON.stringify([lightweightLead]));
-                  console.log("[Walker Bank] Salvo no localStorage sem anexos pesados para evitar estouro de cota.");
-                } catch (errBackup) {
-                  console.error("[Walker Bank] Falha ao salvar lead simplificado no localStorage:", errBackup);
                 }
               }
             }

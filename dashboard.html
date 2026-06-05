@@ -2526,11 +2526,16 @@
         const parcelaVal = lead.proposta?.valor_parcela || 0;
         const margemEl = document.getElementById("m-c-margem-status");
         if (salarioLiq > 0) {
-          const margemDisp = salarioLiq * 0.30;
+          const convenioKey = lead.dados_funcionais?.convenio || 'inss';
+          const configs = getConfigs();
+          const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { margem: 30 };
+          const margemPorcentagem = parseFloat(convCfg.margem) || 30;
+
+          const margemDisp = salarioLiq * (margemPorcentagem / 100);
           const ok = parcelaVal <= margemDisp;
           margemEl.innerHTML = ok
-            ? `<span style="color:var(--green-success);">✓ Dentro da margem — ${formatBRL(parcelaVal)} ≤ 30% do salário (limite: ${formatBRL(margemDisp)})</span>`
-            : `<span style="color:var(--red-error);">✗ Excede a margem — ${formatBRL(parcelaVal)} > 30% do salário (limite: ${formatBRL(margemDisp)}) — revisar valor ou prazo</span>`;
+            ? `<span style="color:var(--green-success);">✓ Dentro da margem — ${formatBRL(parcelaVal)} ≤ ${margemPorcentagem}% do salário (limite: ${formatBRL(margemDisp)})</span>`
+            : `<span style="color:var(--red-error);">✗ Excede a margem — ${formatBRL(parcelaVal)} > ${margemPorcentagem}% do salário (limite: ${formatBRL(margemDisp)}) — revisar valor ou prazo</span>`;
         } else {
           margemEl.innerHTML = `<span style="color:var(--gray-light-text);">Salário líquido não informado</span>`;
         }
