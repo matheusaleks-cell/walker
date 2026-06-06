@@ -4142,7 +4142,7 @@
         const id = document.getElementById("new-conv-id").value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
         const nome = document.getElementById("new-conv-nome").value.trim();
         const tipo = document.getElementById("new-conv-tipo").value.trim();
-        const taxa = parseFloat(document.getElementById("new-conv-taxa").value.trim()) || 3.99;
+        const taxa = parseFloat(document.getElementById("new-conv-taxa").value.trim().replace(',', '.')) || 3.99;
         const margem = parseInt(document.getElementById("new-conv-margem").value.trim()) || 30;
         const margemCartao = parseInt(document.getElementById("new-conv-margem-cartao").value.trim()) || 5;
         const min = parseInt(document.getElementById("new-conv-min").value.trim()) || 500;
@@ -4193,7 +4193,7 @@
           
           if (currentConvenios[key]) {
             if (prop === "taxa") {
-              currentConvenios[key][prop] = parseFloat(val) || 0;
+              currentConvenios[key][prop] = parseFloat(val.replace(',', '.')) || 0;
             } else if (prop === "min" || prop === "max" || prop === "margem" || prop === "margem_cartao") {
               currentConvenios[key][prop] = parseInt(val.replace(/\D/g, "")) || 0;
             } else {
