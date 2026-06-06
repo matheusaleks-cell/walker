@@ -2253,8 +2253,18 @@
       // ==========================================
       // 1. AUTENTICAÇÃO
       // ==========================================
-      // Filtro síncrono rápido local para evitar flash de conteúdo
-      if (sessionStorage.getItem("walker_admin_session") !== "true") {
+      // Filtro síncrono rápido local para evitar flash de conteúdo.
+      // Se não houver sessão no sessionStorage E também não houver token no localStorage do Supabase, redireciona.
+      // Isso evita o loop infinito de redirecionamento caso o operador abra o site com o sessionStorage limpo,
+      // mas com a sessão do Supabase ainda persistida no localStorage.
+      const getProjectRef = (url) => {
+        try { return new URL(url).hostname.split('.')[0]; } catch (e) { return ''; }
+      };
+      const storageKey = `sb-${getProjectRef(supabaseUrl)}-auth-token`;
+      const hasSessionStorage = sessionStorage.getItem("walker_admin_session") === "true";
+      const hasLocalStorage = localStorage.getItem(storageKey) !== null;
+
+      if (!hasSessionStorage && !hasLocalStorage) {
         window.location.href = "login.html";
       }
 
@@ -4486,6 +4496,9 @@
           window.location.href = "login.html";
           return; // Aborta a inicialização caso não esteja autenticado
         }
+
+        // Se a sessão for válida, garante que o sessionStorage esteja marcado
+        sessionStorage.setItem("walker_admin_session", "true");
 
         // Renderiza local cache primeiro
         renderMesaTable();

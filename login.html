@@ -334,6 +334,7 @@
       // Se já tiver logado no Supabase, redireciona
       supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (session) {
+          sessionStorage.setItem("walker_admin_session", "true");
           window.location.href = "dashboard.html";
         }
       });
