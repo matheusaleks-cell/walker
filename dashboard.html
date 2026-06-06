@@ -1065,6 +1065,84 @@
     .client-history-table td {
       padding: 10px 14px;
     }
+
+    /* ========================================
+       IMPRESSÃO PREMIUM (PDF EXPORT)
+    ======================================== */
+    @media print {
+      body {
+        background-color: white !important;
+        color: #181b2c !important;
+        overflow: visible !important;
+        height: auto !important;
+      }
+      .sidebar, 
+      .topbar, 
+      .btn-logout,
+      .controls-row, 
+      .btn-action, 
+      .btn-action-panel,
+      .toast-notification,
+      .btn-delete-conv,
+      #btn-add-convenio,
+      #form-new-convenio {
+        display: none !important;
+      }
+      .main-wrapper {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .content-area {
+        padding: 0 !important;
+      }
+      .page-section {
+        display: none !important;
+      }
+      .page-section.active {
+        display: block !important;
+      }
+      .panel-card,
+      .chart-box,
+      .metric-card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        background: white !important;
+        page-break-inside: avoid;
+        margin-bottom: 20px !important;
+      }
+      .metric-card.highlight {
+        background: #f5f6fa !important;
+        color: #181b2c !important;
+        border: 1px solid #ccc !important;
+      }
+      .metric-card.highlight .metric-label,
+      .metric-card.highlight .metric-sub,
+      .metric-card.highlight .metric-value {
+        color: #181b2c !important;
+      }
+      table {
+        page-break-inside: auto;
+      }
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      /* Cabeçalho corporativo na impressão */
+      .content-area::before {
+        content: "WALKER BANK — RELATÓRIO ADMINISTRATIVO OFICIAL";
+        display: block;
+        font-family: 'Giga Sans', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #181b2c;
+        border-bottom: 2px solid #d4bc6e;
+        padding-bottom: 8px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1267,12 +1345,47 @@
             </div>
           </div>
         </div>
+
+        <!-- Gráfico de Evolução Temporal -->
+        <div class="chart-box" style="margin-top: 24px; width: 100%;">
+          <h4 style="display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Evolução de Propostas e Volume Financiado
+          </h4>
+          <div class="chart-canvas-wrapper" style="height: 320px;">
+            <canvas id="chart-linha-temporal"></canvas>
+          </div>
+        </div>
       </section>
 
       <!-- ========================================
            PAGE 3: RELATÓRIO FINANCEIRO
       ======================================== -->
       <section class="page-section" id="sec-relatorio-financeiro">
+        <!-- Métricas Filtradas Financeiro -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Volume Filtrado</span>
+            <div class="metric-value" id="fin-metric-volume">R$ 0,00</div>
+            <div class="metric-sub"><span>soma do crédito filtrado</span></div>
+          </div>
+          <div class="metric-card highlight">
+            <span class="metric-label">Comissão Líquida (6%)</span>
+            <div class="metric-value" id="fin-metric-comissao">R$ 0,00</div>
+            <div class="metric-sub"><span style="color: var(--gold)">ganho estimado do período</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Ticket Médio</span>
+            <div class="metric-value" id="fin-metric-ticket">R$ 0,00</div>
+            <div class="metric-sub"><span>média das propostas filtradas</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Qtd. Propostas</span>
+            <div class="metric-value" id="fin-metric-quantidade">0</div>
+            <div class="metric-sub"><span>operações realizadas</span></div>
+          </div>
+        </div>
+
         <div class="controls-row">
           <input type="date" class="filter-input" id="fin-data-inicio" title="Data início">
           <input type="date" class="filter-input" id="fin-data-fim" title="Data fim">
@@ -1282,6 +1395,15 @@
             <option value="mil">Militares</option>
             <option value="est">Estadual</option>
             <option value="mun">Municipal</option>
+          </select>
+          <select class="filter-select" id="fin-status">
+            <option value="all">Todos os Status</option>
+            <option value="Recebida">Recebida</option>
+            <option value="Em Análise">Em Análise</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Aguardando Assinatura">Aguardando Assinatura</option>
+            <option value="Recusada">Recusada</option>
+            <option value="Paga">Paga</option>
           </select>
           <input type="number" class="filter-input" id="fin-val-min" placeholder="Valor mín." style="width:120px">
           <input type="number" class="filter-input" id="fin-val-max" placeholder="Valor máx." style="width:120px">
@@ -1323,7 +1445,33 @@
            PAGE 4: RELATÓRIO DE LEADS
       ======================================== -->
       <section class="page-section" id="sec-relatorio-leads">
+        <!-- Métricas Filtradas Leads -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Leads Filtrados</span>
+            <div class="metric-value" id="leads-metric-total">0</div>
+            <div class="metric-sub"><span>leads capturados nos filtros</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Assinados via SMS</span>
+            <div class="metric-value" id="leads-metric-sms">0%</div>
+            <div class="metric-sub"><span>taxa de assinatura eletrônica</span></div>
+          </div>
+          <div class="metric-card highlight">
+            <span class="metric-label">Principal Canal</span>
+            <div class="metric-value" id="leads-metric-canal">-</div>
+            <div class="metric-sub"><span style="color: rgba(255,255,255,0.6)">origem com mais acessos</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Média de SLA</span>
+            <div class="metric-value" id="leads-metric-sla">0h</div>
+            <div class="metric-sub"><span>tempo médio de cadastro</span></div>
+          </div>
+        </div>
+
         <div class="controls-row">
+          <input type="date" class="filter-input" id="leads-data-inicio" title="Data início">
+          <input type="date" class="filter-input" id="leads-data-fim" title="Data fim">
           <select class="filter-select" id="leads-origem">
             <option value="all">Todas as Origens</option>
             <option value="google">Google</option>
@@ -2065,6 +2213,7 @@
       let activeLeadId = null;
       let chartConvenio = null;
       let chartFunil = null;
+      let chartLinha = null;
 
       const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
       const formatCPF = (v) => { v = (v||'').replace(/\D/g, ""); return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"); };
@@ -2924,7 +3073,7 @@
         document.getElementById("dash-conversao").textContent = `${conversao.toFixed(1)}%`;
         document.getElementById("dash-comissao").textContent = formatBRL(comissao);
 
-        // Gráfico de Rosca — Volume por Convênio
+        // Gráfico de Rosca — Volume por Convênio (Aprimorado)
         const convenios = { inss: 0, mil: 0, est: 0, mun: 0 };
         leads.filter(l => l.status !== "Recusada").forEach(l => {
           const c = l.dados_funcionais?.convenio;
@@ -2939,7 +3088,7 @@
             labels: ['INSS', 'Forças Armadas', 'Estadual', 'Municipal'],
             datasets: [{
               data: [convenios.inss, convenios.mil, convenios.est, convenios.mun],
-              backgroundColor: ['#3498db', '#e74c3c', '#d4bc6e', '#2ecc71'],
+              backgroundColor: ['#2ecc71', '#3498db', '#d4bc6e', '#9b59b6'],
               borderWidth: 0,
               hoverOffset: 8
             }]
@@ -2947,14 +3096,14 @@
           options: {
             responsive: true, maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'bottom', labels: { padding: 16, font: { size: 12, weight: '600' }, color: '#606266' } },
-              tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${formatBRL(ctx.raw)}` } }
+              legend: { position: 'bottom', labels: { padding: 16, font: { size: 12, weight: '700' }, color: '#181b2c' } },
+              tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${formatBRL(ctx.raw)}` } }
             },
-            cutout: '65%'
+            cutout: '70%'
           }
         });
 
-        // Gráfico de Barras — Funil de Propostas
+        // Gráfico de Barras — Funil de Propostas (Aprimorado)
         const statusCounts = { 'Recebida': 0, 'Aguardando Averbação': 0, 'Em Análise': 0, 'Aguardando Assinatura': 0, 'Aprovada': 0, 'Recusada': 0, 'Paga': 0 };
         leads.forEach(l => { if (statusCounts[l.status] !== undefined) statusCounts[l.status]++; });
 
@@ -2969,7 +3118,7 @@
             datasets: [{
               label: 'Propostas',
               data: [aguardandoTotal, statusCounts['Aprovada'] || 0, statusCounts['Recusada'] || 0, statusCounts['Paga'] || 0],
-              backgroundColor: ['rgba(52, 152, 219, 0.8)', 'rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)', 'rgba(212, 188, 110, 0.9)'],
+              backgroundColor: ['rgba(52, 152, 219, 0.85)', 'rgba(46, 204, 113, 0.85)', 'rgba(231, 76, 60, 0.85)', 'rgba(212, 188, 110, 0.95)'],
               borderRadius: 6,
               borderSkipped: false
             }]
@@ -2979,11 +3128,116 @@
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
-              tooltip: { callbacks: { label: (ctx) => `${ctx.raw} proposta(s)` } }
+              tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} proposta(s)` } }
             },
             scales: {
               x: { beginAtZero: true, grid: { display: false }, ticks: { font: { weight: '600' } } },
               y: { grid: { display: false }, ticks: { font: { size: 12, weight: '700' }, color: '#181b2c' } }
+            }
+          }
+        });
+
+        // Gráfico de Linha — Evolução Temporal (Últimos 10 dias corridos)
+        const timelineData = {};
+        for (let i = 9; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dateStr = d.toISOString().split('T')[0];
+          timelineData[dateStr] = { volume: 0, count: 0 };
+        }
+
+        leads.forEach(l => {
+          if (!l.createdAt) return;
+          const dateStr = l.createdAt.split('T')[0];
+          if (timelineData[dateStr]) {
+            if (l.status !== "Recusada") {
+              timelineData[dateStr].volume += (l.proposta?.valor_solicitado || 0);
+            }
+            timelineData[dateStr].count += 1;
+          }
+        });
+
+        const sortedDates = Object.keys(timelineData).sort();
+        const labelsLinha = sortedDates.map(d => {
+          const [year, month, day] = d.split('-');
+          return `${day}/${month}`;
+        });
+        const datasetVolume = sortedDates.map(d => timelineData[d].volume);
+        const datasetQtd = sortedDates.map(d => timelineData[d].count);
+
+        if (chartLinha) chartLinha.destroy();
+        const ctxLinha = document.getElementById("chart-linha-temporal").getContext("2d");
+        
+        const gradientVol = ctxLinha.createLinearGradient(0, 0, 0, 300);
+        gradientVol.addColorStop(0, 'rgba(212, 188, 110, 0.35)');
+        gradientVol.addColorStop(1, 'rgba(212, 188, 110, 0.00)');
+
+        const gradientQtd = ctxLinha.createLinearGradient(0, 0, 0, 300);
+        gradientQtd.addColorStop(0, 'rgba(52, 152, 219, 0.35)');
+        gradientQtd.addColorStop(1, 'rgba(52, 152, 219, 0.00)');
+
+        chartLinha = new Chart(ctxLinha, {
+          type: 'line',
+          data: {
+            labels: labelsLinha,
+            datasets: [
+              {
+                label: 'Volume de Crédito (R$)',
+                data: datasetVolume,
+                borderColor: '#d4bc6e',
+                backgroundColor: gradientVol,
+                fill: true,
+                tension: 0.35,
+                borderWidth: 3,
+                yAxisID: 'yVolume'
+              },
+              {
+                label: 'Qtd. Propostas',
+                data: datasetQtd,
+                borderColor: '#3498db',
+                backgroundColor: gradientQtd,
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2.5,
+                yAxisID: 'yCount',
+                borderDash: [5, 5]
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { position: 'top', labels: { font: { size: 12, weight: '700' }, color: '#181b2c' } },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    if (ctx.datasetIndex === 0) return ` Volume: ${formatBRL(ctx.raw)}`;
+                    return ` Propostas: ${ctx.raw}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { weight: '600' } } },
+              yVolume: {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                ticks: {
+                  callback: (val) => formatBRL(val).split(',')[0],
+                  font: { size: 10 }
+                },
+                grid: { color: 'rgba(0,0,0,0.03)' }
+              },
+              yCount: {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                ticks: { stepSize: 1, font: { size: 10 } },
+                grid: { display: false }
+              }
             }
           }
         });
@@ -2997,11 +3251,13 @@
         const dataInicio = document.getElementById("fin-data-inicio").value;
         const dataFim = document.getElementById("fin-data-fim").value;
         const convenio = document.getElementById("fin-convenio").value;
+        const statusVal = document.getElementById("fin-status").value;
         const valMin = parseFloat(document.getElementById("fin-val-min").value) || 0;
         const valMax = parseFloat(document.getElementById("fin-val-max").value) || Infinity;
 
         const filtered = leads.filter(l => {
           if (convenio !== 'all' && l.dados_funcionais?.convenio !== convenio) return false;
+          if (statusVal !== 'all' && l.status !== statusVal) return false;
           const val = l.proposta?.valor_solicitado || 0;
           if (val < valMin || val > valMax) return false;
           if (dataInicio && new Date(l.createdAt) < new Date(dataInicio)) return false;
@@ -3010,6 +3266,17 @@
         });
 
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        // Atualiza os cards de KPI baseados nos filtros
+        const finVolume = filtered.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0);
+        const finComissao = finVolume * 0.06;
+        const finTicket = filtered.length > 0 ? finVolume / filtered.length : 0;
+        const finQuantidade = filtered.length;
+
+        document.getElementById("fin-metric-volume").textContent = formatBRL(finVolume);
+        document.getElementById("fin-metric-comissao").textContent = formatBRL(finComissao);
+        document.getElementById("fin-metric-ticket").textContent = formatBRL(finTicket);
+        document.getElementById("fin-metric-quantidade").textContent = finQuantidade;
 
         const tbody = document.getElementById("fin-table-body");
         const empty = document.getElementById("fin-empty");
@@ -3039,7 +3306,7 @@
       };
 
       // Filtros Financeiro
-      ['fin-data-inicio', 'fin-data-fim', 'fin-convenio', 'fin-val-min', 'fin-val-max'].forEach(id => {
+      ['fin-data-inicio', 'fin-data-fim', 'fin-convenio', 'fin-status', 'fin-val-min', 'fin-val-max'].forEach(id => {
         document.getElementById(id).addEventListener("change", renderFinanceiro);
         document.getElementById(id).addEventListener("input", renderFinanceiro);
       });
@@ -3047,6 +3314,7 @@
         document.getElementById("fin-data-inicio").value = "";
         document.getElementById("fin-data-fim").value = "";
         document.getElementById("fin-convenio").value = "all";
+        document.getElementById("fin-status").value = "all";
         document.getElementById("fin-val-min").value = "";
         document.getElementById("fin-val-max").value = "";
         renderFinanceiro();
@@ -3074,6 +3342,8 @@
       // ==========================================
       const renderLeadsReport = () => {
         const leads = getLeads();
+        const dataInicio = document.getElementById("leads-data-inicio").value;
+        const dataFim = document.getElementById("leads-data-fim").value;
         const origem = document.getElementById("leads-origem").value;
         const sms = document.getElementById("leads-sms").value;
         const rfb = document.getElementById("leads-rfb").value;
@@ -3085,13 +3355,45 @@
             if (smsVal !== sms) return false;
           }
           if (rfb !== 'all') {
-            // Todos são regulares no mock — implementar lógica real
             if (rfb === 'irregular') return false;
           }
+          if (dataInicio && new Date(l.createdAt) < new Date(dataInicio)) return false;
+          if (dataFim) { const end = new Date(dataFim); end.setHours(23,59,59); if (new Date(l.createdAt) > end) return false; }
           return true;
         });
 
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        // Calcula KPIs de Leads baseados nos filtros
+        const totalLeads = filtered.length;
+        const smsValidados = filtered.filter(l => l.proposta?.assinatura_sms_validada).length;
+        const smsRate = totalLeads > 0 ? (smsValidados / totalLeads * 100) : 0;
+
+        const origensCount = {};
+        filtered.forEach(l => {
+          const o = l.marketing?.utm_source || 'Direto';
+          origensCount[o] = (origensCount[o] || 0) + 1;
+        });
+        let principalCanal = '-';
+        let maxCount = 0;
+        Object.entries(origensCount).forEach(([canal, count]) => {
+          if (count > maxCount) {
+            maxCount = count;
+            principalCanal = canal;
+          }
+        });
+
+        let totalSlaHours = 0;
+        filtered.forEach(l => {
+          const slaMs = Date.now() - new Date(l.createdAt).getTime();
+          totalSlaHours += Math.floor(slaMs / (1000 * 60 * 60));
+        });
+        const mediaSla = totalLeads > 0 ? Math.round(totalSlaHours / totalLeads) : 0;
+
+        document.getElementById("leads-metric-total").textContent = totalLeads;
+        document.getElementById("leads-metric-sms").textContent = `${smsRate.toFixed(0)}%`;
+        document.getElementById("leads-metric-canal").textContent = principalCanal.charAt(0).toUpperCase() + principalCanal.slice(1);
+        document.getElementById("leads-metric-sla").textContent = `${mediaSla}h`;
 
         const tbody = document.getElementById("leads-rep-body");
         const empty = document.getElementById("leads-rep-empty");
@@ -3124,10 +3426,12 @@
       };
 
       // Filtros Leads
-      ['leads-origem', 'leads-sms', 'leads-rfb'].forEach(id => {
+      ['leads-data-inicio', 'leads-data-fim', 'leads-origem', 'leads-sms', 'leads-rfb'].forEach(id => {
         document.getElementById(id).addEventListener("change", renderLeadsReport);
       });
       document.getElementById("leads-limpar").addEventListener("click", () => {
+        document.getElementById("leads-data-inicio").value = "";
+        document.getElementById("leads-data-fim").value = "";
         document.getElementById("leads-origem").value = "all";
         document.getElementById("leads-sms").value = "all";
         document.getElementById("leads-rfb").value = "all";
