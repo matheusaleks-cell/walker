@@ -1209,6 +1209,24 @@
                 <input type="text" id="conta" name="conta" placeholder="Ex: 12345-6" required>
                 <span class="error-msg">Campo obrigatório</span>
               </div>
+
+              <div class="form-control">
+                <label for="tipo-pix">Tipo de Chave Pix</label>
+                <select id="tipo-pix" name="tipo_pix" required>
+                  <option value="" disabled selected>Selecione o tipo de Pix</option>
+                  <option value="cpf">CPF</option>
+                  <option value="celular">Celular</option>
+                  <option value="email">E-mail</option>
+                  <option value="aleatoria">Chave Aleatória</option>
+                </select>
+                <span class="error-msg">Selecione o tipo de chave Pix</span>
+              </div>
+
+              <div class="form-control">
+                <label for="chave-pix">Chave Pix</label>
+                <input type="text" id="chave-pix" name="chave_pix" placeholder="Insira sua chave Pix" required>
+                <span class="error-msg">Insira a sua chave Pix</span>
+              </div>
             </div>
           </div>
 
@@ -1859,6 +1877,8 @@
           const banco = document.getElementById("banco-select");
           const agencia = document.getElementById("agencia");
           const conta = document.getElementById("conta");
+          const tipoPix = document.getElementById("tipo-pix");
+          const chavePix = document.getElementById("chave-pix");
 
           // Permite qualquer banco com pelo menos 3 caracteres (flexibilidade para cooperativas/regionais)
           if (banco.value.trim() === "" || banco.value.trim().length < 3) {
@@ -1874,6 +1894,16 @@
           if (conta.value.trim().length < 3) {
             conta.classList.add("error");
             conta.nextElementSibling.style.display = "block";
+            isValid = false;
+          }
+          if (tipoPix.value === "") {
+            tipoPix.classList.add("error");
+            tipoPix.nextElementSibling.style.display = "block";
+            isValid = false;
+          }
+          if (chavePix.value.trim() === "") {
+            chavePix.classList.add("error");
+            chavePix.nextElementSibling.style.display = "block";
             isValid = false;
           }
         }
@@ -2641,7 +2671,9 @@
               banco: document.getElementById("banco-select").value,
               tipo_conta: document.getElementById("tipo-conta").value,
               agencia: document.getElementById("agencia").value,
-              conta: document.getElementById("conta").value
+              conta: document.getElementById("conta").value,
+              tipo_pix: document.getElementById("tipo-pix").value,
+              chave_pix: document.getElementById("chave-pix").value
             },
             proposta: {
               valor_solicitado: simulacaoData.valor,

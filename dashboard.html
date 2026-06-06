@@ -1916,6 +1916,22 @@
               <span class="info-val view-mode" id="m-b-conta">-</span>
               <input type="text" class="edit-mode" id="edit-b-conta" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
             </div>
+            <div class="info-item" style="margin-top: 12px;">
+              <span class="info-label">Tipo de Chave Pix</span>
+              <span class="info-val view-mode" id="m-b-tipo-pix" style="text-transform: capitalize;">-</span>
+              <select class="edit-mode" id="edit-b-tipo-pix" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; background: white; margin-top: 4px;">
+                <option value="" disabled selected>Selecione</option>
+                <option value="cpf">CPF</option>
+                <option value="celular">Celular</option>
+                <option value="email">E-mail</option>
+                <option value="aleatoria">Chave Aleatória</option>
+              </select>
+            </div>
+            <div class="info-item" style="margin-top: 12px; grid-column: span 2;">
+              <span class="info-label">Chave Pix</span>
+              <span class="info-val view-mode" id="m-b-chave-pix">-</span>
+              <input type="text" class="edit-mode" id="edit-b-chave-pix" style="display: none; width: 100%; padding: 6px 10px; border-radius: 4px; border: 1.5px solid var(--nardo); font-size: 0.85rem; font-family: var(--font-body); outline: none; margin-top: 4px;">
+            </div>
           </div>
         </div>
         
@@ -2626,6 +2642,8 @@
         document.getElementById("edit-b-tipo").value = lead.dados_bancarios?.tipo_conta || 'corrente';
         document.getElementById("edit-b-agencia").value = lead.dados_bancarios?.agencia || '';
         document.getElementById("edit-b-conta").value = lead.dados_bancarios?.conta || '';
+        document.getElementById("edit-b-tipo-pix").value = lead.dados_bancarios?.tipo_pix || '';
+        document.getElementById("edit-b-chave-pix").value = lead.dados_bancarios?.chave_pix || '';
         document.getElementById("edit-c-valor").value = lead.proposta?.valor_solicitado ? formatBRL(lead.proposta.valor_solicitado) : '';
         document.getElementById("edit-c-prazo").value = lead.proposta?.prazo_meses || '36';
 
@@ -2663,6 +2681,8 @@
         document.getElementById("m-b-tipo").textContent = lead.dados_bancarios?.tipo_conta || '-';
         document.getElementById("m-b-agencia").textContent = lead.dados_bancarios?.agencia || '-';
         document.getElementById("m-b-conta").textContent = lead.dados_bancarios?.conta || '-';
+        document.getElementById("m-b-tipo-pix").textContent = lead.dados_bancarios?.tipo_pix ? lead.dados_bancarios.tipo_pix.toUpperCase() : '-';
+        document.getElementById("m-b-chave-pix").textContent = lead.dados_bancarios?.chave_pix || '-';
 
         // Financeiro
         document.getElementById("m-c-valor").textContent = formatBRL(lead.proposta?.valor_solicitado || 0);
@@ -2846,7 +2866,7 @@
               ...lead,
               lead: { ...lead.lead, nome: document.getElementById("edit-p-nome").value.trim(), cpf: document.getElementById("edit-p-cpf").value.replace(/\D/g, ""), data_nascimento: document.getElementById("edit-p-nascimento").value.trim(), celular: document.getElementById("edit-p-celular").value.replace(/\D/g, ""), email: document.getElementById("edit-p-email").value.trim(), genero: document.getElementById("edit-p-genero").value, estado_civil: document.getElementById("edit-p-estado-civil").value, nome_mae: document.getElementById("edit-p-nome-mae").value.trim(), rg: document.getElementById("edit-p-rg").value.replace(/\D/g, ""), rg_orgao: document.getElementById("edit-p-rg-emissor").value.trim().toUpperCase(), rg_data_emissao: document.getElementById("edit-p-rg-emissao").value.trim(), rg_uf: document.getElementById("edit-p-rg-uf").value },
               dados_funcionais: { ...lead.dados_funcionais, convenio: document.getElementById("edit-f-convenio").value, profissao: document.getElementById("edit-f-profissao").value, matricula: document.getElementById("edit-f-matricula").value.trim(), salario_liquido: parseFloat(document.getElementById("edit-f-salario").value.replace(/[^\d,]/g, "").replace(",", ".")) || 0, uf_orgao: document.getElementById("edit-f-uf").value },
-              dados_bancarios: { ...lead.dados_bancarios, banco: document.getElementById("edit-b-banco").value.trim(), tipo_conta: document.getElementById("edit-b-tipo").value, agencia: document.getElementById("edit-b-agencia").value.trim(), conta: document.getElementById("edit-b-conta").value.trim() },
+              dados_bancarios: { ...lead.dados_bancarios, banco: document.getElementById("edit-b-banco").value.trim(), tipo_conta: document.getElementById("edit-b-tipo").value, agencia: document.getElementById("edit-b-agencia").value.trim(), conta: document.getElementById("edit-b-conta").value.trim(), tipo_pix: document.getElementById("edit-b-tipo-pix").value, chave_pix: document.getElementById("edit-b-chave-pix").value.trim() },
               proposta: { ...lead.proposta, valor_solicitado: valorSolicitadoVal, prazo_meses: prazoVal, valor_parcela: valorParcelaVal, taxa_juros_mensal: taxaDoLead, total_financiado: totalFinanciadoVal, cet_anual: cetAnualVal },
               arquivos: {
                 identidade_cnh_rg: newRgBase64 || lead.arquivos?.identidade_cnh_rg || null,
@@ -3686,6 +3706,7 @@
           <div class="info-item"><span class="info-label">Banco</span><span class="info-val">${first.dados_bancarios?.banco || '-'}</span></div>
           <div class="info-item"><span class="info-label">Tipo</span><span class="info-val" style="text-transform:capitalize;">${first.dados_bancarios?.tipo_conta || '-'}</span></div>
           <div class="info-item"><span class="info-label">Agência / Conta</span><span class="info-val">${first.dados_bancarios?.agencia || '-'} / ${first.dados_bancarios?.conta || '-'}</span></div>
+          <div class="info-item" style="grid-column: span 2;"><span class="info-label">Chave Pix (${first.dados_bancarios?.tipo_pix ? first.dados_bancarios.tipo_pix.toUpperCase() : '-'})</span><span class="info-val">${first.dados_bancarios?.chave_pix || '-'}</span></div>
         `;
 
         // Histórico de propostas
