@@ -1085,7 +1085,12 @@
       .toast-notification,
       .btn-delete-conv,
       #btn-add-convenio,
-      #form-new-convenio {
+      #form-new-convenio,
+      #dash-btn-hoje,
+      #dash-btn-7d,
+      #dash-btn-mes,
+      #dash-limpar,
+      #clientes-limpar {
         display: none !important;
       }
       .main-wrapper {
@@ -1253,6 +1258,8 @@
             <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
             <input type="text" id="search-input" placeholder="Buscar por nome ou CPF...">
           </div>
+          <input type="date" class="filter-input" id="filter-data-inicio" title="Data início" style="max-width:140px;">
+          <input type="date" class="filter-input" id="filter-data-fim" title="Data fim" style="max-width:140px;">
           <select class="filter-select" id="filter-convenio">
             <option value="all">Todos os Convênios</option>
             <option value="inss">Aposentado/Pensionista INSS</option>
@@ -1302,6 +1309,25 @@
            PAGE 2: DASHBOARD GERAL
       ======================================== -->
       <section class="page-section" id="sec-dashboard-geral">
+        <!-- Filtros do Dashboard Geral -->
+        <div class="controls-row">
+          <input type="date" class="filter-input" id="dash-data-inicio" title="Data início">
+          <input type="date" class="filter-input" id="dash-data-fim" title="Data fim">
+          <select class="filter-select" id="dash-convenio">
+            <option value="all">Todos Convênios</option>
+            <option value="inss">INSS</option>
+            <option value="mil">Militares</option>
+            <option value="est">Estadual</option>
+            <option value="mun">Municipal</option>
+          </select>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-filter" id="dash-btn-hoje" style="padding: 10px 14px; font-size: 0.8rem;">Hoje</button>
+            <button class="btn-filter" id="dash-btn-7d" style="padding: 10px 14px; font-size: 0.8rem;">7 dias</button>
+            <button class="btn-filter" id="dash-btn-mes" style="padding: 10px 14px; font-size: 0.8rem;">Este Mês</button>
+          </div>
+          <button class="btn-filter" id="dash-limpar" style="margin-left: auto;">Limpar Filtros</button>
+        </div>
+
         <div class="metrics-grid">
           <div class="metric-card highlight">
             <span class="metric-label">Volume Total Financiado</span>
@@ -1531,6 +1557,19 @@
             <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
             <input type="text" id="clientes-search" placeholder="Buscar cliente por nome ou CPF...">
           </div>
+          <select class="filter-select" id="clientes-convenio">
+            <option value="all">Todos os Convênios</option>
+            <option value="inss">INSS</option>
+            <option value="mil">Militares</option>
+            <option value="est">Estadual</option>
+            <option value="mun">Municipal</option>
+          </select>
+          <select class="filter-select" id="clientes-propostas-qtd">
+            <option value="all">Volume de Propostas</option>
+            <option value="1">Pelo menos 1 proposta</option>
+            <option value="2">Mais de 1 proposta (Fidelidade)</option>
+          </select>
+          <button class="btn-filter" id="clientes-limpar">Limpar</button>
         </div>
         <div class="panel-card">
           <div class="table-container">
@@ -2459,12 +2498,20 @@
         const leads = getLeads();
         const filterConvenio = document.getElementById("filter-convenio").value;
         const filterStatus = document.getElementById("filter-status").value;
+        const dataInicio = document.getElementById("filter-data-inicio").value;
+        const dataFim = document.getElementById("filter-data-fim").value;
         const searchVal = document.getElementById("search-input").value.toLowerCase().replace(/\D/g, "");
         const searchValText = document.getElementById("search-input").value.toLowerCase();
 
         const filtered = leads.filter(lead => {
           if (filterConvenio !== "all" && lead.dados_funcionais?.convenio !== filterConvenio) return false;
           if (filterStatus !== "all" && lead.status !== filterStatus) return false;
+          if (dataInicio && new Date(lead.createdAt) < new Date(dataInicio)) return false;
+          if (dataFim) {
+            const end = new Date(dataFim);
+            end.setHours(23, 59, 59);
+            if (new Date(lead.createdAt) > end) return false;
+          }
           if (searchValText !== "") {
             const nomeMatch = lead.lead?.nome?.toLowerCase().includes(searchValText);
             const cpfMatch = lead.lead?.cpf?.replace(/\D/g, "").includes(searchVal) || lead.lead?.cpf?.includes(searchValText);
@@ -2526,10 +2573,15 @@
       // Mesa Filtros
       document.getElementById("filter-convenio").addEventListener("change", renderMesaTable);
       document.getElementById("filter-status").addEventListener("change", renderMesaTable);
+      ['filter-data-inicio', 'filter-data-fim'].forEach(id => {
+        document.getElementById(id).addEventListener("change", renderMesaTable);
+      });
       document.getElementById("search-input").addEventListener("input", debounce(renderMesaTable, 280));
       document.getElementById("btn-clear-filters").addEventListener("click", () => {
         document.getElementById("filter-convenio").value = "all";
         document.getElementById("filter-status").value = "all";
+        document.getElementById("filter-data-inicio").value = "";
+        document.getElementById("filter-data-fim").value = "";
         document.getElementById("search-input").value = "";
         renderMesaTable();
       });
@@ -3061,11 +3113,27 @@
       // ==========================================
       const renderDashboard = () => {
         const leads = getLeads();
-        const pagas = leads.filter(l => l.status === "Paga");
+        const dataInicio = document.getElementById("dash-data-inicio").value;
+        const dataFim = document.getElementById("dash-data-fim").value;
+        const convenio = document.getElementById("dash-convenio").value;
+
+        // Filtragem inicial de leads baseado nos controles do dashboard
+        const filteredLeads = leads.filter(l => {
+          if (convenio !== 'all' && l.dados_funcionais?.convenio !== convenio) return false;
+          if (dataInicio && new Date(l.createdAt) < new Date(dataInicio)) return false;
+          if (dataFim) {
+            const end = new Date(dataFim);
+            end.setHours(23, 59, 59);
+            if (new Date(l.createdAt) > end) return false;
+          }
+          return true;
+        });
+
+        const pagas = filteredLeads.filter(l => l.status === "Paga");
 
         const volumeTotal = pagas.reduce((s, l) => s + (l.proposta?.total_financiado || 0), 0);
         const ticketPago = pagas.length > 0 ? pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0) / pagas.length : 0;
-        const conversao = leads.length > 0 ? (pagas.length / leads.length * 100) : 0;
+        const conversao = filteredLeads.length > 0 ? (pagas.length / filteredLeads.length * 100) : 0;
         const comissao = pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0) * 0.06, 0);
 
         document.getElementById("dash-volume-total").textContent = formatBRL(volumeTotal);
@@ -3075,7 +3143,7 @@
 
         // Gráfico de Rosca — Volume por Convênio (Aprimorado)
         const convenios = { inss: 0, mil: 0, est: 0, mun: 0 };
-        leads.filter(l => l.status !== "Recusada").forEach(l => {
+        filteredLeads.filter(l => l.status !== "Recusada").forEach(l => {
           const c = l.dados_funcionais?.convenio;
           if (convenios[c] !== undefined) convenios[c] += (l.proposta?.valor_solicitado || 0);
         });
@@ -3105,7 +3173,7 @@
 
         // Gráfico de Barras — Funil de Propostas (Aprimorado)
         const statusCounts = { 'Recebida': 0, 'Aguardando Averbação': 0, 'Em Análise': 0, 'Aguardando Assinatura': 0, 'Aprovada': 0, 'Recusada': 0, 'Paga': 0 };
-        leads.forEach(l => { if (statusCounts[l.status] !== undefined) statusCounts[l.status]++; });
+        filteredLeads.forEach(l => { if (statusCounts[l.status] !== undefined) statusCounts[l.status]++; });
 
         const aguardandoTotal = (statusCounts['Recebida'] || 0) + (statusCounts['Aguardando Averbação'] || 0) + (statusCounts['Em Análise'] || 0) + (statusCounts['Aguardando Assinatura'] || 0);
 
@@ -3137,19 +3205,37 @@
           }
         });
 
-        // Gráfico de Linha — Evolução Temporal (Últimos 10 dias corridos)
+        // Gráfico de Linha — Evolução Temporal (Filtrado ou últimos 10 dias do período)
         const timelineData = {};
-        for (let i = 9; i >= 0; i--) {
-          const d = new Date();
+        const rangeDays = 10;
+        
+        // Define as datas do eixo horizontal de acordo com os filtros ou os últimos 10 dias corridos
+        let startDate = new Date();
+        startDate.setDate(startDate.getDate() - (rangeDays - 1));
+        if (dataInicio) {
+          startDate = new Date(dataInicio);
+        }
+        let endDate = new Date();
+        if (dataFim) {
+          endDate = new Date(dataFim);
+        }
+        
+        // Se a diferença for muito grande, limita a 15 pontos para não poluir
+        const timeDiff = Math.abs(endDate.getTime() - startDate.getTime());
+        const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const finalSteps = diffDays > 15 ? 15 : diffDays;
+        
+        for (let i = finalSteps - 1; i >= 0; i--) {
+          const d = new Date(endDate);
           d.setDate(d.getDate() - i);
           const dateStr = d.toISOString().split('T')[0];
           timelineData[dateStr] = { volume: 0, count: 0 };
         }
 
-        leads.forEach(l => {
+        filteredLeads.forEach(l => {
           if (!l.createdAt) return;
           const dateStr = l.createdAt.split('T')[0];
-          if (timelineData[dateStr]) {
+          if (timelineData[dateStr] !== undefined) {
             if (l.status !== "Recusada") {
               timelineData[dateStr].volume += (l.proposta?.valor_solicitado || 0);
             }
@@ -3463,6 +3549,8 @@
       const renderClientes = () => {
         const leads = getLeads();
         const search = document.getElementById("clientes-search").value.toLowerCase();
+        const filterConvenio = document.getElementById("clientes-convenio").value;
+        const filterPropostasQtd = document.getElementById("clientes-propostas-qtd").value;
 
         // Agrupar por CPF
         const cpfMap = {};
@@ -3471,7 +3559,6 @@
           if (!cpf) return;
           
           if (!cpfMap[cpf]) {
-            // Mesclar dados do lead caso existam de fallback
             const leadNome = l.lead?.nome || l.nome || '-';
             const leadNomeMae = l.lead?.nome_mae || '-';
             const leadCelular = l.lead?.celular || l.celular || '-';
@@ -3507,7 +3594,22 @@
 
         let clients = Object.entries(cpfMap).map(([cpf, data]) => ({ cpf, ...data }));
 
-        // Filtro
+        // Filtros avançados de Clientes
+        if (filterConvenio !== 'all') {
+          clients = clients.filter(c => 
+            c.proposals.some(p => p.dados_funcionais?.convenio === filterConvenio)
+          );
+        }
+        if (filterPropostasQtd !== 'all') {
+          const minQtd = parseInt(filterPropostasQtd);
+          if (minQtd === 2) {
+            clients = clients.filter(c => c.proposals.length > 1);
+          } else if (minQtd === 1) {
+            clients = clients.filter(c => c.proposals.length >= 1);
+          }
+        }
+
+        // Filtro de Busca
         if (search) {
           clients = clients.filter(c => {
             return (c.lead?.nome || '').toLowerCase().includes(search) || c.cpf.includes(search.replace(/\D/g, ''));
@@ -3542,6 +3644,17 @@
       };
 
       document.getElementById("clientes-search").addEventListener("input", renderClientes);
+      
+      // Filtros adicionais de clientes
+      ['clientes-convenio', 'clientes-propostas-qtd'].forEach(id => {
+        document.getElementById(id).addEventListener("change", renderClientes);
+      });
+      document.getElementById("clientes-limpar").addEventListener("click", () => {
+        document.getElementById("clientes-search").value = "";
+        document.getElementById("clientes-convenio").value = "all";
+        document.getElementById("clientes-propostas-qtd").value = "all";
+        renderClientes();
+      });
 
       // Ficha do Cliente
       const openClientFicha = (cpf) => {
@@ -4077,6 +4190,42 @@
 
         // Renderiza a mesa e páginas com dados do Supabase
         renderMesaTable();
+
+        // Configuração de listeners adicionais para filtros do Dashboard Geral
+        ['dash-data-inicio', 'dash-data-fim', 'dash-convenio'].forEach(id => {
+          document.getElementById(id).addEventListener("change", renderDashboard);
+        });
+        document.getElementById("dash-limpar").addEventListener("click", () => {
+          document.getElementById("dash-data-inicio").value = "";
+          document.getElementById("dash-data-fim").value = "";
+          document.getElementById("dash-convenio").value = "all";
+          renderDashboard();
+        });
+
+        // Botões rápidos de intervalo no Dashboard Geral
+        document.getElementById("dash-btn-hoje").addEventListener("click", () => {
+          const hoje = new Date().toISOString().split('T')[0];
+          document.getElementById("dash-data-inicio").value = hoje;
+          document.getElementById("dash-data-fim").value = hoje;
+          renderDashboard();
+        });
+        document.getElementById("dash-btn-7d").addEventListener("click", () => {
+          const fim = new Date().toISOString().split('T')[0];
+          const inicioObj = new Date();
+          inicioObj.setDate(inicioObj.getDate() - 7);
+          const inicio = inicioObj.toISOString().split('T')[0];
+          document.getElementById("dash-data-inicio").value = inicio;
+          document.getElementById("dash-data-fim").value = fim;
+          renderDashboard();
+        });
+        document.getElementById("dash-btn-mes").addEventListener("click", () => {
+          const d = new Date();
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          document.getElementById("dash-data-inicio").value = `${y}-${m}-01`;
+          document.getElementById("dash-data-fim").value = new Date(y, d.getMonth() + 1, 0).toISOString().split('T')[0];
+          renderDashboard();
+        });
 
         // Inicializa Realtime e fallback polling
         setupRealtime();
