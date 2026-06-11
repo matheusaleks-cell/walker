@@ -1592,6 +1592,140 @@
       transform: scale(1);
       visibility: visible;
     }
+
+    /* WhatsApp Flutuante Premium */
+    .whatsapp-float-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Giga Sans', sans-serif;
+      pointer-events: none;
+    }
+
+    .whatsapp-tooltip {
+      background: var(--white);
+      color: var(--navy);
+      padding: 10px 16px;
+      border-radius: 20px 20px 4px 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+      border: 1px solid rgba(37, 211, 102, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: floatTooltip 3s ease-in-out infinite alternate;
+    }
+
+    .whatsapp-tooltip.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .whatsapp-tooltip-close {
+      background: none;
+      border: none;
+      color: var(--gray-light-text);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .whatsapp-tooltip-close:hover {
+      color: #e74c3c;
+    }
+
+    .whatsapp-btn {
+      width: 60px;
+      height: 60px;
+      background: #25d366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .whatsapp-btn::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #25d366;
+      border-radius: 50%;
+      z-index: -1;
+      opacity: 0.4;
+      animation: whatsappPulse 2s infinite;
+    }
+
+    .whatsapp-btn:hover {
+      transform: scale(1.1) rotate(8deg);
+      background: #20ba5a;
+      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
+    }
+
+    .whatsapp-icon {
+      width: 34px;
+      height: 34px;
+      fill: var(--white);
+    }
+
+    /* Animações */
+    @keyframes whatsappPulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.4;
+      }
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    @keyframes floatTooltip {
+      0% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(-4px);
+      }
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+      .whatsapp-float-container {
+        bottom: 20px;
+        right: 20px;
+        gap: 8px;
+      }
+      .whatsapp-btn {
+        width: 50px;
+        height: 50px;
+      }
+      .whatsapp-icon {
+        width: 28px;
+        height: 28px;
+      }
+      .whatsapp-tooltip {
+        display: none; /* Oculta no mobile para não ocupar tela */
+      }
+    }
   </style>
 </head>
 <body>
@@ -2664,6 +2798,43 @@
       syncConfigsFromSupabase();
 
     });
+  </script>
+
+  <!-- WhatsApp Flutuante Premium -->
+  <div class="whatsapp-float-container">
+    <div class="whatsapp-tooltip" id="wa-tooltip">
+      <span>Precisa de ajuda? Fale conosco!</span>
+      <button class="whatsapp-tooltip-close" onclick="closeWATooltip(event)">×</button>
+    </div>
+    <a href="https://wa.me/5511926067275?text=Ol%C3%A1%2C%20gostaria%20de%20simular%20meu%20cr%C3%A9dito%20no%20Walker%20Bank." 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       class="whatsapp-btn"
+       aria-label="Fale conosco no WhatsApp"
+       id="wa-btn">
+      <svg class="whatsapp-icon" viewBox="0 0 24 24">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.248 8.477 3.517 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.734-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.403.002 9.803-4.394 9.806-9.8.001-2.605-1.006-5.054-2.837-6.89C16.426 2.08 13.982 1.074 11.385 1.074c-5.41 0-9.81 4.403-9.814 9.806-.001 1.562.417 3.09 1.21 4.453l-.94 3.435 3.522-.924zm11.758-6.915c-.092-.153-.338-.245-.707-.43-.368-.184-2.18-1.077-2.518-1.2-.338-.123-.584-.184-.83.184-.245.368-.952 1.2-1.167 1.446-.215.246-.43.276-.799.092-.368-.184-1.556-.573-2.964-1.83-1.096-.977-1.835-2.185-2.05-2.553-.215-.369-.023-.568.16-.752.166-.165.369-.43.554-.645.184-.215.246-.369.369-.615.123-.246.062-.461-.03-.646-.093-.184-.83-2.002-1.137-2.74-.299-.718-.604-.622-.83-.633-.215-.01-.462-.01-.707-.01-.246 0-.646.093-.984.462-.338.369-1.29 1.262-1.29 3.076 0 1.815 1.321 3.568 1.505 3.815.185.246 2.6 3.97 6.296 5.564.878.379 1.564.606 2.102.777.882.28 1.687.24 2.322.145.708-.107 2.18-.89 2.487-1.752.307-.862.307-1.6.215-1.752z"/>
+      </svg>
+    </a>
+  </div>
+
+  <script>
+    // Ativar tooltip após 2.5 segundos
+    setTimeout(function() {
+      const tooltip = document.getElementById('wa-tooltip');
+      if (tooltip) {
+        tooltip.classList.add('active');
+      }
+    }, 2500);
+
+    function closeWATooltip(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const tooltip = document.getElementById('wa-tooltip');
+      if (tooltip) {
+        tooltip.classList.remove('active');
+      }
+    }
   </script>
 </body>
 </html>
