@@ -17,7 +17,12 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- 2. Habilita RLS (Row Level Security)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- 3. Políticas de acesso
+-- 3. Políticas de acesso para a tabela profiles
+-- Remove se já existirem para evitar o erro 42710
+DROP POLICY IF EXISTS "Leitura de perfis autenticados" ON public.profiles;
+DROP POLICY IF EXISTS "Atualização do próprio perfil" ON public.profiles;
+DROP POLICY IF EXISTS "Admin atualiza qualquer perfil" ON public.profiles;
+
 -- Qualquer usuário autenticado pode ler todos os perfis (para listar operadores)
 CREATE POLICY "Leitura de perfis autenticados"
   ON public.profiles FOR SELECT
@@ -69,6 +74,11 @@ CREATE TABLE IF NOT EXISTS public.configs (
 );
 ALTER TABLE public.configs ENABLE ROW LEVEL SECURITY;
 
+-- Remove se já existirem para evitar o erro 42710
+DROP POLICY IF EXISTS "Configs leitura autenticados" ON public.configs;
+DROP POLICY IF EXISTS "Configs insert autenticados" ON public.configs;
+DROP POLICY IF EXISTS "Configs update autenticados" ON public.configs;
+
 CREATE POLICY "Configs leitura autenticados"
   ON public.configs FOR SELECT
   TO authenticated
@@ -83,6 +93,17 @@ CREATE POLICY "Configs update autenticados"
   ON public.configs FOR UPDATE
   TO authenticated
   USING (true);
+
+-- 6. Sincronização Retroativa de Usuários Órfãos
+-- Insere perfis para usuários que já foram cadastrados no Auth mas ainda não têm perfil correspondente
+INSERT INTO public.profiles (id, nome, role, avatar)
+SELECT
+  id,
+  COALESCE(raw_user_meta_data->>'nome', split_part(email, '@', 1)),
+  COALESCE(raw_user_meta_data->>'role', 'operador'),
+  COALESCE(raw_user_meta_data->>'avatar', upper(left(split_part(email, '@', 1), 2)))
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- PASSO MANUAL APÓS EXECUTAR:
