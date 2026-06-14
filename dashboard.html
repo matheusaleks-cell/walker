@@ -2816,10 +2816,14 @@
                     Novo Operador de Crédito
                   </h5>
                   
-                  <div class="config-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="config-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
                     <div class="config-field">
                       <label>Nome Completo</label>
                       <input type="text" id="new-op-nome" placeholder="Ex: Carlos Alberto" style="padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); width: 100%; font-size: 0.85rem; outline: none; font-family: Arial;">
+                    </div>
+                    <div class="config-field">
+                      <label>Função / Cargo</label>
+                      <input type="text" id="new-op-funcao" placeholder="Ex: Operador de Crédito" style="padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); width: 100%; font-size: 0.85rem; outline: none; font-family: Arial;">
                     </div>
                     <div class="config-field">
                       <label>E-mail de Acesso</label>
@@ -3659,8 +3663,8 @@
 
       // Em modo demo, os operadores são mocks; em produção, são carregados do Supabase (profiles table)
       let OPERADORES = [
-        { id: "op-joao", nome: "João Silva", avatar: "JS", meta: 100000 },
-        { id: "op-maria", nome: "Maria Santos", avatar: "MS", meta: 100000 }
+        { id: "op-joao", nome: "João Silva", avatar: "JS", meta: 100000, funcao: "Operador de Consignado" },
+        { id: "op-maria", nome: "Maria Santos", avatar: "MS", meta: 100000, funcao: "Analista de Crédito" }
       ];
 
       const getCurrentUserProfile = () => {
@@ -3675,8 +3679,8 @@
             const cfg = getConfigs();
             const localOps = cfg.operadores_config || {};
             const baseOps = [
-              { id: "op-joao", nome: "João Silva", avatar: "JS", meta: 100000 },
-              { id: "op-maria", nome: "Maria Santos", avatar: "MS", meta: 100000 }
+              { id: "op-joao", nome: "João Silva", avatar: "JS", meta: 100000, funcao: "Operador de Consignado" },
+              { id: "op-maria", nome: "Maria Santos", avatar: "MS", meta: 100000, funcao: "Analista de Crédito" }
             ];
             
             const opsMap = new Map();
@@ -3689,7 +3693,8 @@
                   id,
                   nome: info.nome,
                   avatar: avatar || "OP",
-                  meta: info.meta_mensal !== undefined ? info.meta_mensal : 100000
+                  meta: info.meta_mensal !== undefined ? info.meta_mensal : 100000,
+                  funcao: info.funcao || "Operador"
                 });
               } else if (id.startsWith("op-")) {
                 const existing = opsMap.get(id);
@@ -3697,7 +3702,8 @@
                   id,
                   nome: info.nome || existing?.nome || 'Operador',
                   avatar: info.avatar || existing?.avatar || 'OP',
-                  meta: info.meta_mensal !== undefined ? info.meta_mensal : (existing?.meta || 100000)
+                  meta: info.meta_mensal !== undefined ? info.meta_mensal : (existing?.meta || 100000),
+                  funcao: info.funcao || existing?.funcao || "Operador"
                 });
               }
             });
@@ -3721,11 +3727,13 @@
               const ov = cfgOverrides[p.id] || {};
               const nome = ov.nome || p.nome;
               const meta = ov.meta_mensal !== undefined ? ov.meta_mensal : (p.meta_mensal || 100000);
+              const funcao = ov.funcao || "Operador";
               return {
                 id: p.id,
                 nome,
                 avatar: p.avatar || nome.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2),
-                meta
+                meta,
+                funcao
               };
             });
           }
@@ -3759,12 +3767,14 @@
 
         // Se o perfil ativo é o do próprio usuário logado, usa os dados reais do banco
         if (realProfile && realProfile.id === profileId) {
+          const cfgOverrides = (getConfigs().operadores_config) || {};
+          const ov = cfgOverrides[realProfile.id] || {};
           return {
             id: realProfile.id,
-            nome: realProfile.nome,
-            role: realProfile.role === 'admin' ? 'Administrador' : 'Operador',
-            avatar: realProfile.avatar || realProfile.nome.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2),
-            meta: realProfile.meta_mensal || 100000
+            nome: ov.nome || realProfile.nome,
+            role: ov.funcao || (realProfile.role === 'admin' ? 'Administrador' : 'Operador'),
+            avatar: realProfile.avatar || (ov.nome || realProfile.nome).split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2),
+            meta: ov.meta_mensal !== undefined ? ov.meta_mensal : (realProfile.meta_mensal || 100000)
           };
         }
 
@@ -3779,7 +3789,7 @@
         // Procura na lista de operadores carregada do banco (ou mocks em demo)
         const op = OPERADORES.find(o => o.id === profileId);
         return op
-          ? { id: op.id, nome: op.nome, role: "Operador", avatar: op.avatar, meta: op.meta }
+          ? { id: op.id, nome: op.nome, role: op.funcao || "Operador", avatar: op.avatar, meta: op.meta }
           : { id: "admin", nome: "Equipe Comercial", role: "Administrador", avatar: "EC" };
       };
 
@@ -6712,12 +6722,17 @@
           const ov = overrides[op.id] || {};
           const nome = ov.nome !== undefined ? ov.nome : op.nome;
           const meta = ov.meta_mensal !== undefined ? ov.meta_mensal : op.meta;
+          const funcao = ov.funcao !== undefined ? ov.funcao : (op.funcao || "Operador");
           return `
-            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:grid;grid-template-columns:48px 1fr 1fr;gap:16px;align-items:center;">
+            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:grid;grid-template-columns:48px 1fr 1fr 1fr;gap:16px;align-items:center;">
               <div style="width:40px;height:40px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:0.85rem;flex-shrink:0;">${op.avatar}</div>
               <div class="config-field">
                 <label>Nome do Operador</label>
                 <input type="text" class="op-cfg-nome" data-id="${op.id}" value="${nome}" style="padding:8px 12px;border-radius:6px;border:1.5px solid rgba(24,27,44,0.15);width:100%;font-size:0.85rem;outline:none;font-family:var(--font-body);">
+              </div>
+              <div class="config-field">
+                <label>Função / Cargo</label>
+                <input type="text" class="op-cfg-funcao" data-id="${op.id}" value="${funcao}" style="padding:8px 12px;border-radius:6px;border:1.5px solid rgba(24,27,44,0.15);width:100%;font-size:0.85rem;outline:none;font-family:var(--font-body);">
               </div>
               <div class="config-field">
                 <label>Meta Mensal (R$)</label>
@@ -6794,6 +6809,7 @@
       // Ação de cadastrar novo operador (Modo Demo & Modo Supabase Real)
       document.getElementById("btn-save-new-op").addEventListener("click", async () => {
         const nome = document.getElementById("new-op-nome").value.trim();
+        const funcao = document.getElementById("new-op-funcao").value.trim() || "Operador";
         const email = document.getElementById("new-op-email").value.trim();
         const senha = document.getElementById("new-op-senha").value;
         const metaVal = document.getElementById("new-op-meta").value;
@@ -6823,18 +6839,20 @@
             id: opId,
             nome,
             avatar,
-            meta
+            meta,
+            funcao
           });
 
-          // Grava a meta comercial nas configs locais
+          // Grava a meta comercial e funcao nas configs locais
           const cfg = getConfigs();
           if (!cfg.operadores_config) cfg.operadores_config = {};
-          cfg.operadores_config[opId] = { nome, meta_mensal: meta };
+          cfg.operadores_config[opId] = { nome, meta_mensal: meta, funcao };
           safeSaveConfigs(cfg);
 
           showToast("Operador cadastrado com sucesso (Modo Demonstração)!", "var(--green-success)");
           
           document.getElementById("new-op-nome").value = "";
+          document.getElementById("new-op-funcao").value = "";
           document.getElementById("new-op-email").value = "";
           document.getElementById("new-op-senha").value = "";
           document.getElementById("new-op-meta").value = "";
@@ -6889,10 +6907,10 @@
 
           if (data && data.user) {
             // O trigger handle_new_user() já criou o perfil com nome/role/avatar corretos.
-            // Salva meta_mensal nas configs.operadores_config para aparecer imediatamente na UI.
+            // Salva meta_mensal e funcao nas configs.operadores_config para aparecer imediatamente na UI.
             const cfg = getConfigs();
             if (!cfg.operadores_config) cfg.operadores_config = {};
-            cfg.operadores_config[data.user.id] = { nome, meta_mensal: meta, avatar };
+            cfg.operadores_config[data.user.id] = { nome, meta_mensal: meta, avatar, funcao };
             safeSaveConfigs(cfg);
             try {
               await supabaseClient.from('configs').upsert({ id: 'default', data: cfg });
@@ -6903,6 +6921,7 @@
             showToast("Operador cadastrado com sucesso!", "var(--green-success)");
 
             document.getElementById("new-op-nome").value = "";
+            document.getElementById("new-op-funcao").value = "";
             document.getElementById("new-op-email").value = "";
             document.getElementById("new-op-senha").value = "";
             document.getElementById("new-op-meta").value = "";
@@ -7048,17 +7067,23 @@
           if (!operadoresConfig[id]) operadoresConfig[id] = {};
           operadoresConfig[id].nome = input.value.trim();
         });
+        document.querySelectorAll(".op-cfg-funcao").forEach(input => {
+          const id = input.dataset.id;
+          if (!operadoresConfig[id]) operadoresConfig[id] = {};
+          operadoresConfig[id].funcao = input.value.trim();
+        });
         document.querySelectorAll(".op-cfg-meta").forEach(input => {
           const id = input.dataset.id;
           if (!operadoresConfig[id]) operadoresConfig[id] = {};
           operadoresConfig[id].meta_mensal = parseFloat(input.value.replace(/[^\d.,]/g, '').replace(',', '.')) || 100000;
         });
-        // Aplica nomes/metas editados ao array OPERADORES em memória
+        // Aplica nomes/metas/funções editados ao array OPERADORES em memória
         Object.entries(operadoresConfig).forEach(([id, ov]) => {
           const op = OPERADORES.find(o => o.id === id);
           if (op) {
             if (ov.nome) op.nome = ov.nome;
-            if (ov.meta_mensal) op.meta = ov.meta_mensal;
+            if (ov.meta_mensal !== undefined) op.meta = ov.meta_mensal;
+            if (ov.funcao) op.funcao = ov.funcao;
           }
         });
 
