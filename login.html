@@ -51,9 +51,9 @@
       --black: #000000;
       --dark-gold: #a69458;
       --light-gray: #f5f6fa;
-      --gray-text: #606266;
-      --font-title: 'Giga Sans', sans-serif;
-      --font-body: 'Giga Sans', sans-serif;
+      --gray-text: #4a4c50;
+      --font-title: Arial, Helvetica, sans-serif;
+      --font-body: Arial, Helvetica, sans-serif;
       --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
@@ -173,7 +173,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(255, 255, 255, 0.8);
       margin-bottom: 8px;
     }
     
@@ -240,8 +240,8 @@
     .login-footer {
       text-align: center;
       margin-top: 32px;
-      font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.55);
     }
 
     .password-wrapper {
@@ -292,18 +292,56 @@
           <input type="email" id="email" placeholder="Digite seu e-mail de acesso" required autocomplete="username">
         </div>
         
-        <div class="form-group" style="margin-bottom: 30px;">
+        <div class="form-group" style="margin-bottom: 16px;">
           <label for="password">Senha</label>
           <div class="password-wrapper">
             <input type="password" id="password" placeholder="Digite sua senha" required autocomplete="current-password">
             <button type="button" class="btn-toggle-pass" id="toggle-password" aria-label="Mostrar senha" title="Mostrar / ocultar senha">👁</button>
           </div>
         </div>
+
+        <div style="text-align: right; margin-top: -8px; margin-bottom: 24px;">
+          <a href="#" id="link-forgot-pass" style="color: var(--gold); font-size: 0.8rem; text-decoration: none; font-weight: 500; transition: opacity 0.2s ease;">Esqueci minha senha</a>
+        </div>
         
         <button type="submit" class="btn-login" id="btn-submit">
           Entrar no Sistema
         </button>
+        <button type="button" class="btn-login" id="btn-demo" style="margin-top: 12px; background: rgba(212, 188, 110, 0.1); border: 1.5px solid var(--gold); color: var(--gold); box-shadow: none;">
+          Acessar Modo Demonstração (Mocks Offline)
+        </button>
       </form>
+
+      <!-- Form de Recuperação de Senha -->
+      <form id="forgot-password-form" style="display: none;">
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label for="recovery-email">E-mail de Acesso</label>
+          <input type="email" id="recovery-email" placeholder="Digite seu e-mail cadastrado" required autocomplete="email">
+        </div>
+        
+        <button type="submit" class="btn-login" id="btn-recovery-submit">
+          Enviar Link de Recuperação
+        </button>
+        <button type="button" class="btn-login" id="btn-back-to-login" style="margin-top: 12px; background: transparent; border: 1.5px solid rgba(255, 255, 255, 0.15); color: var(--white); box-shadow: none;">
+          Voltar ao Login
+        </button>
+      </form>
+
+      <!-- Form de Nova Senha (para redefinição via e-mail) -->
+      <form id="new-password-form" style="display: none;">
+        <div class="form-group" style="margin-bottom: 30px;">
+          <label for="new-password">Definir Nova Senha</label>
+          <div class="password-wrapper">
+            <input type="password" id="new-password" placeholder="Digite sua nova senha" required minlength="6" autocomplete="new-password">
+            <button type="button" class="btn-toggle-pass" id="toggle-new-password" aria-label="Mostrar senha" title="Mostrar / ocultar senha">👁</button>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn-login" id="btn-new-pass-submit">
+          Atualizar Senha e Entrar
+        </button>
+      </form>
+
       
       <div class="login-footer">
         Acesso restrito a colaboradores autorizados.<br>
@@ -326,32 +364,111 @@
         return;
       }
 
+      // Se já estiver no modo demonstrativo offline, redireciona diretamente
+      if (sessionStorage.getItem("walker_demo_mode") === "true" && sessionStorage.getItem("walker_admin_session") === "true") {
+        window.location.href = "dashboard.html";
+        return;
+      }
+
       // Configuração do Supabase Client
       const supabaseUrl = "https://jmbolyzmpfnggvoedaiu.supabase.co";
       const supabaseKey = "sb_publishable_EuvTPlZxoQqG9Owc3Yr9Uw_L1rTcLnP";
       const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-      // Se já tiver logado no Supabase, redireciona
-      supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          sessionStorage.setItem("walker_admin_session", "true");
-          window.location.href = "dashboard.html";
+      // Função auxiliar para restaurar os estilos originais do box de erros
+      const resetErrorBoxStyles = () => {
+        errorMsg.style.backgroundColor = "";
+        errorMsg.style.borderColor = "";
+        errorMsg.style.color = "";
+        errorMsg.style.display = "none";
+      };
+
+      // 1. GERENCIAMENTO DE INTERFACE (VIEWS)
+      const loginForm = document.getElementById("login-form");
+      const forgotForm = document.getElementById("forgot-password-form");
+      const newPassForm = document.getElementById("new-password-form");
+      const logoBadge = document.querySelector(".logo-badge");
+
+      // Link "Esqueci minha senha" -> Exibe Form de Recuperação
+      document.getElementById("link-forgot-pass").addEventListener("click", (e) => {
+        e.preventDefault();
+        resetErrorBoxStyles();
+        loginForm.style.display = "none";
+        forgotForm.style.display = "block";
+        logoBadge.textContent = "Mesa de Crédito · Recuperar";
+      });
+
+      // Botão "Voltar ao Login" -> Exibe Login
+      document.getElementById("btn-back-to-login").addEventListener("click", () => {
+        resetErrorBoxStyles();
+        forgotForm.style.display = "none";
+        loginForm.style.display = "block";
+        logoBadge.textContent = "Mesa de Crédito · Admin";
+      });
+
+      // 2. DETECÇÃO E INTERCEPTAÇÃO DE RECUPERAÇÃO DE SENHA (HASH OU ON_AUTH_STATE_CHANGE)
+      const checkRecoveryFlow = () => {
+        const hash = window.location.hash;
+        if (hash && (hash.includes("type=recovery") || hash.includes("access_token="))) {
+          loginForm.style.display = "none";
+          forgotForm.style.display = "none";
+          newPassForm.style.display = "block";
+          logoBadge.textContent = "Mesa de Crédito · Nova Senha";
+          return true;
+        }
+        return false;
+      };
+
+      const isRecoveryActive = checkRecoveryFlow();
+
+      // Monitoramento adicional do evento PASSWORD_RECOVERY do Supabase Auth
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          resetErrorBoxStyles();
+          loginForm.style.display = "none";
+          forgotForm.style.display = "none";
+          newPassForm.style.display = "block";
+          logoBadge.textContent = "Mesa de Crédito · Nova Senha";
         }
       });
 
-      const loginForm = document.getElementById("login-form");
-      const btnSubmit = document.getElementById("btn-submit");
+      // Se não for fluxo de redefinição de senha ativo, verifica se já há sessão comum
+      if (!isRecoveryActive) {
+        supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
+          if (session) {
+            if (!sessionStorage.getItem("walker_user_profile")) {
+              try {
+                const { data: profile } = await supabaseClient
+                  .from('profiles').select('*').eq('id', session.user.id).single();
+                if (profile) sessionStorage.setItem("walker_user_profile", JSON.stringify(profile));
+              } catch(e) {}
+            }
+            sessionStorage.setItem("walker_admin_session", "true");
+            window.location.href = "dashboard.html";
+          }
+        }).catch(err => {
+          console.warn("Erro ao obter sessão no Supabase (esperado se estiver suspenso):", err);
+        });
+      }
 
+      // Evento para o botão de modo de demonstração
+      document.getElementById("btn-demo").addEventListener("click", () => {
+        sessionStorage.setItem("walker_admin_session", "true");
+        sessionStorage.setItem("walker_demo_mode", "true");
+        window.location.href = "dashboard.html";
+      });
+
+      // 3. EVENTO DE LOGIN (E-MAIL E SENHA)
+      const btnSubmit = document.getElementById("btn-submit");
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const user = document.getElementById("email").value.trim();
         const pass = document.getElementById("password").value;
 
-        // Desabilita botão e exibe carregamento
         btnSubmit.textContent = "Autenticando...";
         btnSubmit.disabled = true;
-        errorMsg.style.display = "none";
+        resetErrorBoxStyles();
 
         try {
           const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -365,7 +482,14 @@
             btnSubmit.textContent = "Entrar no Sistema";
             btnSubmit.disabled = false;
           } else {
-            // Backup para compatibilidade e controle de sessão simples
+            // Busca o perfil do usuário no banco e salva na sessão
+            try {
+              const { data: profile } = await supabaseClient
+                .from('profiles').select('*').eq('id', data.user.id).single();
+              if (profile) sessionStorage.setItem("walker_user_profile", JSON.stringify(profile));
+            } catch(pe) {
+              console.warn("[Walker Bank] Perfil não encontrado, prosseguindo como admin.");
+            }
             sessionStorage.setItem("walker_admin_session", "true");
             window.location.href = "dashboard.html";
           }
@@ -378,10 +502,129 @@
         }
       });
 
-      // Toggle show/hide senha
+      // 4. EVENTO DE SOLICITAÇÃO DE RECUPERAÇÃO DE SENHA
+      const btnRecoverySubmit = document.getElementById("btn-recovery-submit");
+      forgotForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("recovery-email").value.trim();
+
+        btnRecoverySubmit.textContent = "Enviando...";
+        btnRecoverySubmit.disabled = true;
+        resetErrorBoxStyles();
+
+        try {
+          const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + window.location.pathname
+          });
+
+          if (error) {
+            errorMsg.textContent = error.message || "Erro ao solicitar recuperação. Tente novamente.";
+            errorMsg.style.display = "block";
+            btnRecoverySubmit.textContent = "Enviar Link de Recuperação";
+            btnRecoverySubmit.disabled = false;
+          } else {
+            errorMsg.innerHTML = "Link de recuperação enviado com sucesso!<br>Verifique a caixa de entrada do seu e-mail.";
+            errorMsg.style.backgroundColor = "rgba(39, 174, 96, 0.1)";
+            errorMsg.style.borderColor = "rgba(39, 174, 96, 0.3)";
+            errorMsg.style.color = "var(--green-success)";
+            errorMsg.style.display = "block";
+
+            forgotForm.reset();
+            setTimeout(() => {
+              resetErrorBoxStyles();
+              forgotForm.style.display = "none";
+              loginForm.style.display = "block";
+              logoBadge.textContent = "Mesa de Crédito · Admin";
+              btnRecoverySubmit.textContent = "Enviar Link de Recuperação";
+              btnRecoverySubmit.disabled = false;
+            }, 5000);
+          }
+        } catch (err) {
+          console.error("Erro ao solicitar recuperação:", err);
+          errorMsg.textContent = "Erro de conexão ao solicitar recuperação.";
+          errorMsg.style.display = "block";
+          btnRecoverySubmit.textContent = "Enviar Link de Recuperação";
+          btnRecoverySubmit.disabled = false;
+        }
+      });
+
+      // 5. EVENTO DE DEFINIÇÃO DE NOVA SENHA
+      const btnNewPassSubmit = document.getElementById("btn-new-pass-submit");
+      newPassForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const newPassword = document.getElementById("new-password").value;
+
+        if (newPassword.length < 6) {
+          errorMsg.textContent = "A senha deve conter no mínimo 6 caracteres.";
+          errorMsg.style.display = "block";
+          return;
+        }
+
+        btnNewPassSubmit.textContent = "Salvando Senha...";
+        btnNewPassSubmit.disabled = true;
+        resetErrorBoxStyles();
+
+        try {
+          const { data, error } = await supabaseClient.auth.updateUser({
+            password: newPassword
+          });
+
+          if (error) {
+            errorMsg.textContent = error.message || "Erro ao redefinir a senha. Tente novamente.";
+            errorMsg.style.display = "block";
+            btnNewPassSubmit.textContent = "Atualizar Senha e Entrar";
+            btnNewPassSubmit.disabled = false;
+          } else {
+            try {
+              const { data: profile } = await supabaseClient
+                .from('profiles').select('*').eq('id', data.user.id).single();
+              if (profile) sessionStorage.setItem("walker_user_profile", JSON.stringify(profile));
+            } catch(pe) {
+              console.warn("[Walker Bank] Perfil não encontrado ao atualizar senha.");
+            }
+
+            sessionStorage.setItem("walker_admin_session", "true");
+
+            errorMsg.innerHTML = "Senha alterada com sucesso! Redirecionando...";
+            errorMsg.style.backgroundColor = "rgba(39, 174, 96, 0.1)";
+            errorMsg.style.borderColor = "rgba(39, 174, 96, 0.3)";
+            errorMsg.style.color = "var(--green-success)";
+            errorMsg.style.display = "block";
+
+            setTimeout(() => {
+              // Limpa o hash de redefinição da URL
+              window.location.hash = "";
+              window.location.href = "dashboard.html";
+            }, 2000);
+          }
+        } catch (err) {
+          console.error("Erro ao atualizar senha:", err);
+          errorMsg.textContent = "Erro de conexão ao salvar nova senha.";
+          errorMsg.style.display = "block";
+          btnNewPassSubmit.textContent = "Atualizar Senha e Entrar";
+          btnNewPassSubmit.disabled = false;
+        }
+      });
+
+      // Toggle show/hide senha (login)
       document.getElementById("toggle-password").addEventListener("click", () => {
         const pwInput = document.getElementById("password");
         const btn = document.getElementById("toggle-password");
+        if (pwInput.type === "password") {
+          pwInput.type = "text";
+          btn.textContent = "🙈";
+          btn.setAttribute("aria-label", "Ocultar senha");
+        } else {
+          pwInput.type = "password";
+          btn.textContent = "👁";
+          btn.setAttribute("aria-label", "Mostrar senha");
+        }
+      });
+
+      // Toggle show/hide senha (nova senha)
+      document.getElementById("toggle-new-password").addEventListener("click", () => {
+        const pwInput = document.getElementById("new-password");
+        const btn = document.getElementById("toggle-new-password");
         if (pwInput.type === "password") {
           pwInput.type = "text";
           btn.textContent = "🙈";
