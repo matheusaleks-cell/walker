@@ -3670,7 +3670,46 @@
       };
 
       const fetchOperadoresFromSupabase = async () => {
-        if (sessionStorage.getItem("walker_demo_mode") === "true") return;
+        if (sessionStorage.getItem("walker_demo_mode") === "true") {
+          try {
+            const cfg = getConfigs();
+            const localOps = cfg.operadores_config || {};
+            const baseOps = [
+              { id: "op-joao", nome: "João Silva", avatar: "JS", meta: 100000 },
+              { id: "op-maria", nome: "Maria Santos", avatar: "MS", meta: 100000 }
+            ];
+            
+            const opsMap = new Map();
+            baseOps.forEach(op => opsMap.set(op.id, op));
+            
+            Object.entries(localOps).forEach(([id, info]) => {
+              if (id !== "admin" && !id.startsWith("op-")) {
+                const avatar = info.avatar || (info.nome || '').split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2);
+                opsMap.set(id, {
+                  id,
+                  nome: info.nome,
+                  avatar: avatar || "OP",
+                  meta: info.meta_mensal !== undefined ? info.meta_mensal : 100000
+                });
+              } else if (id.startsWith("op-")) {
+                const existing = opsMap.get(id);
+                opsMap.set(id, {
+                  id,
+                  nome: info.nome || existing?.nome || 'Operador',
+                  avatar: info.avatar || existing?.avatar || 'OP',
+                  meta: info.meta_mensal !== undefined ? info.meta_mensal : (existing?.meta || 100000)
+                });
+              }
+            });
+            
+            OPERADORES = Array.from(opsMap.values());
+            console.log("[Walker Bank] Operadores carregados localmente (Modo Demo):", OPERADORES);
+          } catch (demoErr) {
+            console.error("[Walker Bank] Erro ao carregar operadores locais no modo demo:", demoErr);
+          }
+          return;
+        }
+
         try {
           const { data, error } = await supabaseClient
             .from('profiles')
@@ -7805,9 +7844,10 @@
               return;
             }
 
-            // Carrega lista de operadores do banco antes de qualquer render
-            await fetchOperadoresFromSupabase();
           }
+
+          // Carrega lista de operadores (seja do banco ou local storage no modo demo) antes de qualquer render
+          await fetchOperadoresFromSupabase();
 
           // Auto-set do perfil baseado no usuário real logado
           const realProfile = getCurrentUserProfile();
