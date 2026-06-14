@@ -2837,6 +2837,25 @@
                       <label>Meta Comercial Mensal (R$)</label>
                       <input type="number" id="new-op-meta" placeholder="Ex: 100000" style="padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); width: 100%; font-size: 0.85rem; outline: none; font-family: Arial;">
                     </div>
+                    <div class="config-field">
+                      <label>Perfil de Acesso</label>
+                      <select id="new-op-role" style="padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); width: 100%; font-size: 0.85rem; outline: none; font-family: Arial; background: white; color: var(--navy);">
+                        <option value="operador" selected>Operador</option>
+                        <option value="admin">Administrador</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Caixa explicativa sobre Perfis de Acesso -->
+                  <div style="margin-top: 20px; background: rgba(212, 188, 110, 0.08); border-left: 4px solid var(--gold); border-radius: 8px; padding: 16px; font-size: 0.78rem; color: var(--navy); line-height: 1.45;">
+                    <strong style="display: flex; align-items: center; gap: 8px; color: var(--navy); margin-bottom: 6px; font-family: Arial; font-size: 0.85rem;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      O que significa cada Perfil de Acesso?
+                    </strong>
+                    <ul style="margin-left: 20px; list-style-type: disc; display: flex; flex-direction: column; gap: 6px; font-family: Arial;">
+                      <li><strong>Administrador:</strong> Possui controle total da plataforma. Consegue editar todas as configurações gerais do sistema (taxas, comissões, chaves de API, convênios), visualizar dados unificados da equipe de vendas e realizar o cadastro ou exclusão de novos perfis.</li>
+                      <li><strong>Operador:</strong> Possui acesso limitado ao sistema. Consegue apenas visualizar a Mesa de Análise para simular propostas de crédito, consultar andamento de propostas criadas por ele mesmo e acompanhar sua meta individual. A aba de configurações gerais e os dados consolidados dos outros operadores ficam totalmente ocultos para ele.</li>
+                    </ul>
                   </div>
                   
                   <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
@@ -3719,21 +3738,23 @@
         try {
           const { data, error } = await supabaseClient
             .from('profiles')
-            .select('id, nome, avatar, meta_mensal')
-            .eq('role', 'operador');
+            .select('id, nome, avatar, meta_mensal, role')
+            .in('role', ['admin', 'operador']);
           if (!error && data && data.length > 0) {
             const cfgOverrides = (getConfigs().operadores_config) || {};
             OPERADORES = data.map(p => {
               const ov = cfgOverrides[p.id] || {};
               const nome = ov.nome || p.nome;
               const meta = ov.meta_mensal !== undefined ? ov.meta_mensal : (p.meta_mensal || 100000);
-              const funcao = ov.funcao || "Operador";
+              const funcao = ov.funcao || (p.role === 'admin' ? "Administrador" : "Operador");
+              const role = ov.role || p.role || "operador";
               return {
                 id: p.id,
                 nome,
                 avatar: p.avatar || nome.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2),
                 meta,
-                funcao
+                funcao,
+                role
               };
             });
           }
@@ -3745,15 +3766,19 @@
       const updateProfileSelectorOptions = () => {
         const selector = document.getElementById("user-profile-selector");
         if (selector) {
-          selector.innerHTML = `<option value="admin">🔑 Administrador</option>` +
-            OPERADORES.map(op => `<option value="${op.id}">👤 ${op.nome}</option>`).join('');
+          selector.innerHTML = `<option value="admin">🔑 Administrador Geral</option>` +
+            OPERADORES.map(op => {
+              const icon = op.role === 'admin' ? '🔑' : '👤';
+              const label = op.role === 'admin' ? `${icon} ${op.nome} (Admin)` : `${icon} ${op.nome}`;
+              return `<option value="${op.id}">${label}</option>`;
+            }).join('');
           selector.value = getActiveProfile();
         }
         const logOpFilter = document.getElementById("log-filter-op");
         if (logOpFilter) {
           logOpFilter.innerHTML =
-            `<option value="all">Todos os Operadores</option><option value="admin">Administrador</option>` +
-            OPERADORES.map(op => `<option value="${op.id}">${op.nome}</option>`).join('');
+            `<option value="all">Todos os Membros</option><option value="admin">Administrador Geral</option>` +
+            OPERADORES.map(op => `<option value="${op.id}">${op.nome} (${op.role === 'admin' ? 'Admin' : 'Operador'})</option>`).join('');
         }
       };
 
@@ -6723,11 +6748,16 @@
           const nome = ov.nome !== undefined ? ov.nome : op.nome;
           const meta = ov.meta_mensal !== undefined ? ov.meta_mensal : op.meta;
           const funcao = ov.funcao !== undefined ? ov.funcao : (op.funcao || "Operador");
+          const opRole = ov.role !== undefined ? ov.role : (op.role || "operador");
+          const badge = opRole === 'admin'
+            ? `<span style="background: rgba(212, 188, 110, 0.15); color: var(--gold); padding: 1.5px 5px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(212, 188, 110, 0.4); margin-left: 6px;">Admin</span>`
+            : `<span style="background: rgba(30, 37, 68, 0.08); color: var(--navy); padding: 1.5px 5px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(24,27,44,0.12); margin-left: 6px;">Op</span>`;
+
           return `
-            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:grid;grid-template-columns:48px 1fr 1fr 1fr;gap:16px;align-items:center;">
+            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:grid;grid-template-columns:48px 1.2fr 1fr 1fr 130px;gap:16px;align-items:center;">
               <div style="width:40px;height:40px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:0.85rem;flex-shrink:0;">${op.avatar}</div>
               <div class="config-field">
-                <label>Nome do Operador</label>
+                <label style="display:flex; align-items:center;">Nome do Operador ${badge}</label>
                 <input type="text" class="op-cfg-nome" data-id="${op.id}" value="${nome}" style="padding:8px 12px;border-radius:6px;border:1.5px solid rgba(24,27,44,0.15);width:100%;font-size:0.85rem;outline:none;font-family:var(--font-body);">
               </div>
               <div class="config-field">
@@ -6737,6 +6767,13 @@
               <div class="config-field">
                 <label>Meta Mensal (R$)</label>
                 <input type="text" class="op-cfg-meta" data-id="${op.id}" value="${meta}" style="padding:8px 12px;border-radius:6px;border:1.5px solid rgba(24,27,44,0.15);width:100%;font-size:0.85rem;outline:none;font-family:var(--font-body);">
+              </div>
+              <div class="config-field">
+                <label>Perfil de Acesso</label>
+                <select class="op-cfg-role" data-id="${op.id}" style="padding: 8px 12px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); width: 100%; font-size: 0.85rem; outline: none; font-family: var(--font-body); background: white; color: var(--navy);">
+                  <option value="operador" ${opRole === 'operador' ? 'selected' : ''}>Operador</option>
+                  <option value="admin" ${opRole === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
               </div>
             </div>
           `;
@@ -6813,6 +6850,7 @@
         const email = document.getElementById("new-op-email").value.trim();
         const senha = document.getElementById("new-op-senha").value;
         const metaVal = document.getElementById("new-op-meta").value;
+        const role = document.getElementById("new-op-role").value;
 
         if (!nome || !email || !senha || !metaVal) {
           showToast("Preencha todos os campos do operador!", "var(--red-error)");
@@ -6840,13 +6878,14 @@
             nome,
             avatar,
             meta,
-            funcao
+            funcao,
+            role
           });
 
-          // Grava a meta comercial e funcao nas configs locais
+          // Grava a meta comercial, funcao e role nas configs locais
           const cfg = getConfigs();
           if (!cfg.operadores_config) cfg.operadores_config = {};
-          cfg.operadores_config[opId] = { nome, meta_mensal: meta, funcao };
+          cfg.operadores_config[opId] = { nome, meta_mensal: meta, funcao, role };
           safeSaveConfigs(cfg);
 
           showToast("Operador cadastrado com sucesso (Modo Demonstração)!", "var(--green-success)");
@@ -6856,6 +6895,7 @@
           document.getElementById("new-op-email").value = "";
           document.getElementById("new-op-senha").value = "";
           document.getElementById("new-op-meta").value = "";
+          document.getElementById("new-op-role").value = "operador";
           document.getElementById("form-new-operador").style.display = "none";
           
           renderOperadoresConfigList();
@@ -6882,7 +6922,7 @@
             email: email,
             password: senha,
             options: {
-              data: { nome: nome, role: 'operador', avatar: avatar }
+              data: { nome: nome, role: role, avatar: avatar }
             }
           });
 
@@ -6907,10 +6947,10 @@
 
           if (data && data.user) {
             // O trigger handle_new_user() já criou o perfil com nome/role/avatar corretos.
-            // Salva meta_mensal e funcao nas configs.operadores_config para aparecer imediatamente na UI.
+            // Salva meta_mensal, funcao e role nas configs.operadores_config para aparecer imediatamente na UI.
             const cfg = getConfigs();
             if (!cfg.operadores_config) cfg.operadores_config = {};
-            cfg.operadores_config[data.user.id] = { nome, meta_mensal: meta, avatar, funcao };
+            cfg.operadores_config[data.user.id] = { nome, meta_mensal: meta, avatar, funcao, role };
             safeSaveConfigs(cfg);
             try {
               await supabaseClient.from('configs').upsert({ id: 'default', data: cfg });
@@ -6925,6 +6965,7 @@
             document.getElementById("new-op-email").value = "";
             document.getElementById("new-op-senha").value = "";
             document.getElementById("new-op-meta").value = "";
+            document.getElementById("new-op-role").value = "operador";
             document.getElementById("form-new-operador").style.display = "none";
 
             await fetchOperadoresFromSupabase();
@@ -7077,13 +7118,20 @@
           if (!operadoresConfig[id]) operadoresConfig[id] = {};
           operadoresConfig[id].meta_mensal = parseFloat(input.value.replace(/[^\d.,]/g, '').replace(',', '.')) || 100000;
         });
-        // Aplica nomes/metas/funções editados ao array OPERADORES em memória
+        document.querySelectorAll(".op-cfg-role").forEach(select => {
+          const id = select.dataset.id;
+          if (!operadoresConfig[id]) operadoresConfig[id] = {};
+          operadoresConfig[id].role = select.value;
+        });
+
+        // Aplica nomes/metas/funções/roles editados ao array OPERADORES em memória
         Object.entries(operadoresConfig).forEach(([id, ov]) => {
           const op = OPERADORES.find(o => o.id === id);
           if (op) {
             if (ov.nome) op.nome = ov.nome;
             if (ov.meta_mensal !== undefined) op.meta = ov.meta_mensal;
             if (ov.funcao) op.funcao = ov.funcao;
+            if (ov.role) op.role = ov.role;
           }
         });
 
@@ -7118,14 +7166,34 @@
         }
 
         try {
-          const { error } = await supabaseClient
+          // 1. Salva as configurações globais na tabela configs
+          const { error: cfgErr } = await supabaseClient
             .from('configs')
             .upsert({
               id: 'default',
               data: cfg
             });
+          if (cfgErr) throw cfgErr;
 
-          if (error) throw error;
+          // 2. Salva as informações de cada perfil individualmente na tabela profiles
+          for (const [opId, opInfo] of Object.entries(operadoresConfig)) {
+            // Ignora o admin geral se for id fixo
+            if (opId === "admin") continue;
+
+            const { error: profErr } = await supabaseClient
+              .from('profiles')
+              .update({
+                nome: opInfo.nome,
+                meta_mensal: opInfo.meta_mensal,
+                role: opInfo.role
+              })
+              .eq('id', opId);
+              
+            if (profErr) {
+              console.warn(`[Walker Bank] Erro ao atualizar perfil ${opId} no Supabase:`, profErr);
+            }
+          }
+
           showToast("💾 Configurações salvas no Supabase!", "var(--green-success)");
         } catch(err) {
           console.error("[Walker Bank] Erro ao salvar configs no Supabase:", err);
