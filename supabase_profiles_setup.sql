@@ -54,7 +54,10 @@ BEGIN
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'nome', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'operador'),
+    CASE 
+      WHEN NEW.email LIKE '%raulfiuza%' THEN 'admin'
+      ELSE COALESCE(NEW.raw_user_meta_data->>'role', 'operador')
+    END,
     COALESCE(NEW.raw_user_meta_data->>'avatar', upper(left(split_part(NEW.email, '@', 1), 2)))
   )
   ON CONFLICT (id) DO NOTHING;
@@ -100,10 +103,20 @@ INSERT INTO public.profiles (id, nome, role, avatar)
 SELECT
   id,
   COALESCE(raw_user_meta_data->>'nome', split_part(email, '@', 1)),
-  COALESCE(raw_user_meta_data->>'role', 'operador'),
+  CASE 
+    WHEN email LIKE '%raulfiuza%' THEN 'admin'
+    ELSE COALESCE(raw_user_meta_data->>'role', 'operador')
+  END,
   COALESCE(raw_user_meta_data->>'avatar', upper(left(split_part(email, '@', 1), 2)))
 FROM auth.users
 ON CONFLICT (id) DO NOTHING;
+
+-- 7. Força atualização do papel (role) de admin para usuários existentes contendo 'raulfiuza'
+UPDATE public.profiles
+SET role = 'admin'
+WHERE id IN (
+  SELECT id FROM auth.users WHERE email LIKE '%raulfiuza%'
+);
 
 -- ============================================================
 -- PASSO MANUAL APÓS EXECUTAR:
