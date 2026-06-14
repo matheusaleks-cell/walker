@@ -3806,7 +3806,15 @@
         if (profileId === "admin") {
           // Fallback: se o admin logado não tem profile no banco, usa o padrão
           if (realProfile && realProfile.role === 'admin') {
-            return { id: "admin", nome: realProfile.nome, role: "Administrador", avatar: realProfile.avatar || "EC", meta: 0 };
+            const cfgOverrides = (getConfigs().operadores_config) || {};
+            const ov = cfgOverrides[realProfile.id] || {};
+            return {
+              id: "admin",
+              nome: ov.nome || realProfile.nome,
+              role: ov.funcao || "Administrador",
+              avatar: realProfile.avatar || (ov.nome || realProfile.nome).split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2),
+              meta: ov.meta_mensal !== undefined ? ov.meta_mensal : 0
+            };
           }
           return { id: "admin", nome: "Equipe Comercial", role: "Administrador", avatar: "EC" };
         }
@@ -4300,6 +4308,26 @@
 
       const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
       const formatCPF = (v) => { v = (v||'').replace(/\D/g, ""); return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"); };
+
+      const mascaraMoeda = (event) => {
+        let value = event.target.value.replace(/\D/g, "");
+        if (!value) {
+          event.target.value = "";
+          return;
+        }
+        value = (parseFloat(value) / 100).toFixed(2);
+        event.target.value = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        }).format(value);
+      };
+
+      const parseMoeda = (val) => {
+        if (!val) return 0;
+        const digitos = val.replace(/\D/g, "");
+        if (!digitos) return 0;
+        return parseFloat(digitos) / 100;
+      };
 
       const getConvenioLabel = (c) => {
         if (!c) return '-';
@@ -6766,7 +6794,7 @@
               </div>
               <div class="config-field">
                 <label>Meta Mensal (R$)</label>
-                <input type="text" class="op-cfg-meta" data-id="${op.id}" value="${meta}" style="padding:8px 12px;border-radius:6px;border:1.5px solid rgba(24,27,44,0.15);width:100%;font-size:0.85rem;outline:none;font-family:var(--font-body);">
+                <input type="text" class="op-cfg-meta" data-id="${op.id}" value="${formatBRL(meta)}" style="padding:8px 12px;border-radius:6px;border:1.5px solid rgba(24,27,44,0.15);width:100%;font-size:0.85rem;outline:none;font-family:var(--font-body);">
               </div>
               <div class="config-field">
                 <label>Perfil de Acesso</label>
@@ -6778,6 +6806,11 @@
             </div>
           `;
         }).join('');
+
+        // Vincula a máscara de moeda em tempo real aos inputs gerados
+        container.querySelectorAll(".op-cfg-meta").forEach(input => {
+          input.addEventListener("input", mascaraMoeda);
+        });
       };
 
       const loadConfigs = () => {
@@ -6843,6 +6876,9 @@
         document.getElementById("form-new-operador").style.display = "none";
       });
 
+      // Vincula a máscara de moeda em tempo real ao input de meta
+      document.getElementById("new-op-meta").addEventListener("input", mascaraMoeda);
+
       // Ação de cadastrar novo operador (Modo Demo & Modo Supabase Real)
       document.getElementById("btn-save-new-op").addEventListener("click", async () => {
         const nome = document.getElementById("new-op-nome").value.trim();
@@ -6871,7 +6907,7 @@
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
           const opId = `op-${Math.random().toString(36).substr(2, 9)}`;
           const avatar = nome.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2);
-          const meta = parseFloat(metaVal);
+          const meta = parseMoeda(metaVal);
 
           OPERADORES.push({
             id: opId,
@@ -6914,7 +6950,7 @@
           const { data: { session: adminSession } } = await supabaseClient.auth.getSession();
 
           const avatar = nome.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2);
-          const meta = parseFloat(metaVal);
+          const meta = parseMoeda(metaVal);
 
           // Passa nome/role/avatar via raw_user_meta_data → o trigger handle_new_user()
           // já lê esses campos e cria o perfil correto automaticamente
@@ -7155,6 +7191,24 @@
           localStorage.setItem("walker_configs", JSON.stringify(cfg));
         } catch (e) {
           console.warn("Erro ao gravar walker_configs no localStorage:", e);
+        }
+
+        // Sincroniza o sessionStorage se o usuário logado acabou de editar seu próprio nome/meta/perfil
+        const realProfile = getCurrentUserProfile();
+        if (realProfile && operadoresConfig[realProfile.id]) {
+          const ov = operadoresConfig[realProfile.id];
+          realProfile.nome = ov.nome || realProfile.nome;
+          realProfile.meta_mensal = ov.meta_mensal !== undefined ? ov.meta_mensal : realProfile.meta_mensal;
+          realProfile.role = ov.role || realProfile.role;
+          sessionStorage.setItem("walker_user_profile", JSON.stringify(realProfile));
+        }
+
+        // Atualiza a interface em tempo real com as novas configurações
+        updateProfileSelectorOptions();
+        updateSidebarUserUI();
+        const activeNav = document.querySelector(".nav-item.active");
+        if (activeNav && activeNav.getAttribute("data-page") === 'inicio') {
+          renderInicioHome();
         }
 
         recordLog('config_save', 'Configurações do sistema salvas');
