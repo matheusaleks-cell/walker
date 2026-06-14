@@ -2723,14 +2723,15 @@
         }
       });
 
-      // Auxiliar para converter arquivo File para Base64
-      const fileToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = (error) => reject(error);
-        });
+      // Faz upload de um arquivo para o Supabase Storage e retorna o path
+      const uploadToStorage = async (file, leadId, type) => {
+        const ext = file.name.split('.').pop().toLowerCase() || 'bin';
+        const path = `leads/${leadId}/${type}.${ext}`;
+        const { error } = await supabaseClient.storage
+          .from('walkerbank-docs')
+          .upload(path, file, { upsert: true, contentType: file.type });
+        if (error) throw error;
+        return path;
       };
 
       const submitForm = async () => {
@@ -2744,29 +2745,34 @@
         loadingView.style.display = "block";
 
         try {
-          // Converter arquivos anexados para Base64 se existirem
-          let rgBase64 = null;
-          let contrachequeBase64 = null;
+          // Gera o ID do lead antes dos uploads para usá-lo como nome de pasta
+          const leadId = `proposta-${Math.random().toString(36).substr(2, 9)}`;
+
+          // Faz upload dos arquivos para o Supabase Storage
+          let rgPath = null;
+          let contrachequePath = null;
 
           if (documentosAnexados.rg) {
-            rgBase64 = await fileToBase64(documentosAnexados.rg);
+            try { rgPath = await uploadToStorage(documentosAnexados.rg, leadId, 'rg'); }
+            catch (e) { console.error("Erro ao fazer upload do RG:", e); }
           }
           if (documentosAnexados.contracheque) {
-            contrachequeBase64 = await fileToBase64(documentosAnexados.contracheque);
+            try { contrachequePath = await uploadToStorage(documentosAnexados.contracheque, leadId, 'contracheque'); }
+            catch (e) { console.error("Erro ao fazer upload do contracheque:", e); }
           }
 
-          // Converter arquivos adicionais para Base64 assincronamente se existirem
-          const outrosBase64 = [];
+          // Faz upload dos arquivos adicionais
+          const outrosPaths = [];
           for (let i = 0; i < outrosDocumentos.length; i++) {
             try {
-              const b64 = await fileToBase64(outrosDocumentos[i]);
-              outrosBase64.push({
+              const path = await uploadToStorage(outrosDocumentos[i], leadId, `outros_${i}`);
+              outrosPaths.push({
                 nome: outrosDocumentos[i].name,
                 tipo: outrosDocumentos[i].type,
-                base64: b64
+                path
               });
             } catch (errFile) {
-              console.error("Erro ao converter arquivo adicional:", outrosDocumentos[i].name, errFile);
+              console.error("Erro ao fazer upload de arquivo adicional:", outrosDocumentos[i].name, errFile);
             }
           }
 
@@ -2821,28 +2827,28 @@
               consentimento_lgpd: document.getElementById("check-lgpd").checked
             },
             arquivos: {
-              identidade_cnh_rg: rgBase64,
-              contracheque: contrachequeBase64,
-              outros: outrosBase64
+              identidade_cnh_rg: rgPath,
+              contracheque: contrachequePath,
+              outros: outrosPaths
             },
             marketing: marketingData
           };
 
           // Salva localmente no localStorage para o Painel do Sistema Interno ler
           const newLead = {
-            id: `proposta-${Math.random().toString(36).substr(2, 9)}`,
+            id: leadId,
             createdAt: new Date().toISOString(),
             status: "Aguardando Averbação",
             ...payload
           };
 
-          // Salva localmente no localStorage (versão simplificada sem binários base64 pesados para evitar estouro de limite de 5MB)
+          // Salva localmente no localStorage (paths de storage, não base64)
           const newLeadLocal = {
             ...newLead,
             arquivos: {
-              identidade_cnh_rg: newLead.arquivos.identidade_cnh_rg ? "presente" : null,
-              contracheque: newLead.arquivos.contracheque ? "presente" : null,
-              outros: newLead.arquivos.outros ? newLead.arquivos.outros.map(o => ({ nome: o.nome, tipo: o.tipo, base64: "presente" })) : []
+              identidade_cnh_rg: newLead.arquivos.identidade_cnh_rg || null,
+              contracheque: newLead.arquivos.contracheque || null,
+              outros: newLead.arquivos.outros || []
             }
           };
 

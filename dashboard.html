@@ -839,7 +839,181 @@
       border: 1px solid var(--nardo);
     }
     .btn-action-panel.reabrir:hover { background: var(--nardo); color: var(--navy); }
-    
+
+    /* ==============================
+       MODAL ESTEIRA — TABS & LAYOUT
+    ============================== */
+    #details-modal .modal-container {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-height: 92vh;
+    }
+    .modal-tab-bar {
+      display: flex;
+      background: var(--light-gray);
+      border-bottom: 2px solid rgba(24,27,44,0.08);
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .modal-tab-bar::-webkit-scrollbar { display: none; }
+    .m-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 18px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gray-light-text);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .m-tab:hover { color: var(--navy); }
+    .m-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+    .m-tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: var(--red-error);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 9px;
+    }
+    .m-tab-panel { display: none; }
+    .m-tab-panel.active { display: block; }
+    #details-modal .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+      scrollbar-width: thin;
+    }
+    .modal-footer {
+      flex-shrink: 0;
+      border-top: 1px solid rgba(24,27,44,0.08);
+      background: var(--white);
+    }
+    .modal-footer-wpp {
+      padding: 16px 32px;
+      border-bottom: 1px solid rgba(24,27,44,0.06);
+    }
+    .modal-footer-actions {
+      padding: 16px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+      background: var(--light-gray);
+    }
+    /* Completeness bar */
+    .m-completeness-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .m-completeness-track {
+      width: 160px;
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .m-completeness-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #e67e22, #27ae60);
+      transition: width 0.5s ease;
+    }
+    .m-completeness-pct {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+    }
+    /* Checklist pills */
+    .tab-checklist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+      padding: 12px 14px;
+      background: rgba(24,27,44,0.02);
+      border: 1px solid rgba(24,27,44,0.06);
+      border-radius: 8px;
+    }
+    .cl-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+    .cl-item.ok { background: rgba(39,174,96,0.1); color: #1e8449; border: 1px solid rgba(39,174,96,0.25); }
+    .cl-item.missing { background: rgba(231,76,60,0.08); color: var(--red-error); border: 1px solid rgba(231,76,60,0.2); }
+    .cl-item.optional { background: rgba(212,188,110,0.1); color: var(--dark-gold); border: 1px solid rgba(212,188,110,0.2); }
+    /* History timeline */
+    .history-timeline { display: flex; flex-direction: column; gap: 0; }
+    .history-item {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      padding-bottom: 24px;
+    }
+    .history-item:last-child { padding-bottom: 0; }
+    .history-item::before {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 24px;
+      bottom: 0;
+      width: 2px;
+      background: rgba(24,27,44,0.08);
+    }
+    .history-item:last-child::before { display: none; }
+    .history-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+    .history-dot.dot-received   { background: rgba(24,27,44,0.08); color: var(--gray-text); }
+    .history-dot.dot-analise    { background: rgba(52,152,219,0.15); color: var(--blue-info); }
+    .history-dot.dot-aprovada   { background: rgba(39,174,96,0.15); color: #1e8449; }
+    .history-dot.dot-recusada   { background: rgba(231,76,60,0.12); color: var(--red-error); }
+    .history-dot.dot-paga       { background: rgba(212,188,110,0.2); color: var(--dark-gold); }
+    .history-dot.dot-edit       { background: rgba(212,188,110,0.1); color: var(--dark-gold); }
+    .history-dot.dot-wpp        { background: rgba(37,211,102,0.15); color: #25d366; }
+    .history-dot.dot-default    { background: rgba(24,27,44,0.06); color: var(--gray-text); }
+    .history-content { flex: 1; }
+    .history-action { font-size: 0.82rem; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .history-meta { font-size: 0.72rem; color: var(--gray-light-text); }
+    .history-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray-light-text);
+      font-size: 0.8rem;
+    }
+
     /* Empty State */
     .empty-state {
       padding: 60px 24px;
@@ -2826,31 +3000,75 @@
 
   <div class="modal-overlay" id="details-modal">
     <div class="modal-container">
+
+      <!-- HEADER FIXO -->
       <div class="modal-header">
         <div class="modal-title-group">
           <span class="modal-title" id="m-nome">Carregando Lead...</span>
-          <span style="font-size: 0.725rem; color: var(--gold); font-weight: 600; text-transform: uppercase; margin-top: 4px;" id="m-id-status">Aguardando Averbação</span>
+          <div class="m-completeness-wrap">
+            <span style="font-size:0.7rem;color:var(--gold);font-weight:700;text-transform:uppercase;" id="m-id-status">Aguardando Averbação</span>
+            <div style="width:1px;height:12px;background:rgba(255,255,255,0.2);margin:0 6px;"></div>
+            <div class="m-completeness-track"><div class="m-completeness-fill" id="m-completeness-fill" style="width:0%"></div></div>
+            <span class="m-completeness-pct" id="m-completeness-pct">0%</span>
+          </div>
         </div>
-        <div style="display: flex; gap: 12px; align-items: center; margin-left: auto; margin-right: 16px;">
-          <button class="btn-action" id="m-btn-editar" style="background: rgba(212, 188, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; cursor: pointer;">
+        <div style="display:flex;gap:10px;align-items:center;margin-left:auto;margin-right:16px;">
+          <button class="btn-action" id="m-btn-editar" style="background:rgba(212,188,110,0.15);border:1px solid var(--gold);color:var(--gold);font-size:0.75rem;padding:6px 12px;border-radius:4px;display:inline-flex;align-items:center;gap:6px;font-weight:700;cursor:pointer;">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
             Editar Dados
           </button>
-          <button class="btn-action" id="m-btn-salvar" style="background: var(--green-success); border: none; color: white; font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; display: none; align-items: center; gap: 6px; font-weight: 700; cursor: pointer;">
+          <button class="btn-action" id="m-btn-salvar" style="background:var(--green-success);border:none;color:white;font-size:0.75rem;padding:6px 12px;border-radius:4px;display:none;align-items:center;gap:6px;font-weight:700;cursor:pointer;">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Salvar Alterações
           </button>
-          <button class="btn-action" id="m-btn-cancelar" style="background: var(--red-error); border: none; color: white; font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; display: none; align-items: center; gap: 6px; font-weight: 700; cursor: pointer;">
+          <button class="btn-action" id="m-btn-cancelar" style="background:var(--red-error);border:none;color:white;font-size:0.75rem;padding:6px 12px;border-radius:4px;display:none;align-items:center;gap:6px;font-weight:700;cursor:pointer;">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             Cancelar
           </button>
         </div>
         <button class="close-modal" id="close-modal">&times;</button>
       </div>
-      
+
+      <!-- BARRA DE ABAS FIXA -->
+      <div class="modal-tab-bar" id="modal-tab-bar">
+        <button class="m-tab active" data-tab="pessoal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Dados Pessoais
+          <span class="m-tab-badge" id="badge-pessoal" style="display:none">0</span>
+        </button>
+        <button class="m-tab" data-tab="vinculo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          Vínculo
+          <span class="m-tab-badge" id="badge-vinculo" style="display:none">0</span>
+        </button>
+        <button class="m-tab" data-tab="bancario">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          Bancário
+          <span class="m-tab-badge" id="badge-bancario" style="display:none">0</span>
+        </button>
+        <button class="m-tab" data-tab="credito">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Crédito
+          <span class="m-tab-badge" id="badge-credito" style="display:none">0</span>
+        </button>
+        <button class="m-tab" data-tab="documentos">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          Documentos
+          <span class="m-tab-badge" id="badge-documentos" style="display:none">0</span>
+        </button>
+        <button class="m-tab" data-tab="historico">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Histórico
+        </button>
+      </div>
+
+      <!-- BODY COM PAINÉIS DE ABA (SCROLLÁVEL) -->
       <div class="modal-body">
-        <!-- Bloco 1: Dados Pessoais -->
-        <div class="proposal-section">
+
+        <!-- PAINEL: Dados Pessoais -->
+        <div class="m-tab-panel active" id="panel-pessoal">
+          <div class="tab-checklist" id="cl-pessoal"></div>
+          <div class="proposal-section">
           <span class="section-title-mod">1. Informações Pessoais</span>
           <div class="info-grid">
             <div class="info-item">
@@ -2952,8 +3170,12 @@
           </div>
         </div>
         
-        <!-- Bloco 2: Dados Funcionais -->
-        <div class="proposal-section">
+        </div><!-- /panel-pessoal -->
+
+        <!-- PAINEL: Vínculo Profissional -->
+        <div class="m-tab-panel" id="panel-vinculo">
+          <div class="tab-checklist" id="cl-vinculo"></div>
+          <div class="proposal-section">
           <span class="section-title-mod">2. Vínculo Profissional</span>
           <div class="info-grid">
             <div class="info-item">
@@ -2999,8 +3221,12 @@
           </div>
         </div>
         
-        <!-- Bloco 3: Dados Bancários -->
-        <div class="proposal-section">
+        </div><!-- /panel-vinculo -->
+
+        <!-- PAINEL: Bancário -->
+        <div class="m-tab-panel" id="panel-bancario">
+          <div class="tab-checklist" id="cl-bancario"></div>
+          <div class="proposal-section">
           <span class="section-title-mod">3. Conta Bancária de Depósito</span>
           <div class="info-grid">
             <div class="info-item">
@@ -3045,8 +3271,12 @@
           </div>
         </div>
         
-        <!-- Bloco 4: Dados da Simulação de Crédito -->
-        <div class="proposal-section">
+        </div><!-- /panel-bancario -->
+
+        <!-- PAINEL: Crédito -->
+        <div class="m-tab-panel" id="panel-credito">
+          <div class="tab-checklist" id="cl-credito"></div>
+          <div class="proposal-section">
           <span class="section-title-mod">4. Resumo da Simulação Financeira</span>
           <div class="info-grid" style="background: rgba(24, 27, 44, 0.03); padding: 16px; border-radius: 8px; border: 1px dashed var(--nardo);">
             <div class="info-item">
@@ -3092,8 +3322,12 @@
           </div>
         </div>
         
-        <!-- Bloco 5: Documentos Carregados -->
-        <div class="proposal-section">
+        </div><!-- /panel-credito -->
+
+        <!-- PAINEL: Documentos -->
+        <div class="m-tab-panel" id="panel-documentos">
+          <div class="tab-checklist" id="cl-documentos"></div>
+          <div class="proposal-section">
           <span class="section-title-mod">5. Documentação em Anexo</span>
           <div class="docs-viewer-row">
             <div class="info-item">
@@ -3113,42 +3347,48 @@
           </div>
         </div>
 
-        <!-- Bloco 6: Comunicação via WhatsApp -->
-        <div class="proposal-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
-          <span class="section-title-mod" style="background: #25d366; color: white;">6. Comunicação via WhatsApp</span>
-          <div style="margin-top: 12px;">
-            <div class="info-item" style="margin-bottom: 12px;">
-              <span class="info-label">Justificativa / Motivo de Recusa</span>
-              <textarea id="m-wpp-justificativa" placeholder="Se necessário, digite o motivo da recusa ou observações para o cliente..." style="width: 100%; height: 70px; padding: 10px; border-radius: 6px; border: 1.5px solid var(--nardo); font-family: var(--font-body); font-size: 0.85rem; outline: none; resize: vertical; margin-top: 4px;"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button type="button" class="btn-action" id="wpp-btn-analise" style="background: #25d366; color: white; border: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: var(--font-body);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
-                Proposta em Análise
+          <!-- PAINEL: Histórico -->
+        </div><!-- /panel-documentos -->
+
+        <!-- PAINEL: Histórico -->
+        <div class="m-tab-panel" id="panel-historico">
+          <div id="m-historico-timeline" class="history-timeline"></div>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <!-- RODAPÉ FIXO: WhatsApp + Ações -->
+      <div class="modal-footer">
+        <div class="modal-footer-wpp">
+          <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+            <textarea id="m-wpp-justificativa" placeholder="Justificativa ou observações para o cliente..." style="flex:1;min-width:180px;height:38px;padding:8px 12px;border-radius:6px;border:1.5px solid rgba(24,27,44,0.12);font-family:var(--font-body);font-size:0.8rem;outline:none;resize:none;"></textarea>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;">
+              <button type="button" class="btn-action" id="wpp-btn-analise" style="background:#25d366;color:white;border:none;display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;padding:8px 11px;border-radius:6px;cursor:pointer;font-weight:700;font-family:var(--font-body);white-space:nowrap;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
+                Em Análise
               </button>
-              <button type="button" class="btn-action" id="wpp-btn-aceita" style="background: #25d366; color: white; border: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: var(--font-body);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
-                Proposta Aceita (Passo a Passo)
+              <button type="button" class="btn-action" id="wpp-btn-aceita" style="background:#25d366;color:white;border:none;display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;padding:8px 11px;border-radius:6px;cursor:pointer;font-weight:700;font-family:var(--font-body);white-space:nowrap;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
+                Aceita
               </button>
-              <button type="button" class="btn-action" id="wpp-btn-recusada" style="background: var(--red-error); color: white; border: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: var(--font-body);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
-                Proposta Recusada
+              <button type="button" class="btn-action" id="wpp-btn-recusada" style="background:var(--red-error);color:white;border:none;display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;padding:8px 11px;border-radius:6px;cursor:pointer;font-weight:700;font-family:var(--font-body);white-space:nowrap;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14h.9a8.38 8.38 0 0 1 3.8.9L21 3l-1.9 5.7z"></path></svg>
+                Recusada
               </button>
             </div>
           </div>
         </div>
-        
-        <!-- Ações do Modal -->
-        <div class="proposal-actions-row" id="m-actions-panel">
-          <button class="btn-action-panel reabrir" id="m-btn-reabrir">↩ Reabrir Proposta</button>
-          <button class="btn-action-panel recusar" id="m-btn-recusar">✕ Recusar Proposta</button>
+        <div class="modal-footer-actions" id="m-actions-panel">
+          <button class="btn-action-panel reabrir" id="m-btn-reabrir">↩ Reabrir</button>
+          <button class="btn-action-panel recusar" id="m-btn-recusar">✕ Recusar</button>
           <button class="btn-action-panel iniciar" id="m-btn-iniciar">▶ Iniciar Análise</button>
-          <button class="btn-action-panel aprovar" id="m-btn-aprovar">✓ Aprovar Proposta</button>
+          <button class="btn-action-panel aprovar" id="m-btn-aprovar">✓ Aprovar</button>
           <button class="btn-action-panel pagar" id="m-btn-pagar">💰 Liberar Recurso</button>
         </div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- /modal-container -->
+  </div><!-- /details-modal -->
 
   <!-- ========================================
        MODAL: NOVA PROPOSTA (CADASTRO MANUAL)
@@ -4106,13 +4346,51 @@
                 statusMapped = "Recebida";
               }
 
+              // Otimização: Tenta obter dados completos que já existem localmente em cache para não sobrescrevê-los com nulos
+              const existing = (typeof currentLeads !== 'undefined' && currentLeads)
+                ? currentLeads.find(l => l.id === row.id)
+                : null;
+
               const item = {
                 id: row.id,
                 createdAt: row.created_at,
                 status: statusMapped,
-                lead: { nome: row.nome, cpf: row.cpf },
-                dados_funcionais: { convenio: row.convenio, profissao: row.profissao },
-                proposta: { valor_solicitado: row.valor_solicitado }
+                operador_id: existing?.operador_id || null,
+                operador_nome: existing?.operador_nome || null,
+                justificativa: existing?.justificativa || '',
+                rfb: existing?.rfb || null,
+                lead: {
+                  nome: row.nome,
+                  cpf: row.cpf,
+                  celular: existing?.lead?.celular || '',
+                  email: existing?.lead?.email || '',
+                  genero: existing?.lead?.genero || '',
+                  estado_civil: existing?.lead?.estado_civil || '',
+                  data_nascimento: existing?.lead?.data_nascimento || '',
+                  nome_mae: existing?.lead?.nome_mae || '',
+                  rg: existing?.lead?.rg || '',
+                  rg_orgao: existing?.lead?.rg_orgao || '',
+                  rg_data_emissao: existing?.lead?.rg_data_emissao || '',
+                  rg_uf: existing?.lead?.rg_uf || ''
+                },
+                dados_funcionais: {
+                  convenio: row.convenio,
+                  profissao: row.profissao,
+                  matricula: existing?.dados_funcionais?.matricula || '',
+                  salario_liquido: existing?.dados_funcionais?.salario_liquido || 0
+                },
+                dados_bancarios: existing?.dados_bancarios || null,
+                proposta: {
+                  valor_solicitado: row.valor_solicitado,
+                  prazo_meses: existing?.proposta?.prazo_meses || 0,
+                  valor_parcela: existing?.proposta?.valor_parcela || 0,
+                  taxa_juros_mensal: existing?.proposta?.taxa_juros_mensal || 0,
+                  total_financiado: existing?.proposta?.total_financiado || 0,
+                  cet_anual: existing?.proposta?.cet_anual || 0,
+                  assinatura_sms_validada: existing?.proposta?.assinatura_sms_validada || false
+                },
+                marketing: existing?.marketing || { utm_source: '', utm_medium: '' },
+                arquivos: existing?.arquivos || { identidade_cnh_rg: null, contracheque: null }
               };
 
               return item;
@@ -4474,33 +4752,89 @@
       const newLeadModal = document.getElementById("new-lead-modal");
 
       const openNewLeadModal = () => {
-        // Popula o select de convênio
-        const convSel = document.getElementById("nl-convenio");
-        const convs = Object.keys(currentConvenios).length ? currentConvenios : defaultConvenios;
-        convSel.innerHTML = '<option value="">Selecione o convênio...</option>';
-        Object.entries(convs).forEach(([key, cv]) => {
-          const opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = cv.nome || key;
-          convSel.appendChild(opt);
-        });
-        // Limpa o form
-        document.getElementById("form-new-lead").reset();
-        document.getElementById("nl-calc-preview").style.display = "none";
-        newLeadModal.classList.add("active");
-        document.body.style.overflow = "hidden";
-        document.getElementById("nl-nome").focus();
+        try {
+          console.log("[Walker Bank] Chamando openNewLeadModal()...");
+          // Popula o select de convênio
+          const convSel = document.getElementById("nl-convenio");
+          if (!convSel) {
+            throw new Error("Elemento 'nl-convenio' não encontrado no DOM.");
+          }
+
+          const convs = (typeof currentConvenios !== 'undefined' && currentConvenios && Object.keys(currentConvenios).length)
+            ? currentConvenios
+            : (typeof defaultConvenios !== 'undefined' && defaultConvenios ? defaultConvenios : {});
+          
+          convSel.innerHTML = '<option value="">Selecione o convênio...</option>';
+          Object.entries(convs).forEach(([key, cv]) => {
+            if (cv) {
+              const opt = document.createElement('option');
+              opt.value = key;
+              opt.textContent = cv.nome || key;
+              convSel.appendChild(opt);
+            }
+          });
+
+          // Limpa o form
+          const form = document.getElementById("form-new-lead");
+          if (form) form.reset();
+
+          const preview = document.getElementById("nl-calc-preview");
+          if (preview) preview.style.display = "none";
+
+          if (newLeadModal) {
+            newLeadModal.classList.add("active");
+          } else {
+            throw new Error("Elemento 'new-lead-modal' não encontrado no DOM.");
+          }
+
+          document.body.style.overflow = "hidden";
+
+          const nomeInput = document.getElementById("nl-nome");
+          if (nomeInput) {
+            setTimeout(() => {
+              try { nomeInput.focus(); } catch (fe) {}
+            }, 50);
+          }
+          console.log("[Walker Bank] Modal de Nova Proposta aberto com sucesso.");
+        } catch (err) {
+          console.error("[Walker Bank] Erro ao abrir modal de Nova Proposta:", err);
+          alert("Não foi possível abrir o formulário de Nova Proposta. Detalhes: " + err.message);
+        }
       };
 
       const closeNewLeadModal = () => {
-        newLeadModal.classList.remove("active");
+        if (newLeadModal) {
+          newLeadModal.classList.remove("active");
+        }
         document.body.style.overflow = "";
       };
 
-      document.getElementById("btn-new-lead").addEventListener("click", openNewLeadModal);
-      document.getElementById("close-new-lead-modal").addEventListener("click", closeNewLeadModal);
-      document.getElementById("btn-cancel-new-lead").addEventListener("click", closeNewLeadModal);
-      newLeadModal.addEventListener("click", (e) => { if (e.target === newLeadModal) closeNewLeadModal(); });
+      // Expõe as funções globalmente no escopo window para permitir chamadas via onclick inline no HTML (ex: página de Início)
+      window.openNewLeadModal = openNewLeadModal;
+      window.closeNewLeadModal = closeNewLeadModal;
+
+      try {
+        const btnNewLead = document.getElementById("btn-new-lead");
+        if (btnNewLead) {
+          btnNewLead.addEventListener("click", openNewLeadModal);
+        } else {
+          console.warn("[Walker Bank] Botão 'btn-new-lead' não encontrado no carregamento.");
+        }
+      } catch (errBtn) {
+        console.error("[Walker Bank] Erro ao vincular clique no botão de nova proposta:", errBtn);
+      }
+
+      try {
+        const btnCloseNewLead = document.getElementById("close-new-lead-modal");
+        if (btnCloseNewLead) btnCloseNewLead.addEventListener("click", closeNewLeadModal);
+        const btnCancelNewLead = document.getElementById("btn-cancel-new-lead");
+        if (btnCancelNewLead) btnCancelNewLead.addEventListener("click", closeNewLeadModal);
+        if (newLeadModal) {
+          newLeadModal.addEventListener("click", (e) => { if (e.target === newLeadModal) closeNewLeadModal(); });
+        }
+      } catch (errClose) {
+        console.error("[Walker Bank] Erro ao vincular botões de fechamento do modal:", errClose);
+      }
 
       // Máscaras nos campos do modal
       applyMask(document.getElementById("nl-cpf"), maskCPF);
@@ -4613,6 +4947,9 @@
         const leads = getLeads();
         leads.unshift(newLead);
         currentLeads = leads;
+        if (typeof knownLeadIds !== 'undefined' && knownLeadIds.add) {
+          knownLeadIds.add(newLead.id); // Evita receber alerta de nova proposta recebida para o próprio operador
+        }
         safeSaveLeads(leads);
 
         // Salva no Supabase (modo real)
@@ -4764,8 +5101,149 @@
       window.sendWppTable = sendWppTable;
 
       // ==========================================
-      // 6. MODAL DE DETALHES (PROPOSTA)
+      // 6. MODAL DE DETALHES — ESTEIRA (ABAS)
       // ==========================================
+
+      // --- Troca de abas ---
+      const switchModalTab = (tabName) => {
+        document.querySelectorAll('#details-modal .m-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+        document.querySelectorAll('#details-modal .m-tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tabName}`));
+        // Rola o body do modal para o topo ao trocar de aba
+        const body = document.querySelector('#details-modal .modal-body');
+        if (body) body.scrollTop = 0;
+      };
+      document.querySelectorAll('#modal-tab-bar .m-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchModalTab(btn.dataset.tab));
+      });
+
+      // --- Checklist de campos obrigatórios ---
+      const CHECKLIST_DEF = {
+        pessoal: [
+          { label: 'Nome',        check: l => !!l.lead?.nome },
+          { label: 'CPF',         check: l => (l.lead?.cpf || '').replace(/\D/g,'').length >= 11 },
+          { label: 'Celular',     check: l => !!l.lead?.celular },
+          { label: 'Nascimento',  check: l => !!l.lead?.data_nascimento },
+          { label: 'E-mail',      check: l => !!l.lead?.email, optional: true },
+          { label: 'Nome da mãe', check: l => !!l.lead?.nome_mae, optional: true },
+          { label: 'RG',          check: l => !!l.lead?.rg },
+          { label: 'Órgão emissor', check: l => !!l.lead?.rg_orgao },
+        ],
+        vinculo: [
+          { label: 'Convênio',    check: l => !!l.dados_funcionais?.convenio },
+          { label: 'Matrícula/NB',check: l => !!l.dados_funcionais?.matricula },
+          { label: 'Salário líquido', check: l => (l.dados_funcionais?.salario_liquido || 0) > 0 },
+        ],
+        bancario: [
+          { label: 'Banco',       check: l => !!l.dados_bancarios?.banco },
+          { label: 'Tipo de conta', check: l => !!l.dados_bancarios?.tipo_conta },
+          { label: 'Agência',     check: l => !!l.dados_bancarios?.agencia },
+          { label: 'Conta',       check: l => !!l.dados_bancarios?.conta },
+        ],
+        credito: [
+          { label: 'Valor solicitado', check: l => (l.proposta?.valor_solicitado || 0) > 0 },
+          { label: 'Prazo',       check: l => (l.proposta?.prazo_meses || 0) > 0 },
+          { label: 'Assinatura SMS', check: l => !!l.proposta?.assinatura_sms_validada, optional: true },
+        ],
+        documentos: [
+          { label: 'RG/CNH',      check: l => !!l.arquivos?.identidade_cnh_rg },
+          { label: 'Contracheque', check: l => !!l.arquivos?.contracheque },
+        ],
+      };
+
+      const buildChecklist = (lead) => {
+        let totalRequired = 0, totalOk = 0;
+        const result = {};
+        Object.entries(CHECKLIST_DEF).forEach(([tab, items]) => {
+          result[tab] = items.map(item => ({ ...item, filled: item.check(lead) }));
+          items.forEach(item => {
+            if (!item.optional) { totalRequired++; if (item.check(lead)) totalOk++; }
+          });
+        });
+        result._pct = totalRequired > 0 ? Math.round(totalOk / totalRequired * 100) : 0;
+        return result;
+      };
+
+      const renderChecklistUI = (checklist) => {
+        // Barra de completude no header
+        const pct = checklist._pct;
+        const fillEl = document.getElementById('m-completeness-fill');
+        const pctEl  = document.getElementById('m-completeness-pct');
+        if (fillEl) fillEl.style.width = pct + '%';
+        if (pctEl)  pctEl.textContent  = pct + '%';
+
+        // Badges nas abas + pills dentro dos painéis
+        Object.keys(CHECKLIST_DEF).forEach(tab => {
+          const items = checklist[tab];
+          const missing = items.filter(i => !i.filled && !i.optional).length;
+          const badge = document.getElementById(`badge-${tab}`);
+          if (badge) { badge.textContent = missing; badge.style.display = missing > 0 ? 'inline-flex' : 'none'; }
+
+          const clEl = document.getElementById(`cl-${tab}`);
+          if (clEl) {
+            clEl.innerHTML = items.map(item => {
+              const cls = item.filled ? 'ok' : (item.optional ? 'optional' : 'missing');
+              const icon = item.filled
+                ? '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+              return `<span class="cl-item ${cls}">${icon} ${item.label}</span>`;
+            }).join('');
+          }
+        });
+      };
+
+      // --- Histórico do lead ---
+      const renderLeadHistory = (lead) => {
+        const container = document.getElementById('m-historico-timeline');
+        if (!container) return;
+
+        // Busca logs deste lead no audit log
+        let logs = [];
+        try { logs = JSON.parse(localStorage.getItem('walker_audit_log') || '[]'); } catch(e) {}
+        const leadLogs = logs.filter(l => l.lead_id === lead.id);
+
+        // Sempre inclui a entrada de criação
+        const entries = [];
+        const origem = lead.marketing?.utm_source || 'formulário web';
+        entries.push({
+          data: lead.createdAt,
+          acao: `Proposta recebida via ${origem}`,
+          dot: 'dot-received',
+          usuario: null,
+        });
+
+        // Adiciona logs do audit
+        leadLogs.forEach(log => {
+          const dotMap = { status_change: 'dot-analise', lead_edit: 'dot-edit', wpp_sent: 'dot-wpp' };
+          let dot = dotMap[log.tipo] || 'dot-default';
+          if (log.tipo === 'status_change') {
+            const s = log.meta?.para || '';
+            if (s === 'Aprovada' || s === 'Paga') dot = s === 'Paga' ? 'dot-paga' : 'dot-aprovada';
+            if (s === 'Recusada') dot = 'dot-recusada';
+          }
+          entries.push({ data: log.timestamp, acao: log.descricao, dot, usuario: log.operador_nome });
+        });
+
+        // Ordena do mais antigo para o mais novo
+        entries.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+        if (entries.length === 0) {
+          container.innerHTML = `<div class="history-empty">Nenhum registro de atividade encontrado para este lead.</div>`;
+          return;
+        }
+
+        container.innerHTML = entries.map(e => {
+          const d = new Date(e.data);
+          const dateStr = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          return `
+            <div class="history-item">
+              <div class="history-dot ${e.dot}">●</div>
+              <div class="history-content">
+                <div class="history-action">${e.acao}</div>
+                <div class="history-meta">${dateStr}${e.usuario ? ` · por ${e.usuario}` : ''}</div>
+              </div>
+            </div>`;
+        }).join('');
+      };
       const modal = document.getElementById("details-modal");
 
       const openLeadDetails = async (id) => {
@@ -4874,7 +5352,7 @@
         const statusEl = document.getElementById("m-id-status");
         statusEl.textContent = lead.status;
         statusEl.className = 'status-badge ' + getStatusClass(lead.status);
-        statusEl.style.cssText = "font-size:0.725rem; font-weight:700; padding:2px 8px; border-radius:20px; display:inline-block;";
+        statusEl.style.cssText = "font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:20px; display:inline-block; text-transform:uppercase;";
 
         // Dados pessoais
         document.getElementById("m-p-nome").innerHTML = makeCopyable(lead.lead?.nome);
@@ -4915,10 +5393,18 @@
         document.getElementById("m-c-valor").textContent = formatBRL(lead.proposta?.valor_solicitado || 0);
         document.getElementById("m-c-prazo").textContent = `${lead.proposta?.prazo_meses} meses`;
         document.getElementById("m-c-parcela").textContent = `${formatBRL(lead.proposta?.valor_parcela || 0)} / mês`;
-        document.getElementById("m-c-taxa").textContent = `${(lead.proposta?.taxa_juros_mensal * 100).toFixed(2).replace('.', ',')}% a.m.`;
+        document.getElementById("m-c-taxa").textContent = `${((lead.proposta?.taxa_juros_mensal || 0) * 100).toFixed(2).replace('.', ',')}% a.m.`;
         document.getElementById("m-c-cet").textContent = `${lead.proposta?.cet_anual?.toFixed(2).replace('.', ',') || '0,00'}% a.a.`;
         document.getElementById("m-c-total").textContent = formatBRL(lead.proposta?.total_financiado || 0);
         document.getElementById("m-c-assinatura").textContent = lead.proposta?.assinatura_sms_validada ? '✓ Assinatura Eletrônica SMS Validada' : '⚠ Assinatura SMS Pendente';
+
+        // Checklist de completude e histórico
+        const checklist = buildChecklist(lead);
+        renderChecklistUI(checklist);
+        renderLeadHistory(lead);
+
+        // Reseta para a primeira aba ao abrir
+        switchModalTab('pessoal');
 
         // Arquivos — resolve URLs assinadas do Storage antes de renderizar
         const rgVal = lead.arquivos?.identidade_cnh_rg || null;
@@ -4931,7 +5417,9 @@
         // RG
         if (rgVal) {
           rgBox.innerHTML = `<span style="font-size:0.75rem;color:var(--gray-light-text);">Carregando documento...</span>`;
+          const _rgLeadId = id;
           resolveFileUrl(rgVal).then(rgUrl => {
+            if (activeLeadId !== _rgLeadId) return;
             if (!rgUrl) { rgBox.innerHTML = `<span style="font-size:0.75rem;color:var(--nardo);">Erro ao carregar arquivo.</span>`; return; }
             const cpf = lead.lead?.cpf || 'cliente';
             const isImagem = !rgVal.toLowerCase().includes('.pdf') && !rgUrl.startsWith('data:application/pdf');
@@ -4960,7 +5448,9 @@
         // Contracheque
         if (contraVal) {
           contraBox.innerHTML = `<span style="font-size:0.75rem;color:var(--gray-light-text);">Carregando documento...</span>`;
+          const _contraLeadId = id;
           resolveFileUrl(contraVal).then(contraUrl => {
+            if (activeLeadId !== _contraLeadId) return;
             if (!contraUrl) { contraBox.innerHTML = `<span style="font-size:0.75rem;color:var(--nardo);">Erro ao carregar arquivo.</span>`; return; }
             const cpf = lead.lead?.cpf || 'cliente';
             const isPdf = contraVal.toLowerCase().includes('.pdf') || contraUrl.startsWith('data:application/pdf');
@@ -5140,10 +5630,10 @@
         let newContraPath = null;
 
         if (rgInput.files && rgInput.files[0]) {
-          try { newRgPath = await uploadToStorage(rgInput.files[0], activeLeadId, 'rg'); } catch(e) { console.error(e); }
+          try { newRgPath = await uploadToStorage(rgInput.files[0], activeLeadId, 'rg'); } catch(e) { console.error(e); showToast("Erro ao enviar documento de identidade. Verifique sua conexão.", "var(--red-error)"); }
         }
         if (contraInput.files && contraInput.files[0]) {
-          try { newContraPath = await uploadToStorage(contraInput.files[0], activeLeadId, 'contracheque'); } catch(e) { console.error(e); }
+          try { newContraPath = await uploadToStorage(contraInput.files[0], activeLeadId, 'contracheque'); } catch(e) { console.error(e); showToast("Erro ao enviar contracheque. Verifique sua conexão.", "var(--red-error)"); }
         }
 
         let targetLead = null;
@@ -5201,6 +5691,7 @@
             console.log("[Walker Bank] Lead atualizado no Supabase com sucesso.");
           } catch(dbErr) {
             console.error("[Walker Bank] Erro ao salvar edição no Supabase:", dbErr);
+            showToast("Erro ao salvar no banco de dados. As alterações foram salvas localmente.", "var(--red-error)");
           }
         }
 
@@ -5294,6 +5785,7 @@
             console.log("[Walker Bank] Status do lead atualizado no Supabase.");
           } catch(err) {
             console.error("[Walker Bank] Erro ao salvar alteração de status no Supabase:", err);
+            showToast("Erro ao sincronizar status com o banco de dados. Status salvo localmente.", "var(--red-error)");
           }
         }
 
@@ -7262,139 +7754,175 @@
       // INICIALIZAÇÃO
       // ==========================================
       (async () => {
-        updateSidebarUserUI();
-        const isDemo = sessionStorage.getItem("walker_demo_mode") === "true";
-        
-        if (isDemo) {
-          console.log("[Walker Bank] Iniciado em Modo de Demonstração Offline.");
+        try {
+          updateSidebarUserUI();
+          const isDemo = sessionStorage.getItem("walker_demo_mode") === "true";
           
-          // Banner visual indicando o modo de demonstração
-          const demoBanner = document.createElement("div");
-          demoBanner.id = "demo-offline-banner";
-          demoBanner.style.cssText = "background: var(--gold); color: var(--navy); text-align: center; padding: 8px; font-size: 0.8rem; font-weight: 700; position: fixed; top: 0; left: 0; right: 0; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.2);";
-          demoBanner.innerHTML = "⚠️ MODO DEMONSTRAÇÃO OFFLINE: Visualizando dados locais salvos em cache (o Supabase está suspenso temporariamente).";
-          document.body.insertBefore(demoBanner, document.body.firstChild);
-          
-          // Adiciona margem no topo do corpo se necessário (ou no menu)
-          document.body.style.paddingTop = "32px";
-          
-          // No modo demo, pulamos a autenticação do Supabase
-          sessionStorage.setItem("walker_admin_session", "true");
-        } else {
-          // Valida se há uma sessão ativa de verdade no Supabase Auth
-          try {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+          if (isDemo) {
+            console.log("[Walker Bank] Iniciado em Modo de Demonstração Offline.");
+            
+            // Banner visual indicando o modo de demonstração
+            const demoBanner = document.createElement("div");
+            demoBanner.id = "demo-offline-banner";
+            demoBanner.style.cssText = "background: var(--gold); color: var(--navy); text-align: center; padding: 8px; font-size: 0.8rem; font-weight: 700; position: fixed; top: 0; left: 0; right: 0; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.2);";
+            demoBanner.innerHTML = "⚠️ MODO DEMONSTRAÇÃO OFFLINE: Visualizando dados locais salvos em cache (o Supabase está suspenso temporariamente).";
+            document.body.insertBefore(demoBanner, document.body.firstChild);
+            
+            // Adiciona margem no topo do corpo se necessário (ou no menu)
+            document.body.style.paddingTop = "32px";
+            
+            // No modo demo, pulamos a autenticação do Supabase
+            sessionStorage.setItem("walker_admin_session", "true");
+          } else {
+            // Valida se há uma sessão ativa de verdade no Supabase Auth
+            try {
+              const { data: { session } } = await supabaseClient.auth.getSession();
+              if (!session) {
+                sessionStorage.removeItem("walker_admin_session");
+                sessionStorage.removeItem("walker_user_profile");
+                window.location.href = "login.html";
+                return;
+              }
+              sessionStorage.setItem("walker_admin_session", "true");
+
+              // Se o profile ainda não está na sessão (ex: refresh de página), recarrega do banco
+              if (!sessionStorage.getItem("walker_user_profile")) {
+                try {
+                  const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
+                  if (profile) sessionStorage.setItem("walker_user_profile", JSON.stringify(profile));
+                } catch(pe) {
+                  console.warn("[Walker Bank] Não foi possível carregar o perfil do usuário:", pe);
+                }
+              }
+            } catch (e) {
+              console.error("Erro ao validar sessão com o Supabase:", e);
               sessionStorage.removeItem("walker_admin_session");
-              sessionStorage.removeItem("walker_user_profile");
               window.location.href = "login.html";
               return;
             }
-            sessionStorage.setItem("walker_admin_session", "true");
 
-            // Se o profile ainda não está na sessão (ex: refresh de página), recarrega do banco
-            if (!sessionStorage.getItem("walker_user_profile")) {
-              try {
-                const { data: profile } = await supabaseClient
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', session.user.id)
-                  .single();
-                if (profile) sessionStorage.setItem("walker_user_profile", JSON.stringify(profile));
-              } catch(pe) {
-                console.warn("[Walker Bank] Não foi possível carregar o perfil do usuário:", pe);
+            // Carrega lista de operadores do banco antes de qualquer render
+            await fetchOperadoresFromSupabase();
+          }
+
+          // Auto-set do perfil baseado no usuário real logado
+          const realProfile = getCurrentUserProfile();
+          if (realProfile) {
+            if (realProfile.role === 'operador') {
+              // Operador: trava no próprio perfil, sem possibilidade de mudar
+              sessionStorage.setItem("walker_active_profile", realProfile.id);
+            } else if (realProfile.role === 'admin') {
+              // Admin: garante que começa como "admin" (visão geral)
+              if (!sessionStorage.getItem("walker_active_profile")) {
+                sessionStorage.setItem("walker_active_profile", "admin");
               }
             }
-          } catch (e) {
-            console.error("Erro ao validar sessão com o Supabase:", e);
-            sessionStorage.removeItem("walker_admin_session");
-            window.location.href = "login.html";
-            return;
           }
 
-          // Carrega lista de operadores do banco antes de qualquer render
-          await fetchOperadoresFromSupabase();
-        }
+          // Reconstrói as opções dinâmicas do seletor e atualiza sidebar
+          updateProfileSelectorOptions();
+          updateSidebarUserUI();
 
-        // Auto-set do perfil baseado no usuário real logado
-        const realProfile = getCurrentUserProfile();
-        if (realProfile) {
-          if (realProfile.role === 'operador') {
-            // Operador: trava no próprio perfil, sem possibilidade de mudar
-            sessionStorage.setItem("walker_active_profile", realProfile.id);
-          } else if (realProfile.role === 'admin') {
-            // Admin: garante que começa como "admin" (visão geral)
-            if (!sessionStorage.getItem("walker_active_profile")) {
-              sessionStorage.setItem("walker_active_profile", "admin");
-            }
+          // Renderiza local cache primeiro
+          navigateTo('inicio');
+
+          // Carrega configurações
+          try {
+            await fetchConfigsFromSupabase();
+          } catch (cfgErr) {
+            console.error("[Walker Bank] Erro ao buscar configurações, seguindo com o cache local:", cfgErr);
           }
+
+          // Inicializa convênios e popula todos os selects de filtro
+          { const c = getConfigs(); currentConvenios = (c.convenios && Object.keys(c.convenios).length) ? c.convenios : { ...defaultConvenios }; }
+          populateConvenioSelects();
+
+          // Carrega leads reais do Supabase
+          try {
+            await fetchLeadsFromSupabase();
+          } catch (leadsErr) {
+            console.error("[Walker Bank] Erro ao buscar leads, seguindo com o cache local:", leadsErr);
+          }
+
+          // Inicializa conhecidos
+          knownLeadIds = new Set(getLeads().map(l => l.id));
+
+          // Renderiza a mesa e páginas com dados do Supabase
+          navigateTo('inicio');
+
+          // Configuração de listeners adicionais para filtros do Dashboard Geral
+          ['dash-data-inicio', 'dash-data-fim', 'dash-convenio'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("change", renderDashboard);
+          });
+          const btnDashLimpar = document.getElementById("dash-limpar");
+          if (btnDashLimpar) {
+            btnDashLimpar.addEventListener("click", () => {
+              const di = document.getElementById("dash-data-inicio");
+              const df = document.getElementById("dash-data-fim");
+              const dc = document.getElementById("dash-convenio");
+              if (di) di.value = "";
+              if (df) df.value = "";
+              if (dc) dc.value = "all";
+              renderDashboard();
+            });
+          }
+
+          // Botões rápidos de intervalo no Dashboard Geral
+          const btnDashHoje = document.getElementById("dash-btn-hoje");
+          if (btnDashHoje) {
+            btnDashHoje.addEventListener("click", () => {
+              const hoje = new Date().toISOString().split('T')[0];
+              const di = document.getElementById("dash-data-inicio");
+              const df = document.getElementById("dash-data-fim");
+              if (di) di.value = hoje;
+              if (df) df.value = hoje;
+              renderDashboard();
+            });
+          }
+          const btnDash7d = document.getElementById("dash-btn-7d");
+          if (btnDash7d) {
+            btnDash7d.addEventListener("click", () => {
+              const fim = new Date().toISOString().split('T')[0];
+              const inicioObj = new Date();
+              inicioObj.setDate(inicioObj.getDate() - 7);
+              const inicio = inicioObj.toISOString().split('T')[0];
+              const di = document.getElementById("dash-data-inicio");
+              const df = document.getElementById("dash-data-fim");
+              if (di) di.value = inicio;
+              if (df) df.value = fim;
+              renderDashboard();
+            });
+          }
+          const btnDashMes = document.getElementById("dash-btn-mes");
+          if (btnDashMes) {
+            btnDashMes.addEventListener("click", () => {
+              const d = new Date();
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const di = document.getElementById("dash-data-inicio");
+              const df = document.getElementById("dash-data-fim");
+              if (di) di.value = `${y}-${m}-01`;
+              if (df) df.value = new Date(y, d.getMonth() + 1, 0).toISOString().split('T')[0];
+              renderDashboard();
+            });
+          }
+
+          // Inicializa Realtime e fallback polling apenas se não estiver no modo de demonstração
+          if (!isDemo) {
+            setupRealtime();
+            // Otimização de Egress: O Realtime WebSocket já faz atualizações instantâneas.
+            // O polling de fallback foi alterado de 10s para 5 minutos (300000ms) para reduzir drasticamente o consumo de banda e acessos.
+            setInterval(checkNewProposals, 300000); 
+          }
+          requestNotificationPermission();
+        } catch (initErr) {
+          console.error("[Walker Bank] Falha crítica na inicialização do painel:", initErr);
         }
-
-        // Reconstrói as opções dinâmicas do seletor e atualiza sidebar
-        updateProfileSelectorOptions();
-        updateSidebarUserUI();
-
-        // Renderiza local cache primeiro
-        navigateTo('inicio');
-
-        // Carrega configurações
-        await fetchConfigsFromSupabase();
-
-        // Inicializa convênios e popula todos os selects de filtro
-        { const c = getConfigs(); currentConvenios = (c.convenios && Object.keys(c.convenios).length) ? c.convenios : { ...defaultConvenios }; }
-        populateConvenioSelects();
-
-        // Carrega leads reais do Supabase
-        await fetchLeadsFromSupabase();
-
-        // Inicializa conhecidos
-        knownLeadIds = new Set(getLeads().map(l => l.id));
-
-        // Renderiza a mesa e páginas com dados do Supabase
-        navigateTo('inicio');
-
-        // Configuração de listeners adicionais para filtros do Dashboard Geral
-        ['dash-data-inicio', 'dash-data-fim', 'dash-convenio'].forEach(id => {
-          document.getElementById(id).addEventListener("change", renderDashboard);
-        });
-        document.getElementById("dash-limpar").addEventListener("click", () => {
-          document.getElementById("dash-data-inicio").value = "";
-          document.getElementById("dash-data-fim").value = "";
-          document.getElementById("dash-convenio").value = "all";
-          renderDashboard();
-        });
-
-        // Botões rápidos de intervalo no Dashboard Geral
-        document.getElementById("dash-btn-hoje").addEventListener("click", () => {
-          const hoje = new Date().toISOString().split('T')[0];
-          document.getElementById("dash-data-inicio").value = hoje;
-          document.getElementById("dash-data-fim").value = hoje;
-          renderDashboard();
-        });
-        document.getElementById("dash-btn-7d").addEventListener("click", () => {
-          const fim = new Date().toISOString().split('T')[0];
-          const inicioObj = new Date();
-          inicioObj.setDate(inicioObj.getDate() - 7);
-          const inicio = inicioObj.toISOString().split('T')[0];
-          document.getElementById("dash-data-inicio").value = inicio;
-          document.getElementById("dash-data-fim").value = fim;
-          renderDashboard();
-        });
-        document.getElementById("dash-btn-mes").addEventListener("click", () => {
-          const d = new Date();
-          const y = d.getFullYear();
-          const m = String(d.getMonth() + 1).padStart(2, '0');
-          document.getElementById("dash-data-inicio").value = `${y}-${m}-01`;
-          document.getElementById("dash-data-fim").value = new Date(y, d.getMonth() + 1, 0).toISOString().split('T')[0];
-          renderDashboard();
-        });
-
-        // Inicializa Realtime e fallback polling
-        setupRealtime();
-        // Otimização de Egress: O Realtime WebSocket já faz atualizações instantâneas.
-        // O polling de fallback foi alterado de 10s para 5 minutos (300000ms) para reduzir drasticamente o consumo de banda e acessos.
-        setInterval(checkNewProposals, 300000); 
-        requestNotificationPermission();
       })();
     });
   </script>
