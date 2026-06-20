@@ -4520,6 +4520,32 @@
       let chartFunil = null;
       let chartLinha = null;
 
+      const _dirtyPages = new Set();
+      const markDirty = (...pages) => pages.forEach(p => _dirtyPages.add(p));
+      const refreshVisiblePages = () => {
+        const active = document.querySelector('.page-section.active');
+        if (!active) return;
+        const id = active.id.replace('sec-', '');
+        const renderMap = {
+          'inicio': renderInicioHome,
+          'mesa-analise': renderMesaTable,
+          'dashboard-geral': renderDashboard,
+          'relatorio-financeiro': renderFinanceiro,
+          'relatorio-leads': renderLeadsReport,
+          'base-geral': renderBaseGeral,
+          'clientes': renderClientes
+        };
+        if (renderMap[id]) renderMap[id]();
+        _dirtyPages.delete(id);
+      };
+      const flushDirtyPage = (pageId) => {
+        if (_dirtyPages.has(pageId)) {
+          _dirtyPages.delete(pageId);
+          return true;
+        }
+        return false;
+      };
+
       // Gera URL assinada (1h) para um arquivo no Supabase Storage
       const getStorageUrl = async (path) => {
         const { data, error } = await supabaseClient.storage
@@ -4953,7 +4979,8 @@
           document.getElementById('topbar-title').innerHTML = `${info.title} <small>${info.sub}</small>`;
         }
 
-        // Renderiza conteúdo da página
+        // Renderiza conteúdo da página (limpa dirty flag)
+        _dirtyPages.delete(page);
         if (page === 'inicio') renderInicioHome();
         if (page === 'mesa-analise') renderMesaTable();
         if (page === 'dashboard-geral') renderDashboard();
@@ -5110,9 +5137,9 @@
         const tbody = document.getElementById("leads-table-body");
         const emptyState = document.getElementById("empty-state");
         const table = document.getElementById("leads-table");
-        tbody.innerHTML = "";
 
         if (filtered.length === 0) {
+          tbody.innerHTML = "";
           emptyState.style.display = "block";
           table.style.display = "none";
           updateMesaMetrics(leads);
@@ -5122,6 +5149,7 @@
         emptyState.style.display = "none";
         table.style.display = "table";
 
+        const fragment = document.createDocumentFragment();
         filtered.forEach(lead => {
           // Badges de documentação
           const hasIdentidade = !!lead.arquivos?.identidade_cnh_rg || lead.id.startsWith("proposta-mock");
@@ -5202,8 +5230,10 @@
             </td>
           `;
           tr.querySelector(".btn-action").addEventListener("click", () => openLeadDetails(lead.id));
-          tbody.appendChild(tr);
+          fragment.appendChild(tr);
         });
+        tbody.innerHTML = "";
+        tbody.appendChild(fragment);
 
         updateMesaMetrics(leads);
       };
@@ -6587,15 +6617,24 @@
         });
         const chartConvKeys = convKeys;
 
-        if (chartConvenio) chartConvenio.destroy();
+        const convLabels = chartConvKeys.map(k => (activeConvs[k]?.nome || k));
+        const convData = chartConvKeys.map(k => convenioVol[k] || 0);
+        const convColors = chartConvKeys.map((_, i) => convPalette[i % convPalette.length]);
+
+        if (chartConvenio) {
+          chartConvenio.data.labels = convLabels;
+          chartConvenio.data.datasets[0].data = convData;
+          chartConvenio.data.datasets[0].backgroundColor = convColors;
+          chartConvenio.update('none');
+        } else {
         const ctxConvenio = document.getElementById("chart-convenio").getContext("2d");
         chartConvenio = new Chart(ctxConvenio, {
           type: 'doughnut',
           data: {
-            labels: chartConvKeys.map(k => (activeConvs[k]?.nome || k)),
+            labels: convLabels,
             datasets: [{
-              data: chartConvKeys.map(k => convenioVol[k] || 0),
-              backgroundColor: chartConvKeys.map((_, i) => convPalette[i % convPalette.length]),
+              data: convData,
+              backgroundColor: convColors,
               borderWidth: 0,
               hoverOffset: 8
             }]
@@ -6609,6 +6648,7 @@
             cutout: '70%'
           }
         });
+        }
 
         // Gráfico de Barras — Funil de Propostas (Aprimorado)
         const statusCounts = { 'Recebida': 0, 'Aguardando Averbação': 0, 'Em Análise': 0, 'Aguardando Assinatura': 0, 'Aprovada': 0, 'Recusada': 0, 'Paga': 0 };
@@ -6616,7 +6656,12 @@
 
         const aguardandoTotal = (statusCounts['Recebida'] || 0) + (statusCounts['Aguardando Averbação'] || 0) + (statusCounts['Em Análise'] || 0) + (statusCounts['Aguardando Assinatura'] || 0);
 
-        if (chartFunil) chartFunil.destroy();
+        const funilData = [aguardandoTotal, statusCounts['Aprovada'] || 0, statusCounts['Recusada'] || 0, statusCounts['Paga'] || 0];
+
+        if (chartFunil) {
+          chartFunil.data.datasets[0].data = funilData;
+          chartFunil.update('none');
+        } else {
         const ctxFunil = document.getElementById("chart-funil").getContext("2d");
         chartFunil = new Chart(ctxFunil, {
           type: 'bar',
@@ -6624,7 +6669,7 @@
             labels: ['Aguardando', 'Aprovada', 'Recusada', 'Paga'],
             datasets: [{
               label: 'Propostas',
-              data: [aguardandoTotal, statusCounts['Aprovada'] || 0, statusCounts['Recusada'] || 0, statusCounts['Paga'] || 0],
+              data: funilData,
               backgroundColor: ['rgba(52, 152, 219, 0.85)', 'rgba(46, 204, 113, 0.85)', 'rgba(231, 76, 60, 0.85)', 'rgba(212, 188, 110, 0.95)'],
               borderRadius: 6,
               borderSkipped: false
@@ -6643,6 +6688,7 @@
             }
           }
         });
+        }
 
         // Gráfico de Linha — Evolução Temporal (Filtrado ou últimos 10 dias do período)
         const timelineData = {};
@@ -6690,7 +6736,12 @@
         const datasetVolume = sortedDates.map(d => timelineData[d].volume);
         const datasetQtd = sortedDates.map(d => timelineData[d].count);
 
-        if (chartLinha) chartLinha.destroy();
+        if (chartLinha) {
+          chartLinha.data.labels = labelsLinha;
+          chartLinha.data.datasets[0].data = datasetVolume;
+          chartLinha.data.datasets[1].data = datasetQtd;
+          chartLinha.update('none');
+        } else {
         const ctxLinha = document.getElementById("chart-linha-temporal").getContext("2d");
         
         const gradientVol = ctxLinha.createLinearGradient(0, 0, 0, 300);
@@ -6766,6 +6817,7 @@
             }
           }
         });
+        }
       };
 
       // ==========================================
@@ -7088,11 +7140,11 @@
         const tbody = document.getElementById("clientes-table-body");
         const empty = document.getElementById("clientes-empty");
         const table = document.getElementById("clientes-table");
-        tbody.innerHTML = "";
 
-        if (clients.length === 0) { empty.style.display = "block"; table.style.display = "none"; return; }
+        if (clients.length === 0) { tbody.innerHTML = ""; empty.style.display = "block"; table.style.display = "none"; return; }
         empty.style.display = "none"; table.style.display = "table";
 
+        const frag = document.createDocumentFragment();
         clients.forEach(c => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -7108,11 +7160,13 @@
             </td>
           `;
           tr.querySelector(".btn-action-sm").addEventListener("click", () => openClientFicha(c.cpf));
-          tbody.appendChild(tr);
+          frag.appendChild(tr);
         });
+        tbody.innerHTML = "";
+        tbody.appendChild(frag);
       };
 
-      document.getElementById("clientes-search").addEventListener("input", renderClientes);
+      document.getElementById("clientes-search").addEventListener("input", debounce(renderClientes, 280));
       
       // Filtros adicionais de clientes
       ['clientes-convenio', 'clientes-propostas-qtd', 'clientes-status'].forEach(id => {
@@ -7321,6 +7375,7 @@
 
         // Renderizar linhas da página atual
         const profile = getActiveProfile();
+        const fragBase = document.createDocumentFragment();
         pageLeads.forEach(c => {
           const tr = document.createElement("tr");
           const btnDescartarHTML = profile === "admin"
@@ -7344,14 +7399,16 @@
           if (profile === "admin") {
             tr.querySelector(".descartar-btn").addEventListener("click", () => descartarLeadPeloAdmin(c.cpf));
           }
-          tbody.appendChild(tr);
+          fragBase.appendChild(tr);
         });
+        tbody.innerHTML = "";
+        tbody.appendChild(fragBase);
       };
 
-      document.getElementById("base-search").addEventListener("input", () => {
+      document.getElementById("base-search").addEventListener("input", debounce(() => {
         currentPageBase = 1;
         renderBaseGeral();
-      });
+      }, 280));
       document.getElementById("base-convenio").addEventListener("change", () => {
         currentPageBase = 1;
         renderBaseGeral();
@@ -7729,10 +7786,8 @@
           clientModal.classList.remove("active");
           document.body.style.overflow = "";
 
-          renderBaseGeral();
-          renderMesaTable();
-          renderInicioHome();
-          renderDashboard();
+          markDirty('base-geral', 'mesa-analise', 'inicio', 'dashboard-geral');
+          refreshVisiblePages();
           navigateTo('mesa-analise');
         }
 
@@ -7794,10 +7849,8 @@
         recordLog('status_change', `Lead com CPF ${formatCPF(cpfClean)} descartado (removido da prospecção) pelo administrador.`, leadsParaAtualizar[0], { de: "Consulta de Margem", para: "Descartado" });
 
         showToast("Lead descartado com sucesso!", "var(--gold)");
-        renderBaseGeral();
-        renderMesaTable();
-        renderInicioHome();
-        renderDashboard();
+        markDirty('base-geral', 'mesa-analise', 'inicio', 'dashboard-geral');
+        refreshVisiblePages();
       };
 
       // ==========================================
@@ -8645,10 +8698,7 @@
             recordLog('status_change', `Iniciado atendimento do lead na busca simples. Status → Recebida`, foundLead, { de: "Consulta de Margem", para: "Recebida" });
             showToast("Atendimento iniciado! Proposta enviada para a Mesa de Crédito.", "var(--green-success)");
 
-            renderMesaTable();
-            renderInicioHome();
-            renderDashboard();
-
+            markDirty('mesa-analise', 'inicio', 'dashboard-geral', 'base-geral');
             navigateTo("mesa-analise");
             openLeadDetails(foundLead.id);
           });
@@ -9613,11 +9663,12 @@
       };
 
       // Event listeners dos filtros de log
+      const debouncedRenderLogs = debounce(renderLogs, 280);
       ['log-search', 'log-data-inicio', 'log-data-fim', 'log-filter-op', 'log-filter-tipo'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.addEventListener('change', renderLogs);
-          el.addEventListener('input', renderLogs);
+          el.addEventListener('input', debouncedRenderLogs);
         }
       });
       document.getElementById("log-limpar").addEventListener("click", () => {
