@@ -681,6 +681,114 @@
       color: var(--white);
     }
 
+    /* Custom Dropdown Seletor de Convênio na Calculadora */
+    .convenio-select-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .convenio-select-trigger {
+      width: 100%;
+      background: var(--white);
+      border: 1.5px solid var(--nardo);
+      color: var(--navy);
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition-fast);
+      outline: none;
+      font-family: var(--font-body);
+      text-align: left;
+    }
+
+    .convenio-select-trigger:hover, .convenio-select-trigger:focus {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 4px rgba(24, 27, 44, 0.05);
+    }
+
+    .convenio-select-arrow {
+      font-size: 0.75rem;
+      transition: transform 0.3s ease;
+      color: var(--gray-light-text);
+    }
+
+    .convenio-select-container.open .convenio-select-arrow {
+      transform: rotate(180deg);
+      color: var(--navy);
+    }
+
+    .convenio-select-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background: var(--white);
+      border: 1.5px solid var(--navy);
+      border-radius: 8px;
+      margin-top: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: var(--shadow-lg);
+      display: none;
+      animation: selectDropdownFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes selectDropdownFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .convenio-select-list.show {
+      display: block;
+    }
+
+    .convenio-select-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px solid rgba(24, 27, 44, 0.05);
+      transition: var(--transition-fast);
+    }
+
+    .convenio-select-item:last-child {
+      border-bottom: none;
+    }
+
+    .convenio-select-item:hover {
+      background: var(--light-gray);
+    }
+
+    .convenio-select-item.selected {
+      background: rgba(212, 188, 110, 0.08);
+      border-left: 3px solid var(--gold);
+      padding-left: 13px; /* Compensa a borda lateral */
+    }
+
+    .convenio-item-name {
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 0.95rem;
+    }
+
+    .convenio-item-desc {
+      font-size: 0.75rem;
+      color: var(--gray-text);
+      margin-top: 2px;
+    }
+
     /* Range Slider styles */
     .slider-display {
       text-align: center;
@@ -1829,11 +1937,16 @@
           </div>
           
           <div class="simulator-card" data-aos="fade-up" data-aos-delay="100">
-            <!-- Campo 1 — Convênio -->
             <div class="form-group">
               <label class="form-label">Seu convênio</label>
-              <div class="pill-grid" id="convenio-selector">
-                <!-- Populado dinamicamente -->
+              <div class="convenio-select-container">
+                <button type="button" class="convenio-select-trigger" id="convenio-select-trigger">
+                  <span id="convenio-selected-text">Selecione seu convênio</span>
+                  <span class="convenio-select-arrow">▼</span>
+                </button>
+                <div class="convenio-select-list" id="convenio-select-list">
+                  <!-- Populado dinamicamente -->
+                </div>
               </div>
             </div>
             
@@ -2421,31 +2534,88 @@
         valorSlider: 0
       };
       
-      // Função para renderizar os botões do seletor de convênio dinamicamente
+      // Função para renderizar a lista suspensa do seletor de convênio
       const renderConvenioSelector = () => {
-        const selector = document.getElementById("convenio-selector");
-        if (!selector) return;
-        selector.innerHTML = "";
+        const list = document.getElementById("convenio-select-list");
+        if (!list) return;
+        list.innerHTML = "";
 
-        Object.keys(convenioConfigs).forEach((key, index) => {
+        Object.keys(convenioConfigs).forEach((key) => {
           const c = convenioConfigs[key];
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = key === activeConvenio ? "pill-btn active" : "pill-btn";
-          btn.setAttribute("data-convenio", key);
-          btn.textContent = c.nome;
+          const item = document.createElement("div");
+          item.className = key === activeConvenio ? "convenio-select-item selected" : "convenio-select-item";
+          item.innerHTML = `
+            <span class="convenio-item-name">${c.nome}</span>
+            <span class="convenio-item-desc">${c.tipo || ''}</span>
+          `;
 
-          btn.addEventListener("click", () => {
-            document.querySelectorAll("#convenio-selector .pill-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
+          item.addEventListener("click", () => {
             activeConvenio = key;
+            const triggerText = document.getElementById("convenio-selected-text");
+            if (triggerText) triggerText.textContent = `${c.nome} — ${c.tipo || ''}`;
+            
+            document.querySelectorAll(".convenio-select-item").forEach(el => el.classList.remove("selected"));
+            item.classList.add("selected");
+            
+            closeDropdown();
             updateSliderLimits(activeConvenio);
             calculatePrice();
           });
 
-          selector.appendChild(btn);
+          list.appendChild(item);
         });
+
+        // Inicializa o texto do trigger com o convênio ativo
+        const activeCfg = convenioConfigs[activeConvenio];
+        if (activeCfg) {
+          const triggerText = document.getElementById("convenio-selected-text");
+          if (triggerText) triggerText.textContent = `${activeCfg.nome} — ${activeCfg.tipo || ''}`;
+        }
       };
+
+      // Controles do Dropdown Customizado de Convênios
+      const initConvenioDropdown = () => {
+        const trigger = document.getElementById("convenio-select-trigger");
+        const list = document.getElementById("convenio-select-list");
+        if (!trigger || !list) return;
+
+        const container = trigger.parentElement;
+
+        const toggleDropdown = () => {
+          const isOpen = container.classList.contains("open");
+          if (isOpen) {
+            closeDropdown();
+          } else {
+            openDropdown();
+          }
+        };
+
+        const openDropdown = () => {
+          container.classList.add("open");
+          list.classList.add("show");
+        };
+
+        const closeDropdown = () => {
+          container.classList.remove("open");
+          list.classList.remove("show");
+        };
+
+        trigger.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleDropdown();
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!container.contains(e.target)) {
+            closeDropdown();
+          }
+        });
+
+        // Exporta closeDropdown globalmente para uso no clique dos itens da lista
+        window.closeDropdown = closeDropdown;
+      };
+
+      initConvenioDropdown();
 
       const prazoButtons = document.querySelectorAll("#prazo-selector [data-prazo]");
       const valSlider = document.getElementById("val-slider");

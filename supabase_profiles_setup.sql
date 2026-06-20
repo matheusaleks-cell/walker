@@ -132,3 +132,49 @@ WHERE id IN (
 -- 3. O perfil é criado automaticamente com role = 'operador'
 -- 4. Edite o campo "nome" e "avatar" na tabela profiles se quiser
 -- ============================================================
+
+-- 8. Tabela de leads (propostas de crédito consignado e consultas de margem)
+CREATE TABLE IF NOT EXISTS public.leads (
+  id               TEXT        PRIMARY KEY, -- ID pode ser UUID ou texto estruturado (ex: lead-import-...)
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  nome             TEXT        NOT NULL,
+  cpf              TEXT        NOT NULL,
+  status           TEXT        NOT NULL DEFAULT 'Recebida',
+  convenio         TEXT,
+  valor_solicitado NUMERIC,
+  payload          JSONB       NOT NULL DEFAULT '{}'
+);
+
+-- Habilita RLS para a tabela de leads
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de acesso para a tabela de leads
+DROP POLICY IF EXISTS "Leitura de leads autenticados" ON public.leads;
+DROP POLICY IF EXISTS "Inserção de leads anônimos ou autenticados" ON public.leads;
+DROP POLICY IF EXISTS "Atualização de leads autenticados" ON public.leads;
+
+-- Qualquer usuário autenticado (operador/admin) pode ler todos os leads
+CREATE POLICY "Leitura de leads autenticados"
+  ON public.leads FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Qualquer usuário (mesmo anônimo na LP de captura) pode criar um lead
+CREATE POLICY "Inserção de leads anônimos ou autenticados"
+  ON public.leads FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+-- Usuários autenticados (operadores/admins) podem atualizar os leads
+CREATE POLICY "Atualização de leads autenticados"
+  ON public.leads FOR UPDATE
+  TO authenticated
+  USING (true);
+
+-- Usuários autenticados (operadores/admins) podem excluir leads
+DROP POLICY IF EXISTS "Exclusão de leads autenticados" ON public.leads;
+CREATE POLICY "Exclusão de leads autenticados"
+  ON public.leads FOR DELETE
+  TO authenticated
+  USING (true);
+

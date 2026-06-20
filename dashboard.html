@@ -584,6 +584,7 @@
     .status-badge.recebida { background: rgba(149, 165, 166, 0.15); color: #7f8c8d; }
     .status-badge.em-analise { background: rgba(230, 126, 34, 0.1); color: #e67e22; }
     .status-badge.aguard-assinatura { background: rgba(155, 89, 182, 0.1); color: #9b59b6; }
+    .status-badge.consulta-margem { background: rgba(52, 152, 219, 0.1); color: #2471a3; }
     
     /* Botões de Ação */
     .btn-action {
@@ -1846,6 +1847,11 @@
         <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></span>
         <span>Consultar Margem</span>
       </div>
+      <div class="nav-item" data-page="base-geral" id="nav-base-geral">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg></span>
+        <span>Base Geral</span>
+        <span class="nav-count" id="nav-count-base">0</span>
+      </div>
       <div class="nav-item" data-page="clientes" id="nav-clientes">
         <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
         <span>Clientes</span>
@@ -2397,6 +2403,53 @@
           <div class="empty-state" id="clientes-empty" style="display: none;">
             <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
             <h3>Nenhum cliente encontrado</h3>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE 5A: BASE GERAL
+      ======================================== -->
+      <section class="page-section" id="sec-base-geral">
+        <div class="controls-row">
+          <div class="search-input-wrapper">
+            <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+            <input type="text" id="base-search" placeholder="Buscar na base por nome ou CPF...">
+          </div>
+          <select class="filter-select" id="base-convenio">
+            <option value="all">Todos os Convênios</option>
+          </select>
+          <button class="btn-filter" id="base-limpar">Limpar</button>
+        </div>
+        <div class="panel-card">
+          <div class="table-container">
+            <table id="base-table">
+              <thead>
+                <tr>
+                  <th>Nome Completo</th>
+                  <th>CPF</th>
+                  <th>Celular</th>
+                  <th>E-mail</th>
+                  <th>Gênero</th>
+                  <th>Renda Faixa</th>
+                  <th>Classe Econômica</th>
+                  <th style="text-align:right;">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="base-table-body"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="base-empty" style="display: none;">
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+            <h3>Nenhum lead encontrado na base</h3>
+          </div>
+          <!-- Linha de Paginação da Base Geral -->
+          <div class="pagination-row" id="base-pagination-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding: 12px 16px; border-top: 1px solid rgba(24, 27, 44, 0.08);">
+            <div class="pagination-info" id="base-pagination-info" style="font-size: 0.8rem; color: var(--gray-light-text); font-weight: 500;">
+              Mostrando 0-0 de 0 registros
+            </div>
+            <div class="pagination-controls" id="base-pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+            </div>
           </div>
         </div>
       </section>
@@ -3545,35 +3598,96 @@
         <button class="close-modal" id="close-client-modal">&times;</button>
       </div>
       <div class="modal-body">
+        <!-- Alerta de Habilitação de Margem (BE) -->
+        <div id="cm-alerta-habilitado" style="display: none; margin-bottom: 20px; padding: 14px 18px; border-radius: 10px; background: rgba(192, 57, 43, 0.08); border: 1.5px solid var(--red-error); color: var(--navy); font-weight: 500; font-size: 0.88rem; align-items: flex-start; gap: 12px; transition: var(--transition-smooth);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red-error)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <div>
+            <span style="font-weight: 700; color: var(--red-error); display: block; margin-bottom: 4px;">⚠️ Cliente não habilitado para Margem Automática</span>
+            <span id="cm-alerta-mensagem-texto" style="font-size: 0.82rem; color: var(--gray-text);">Motivo: ...</span>
+          </div>
+        </div>
+
         <!-- Dados Pessoais -->
         <div class="proposal-section">
           <span class="section-title-mod">Dados Cadastrais</span>
           <div class="info-grid" id="cm-dados"></div>
+        </div>
+        <!-- Dados Funcionais e Margem -->
+        <div class="proposal-section">
+          <span class="section-title-mod">Dados de Renda, Margem e Vínculo</span>
+          <div class="info-grid" id="cm-funcionais"></div>
         </div>
         <!-- Dados Bancários -->
         <div class="proposal-section">
           <span class="section-title-mod">Dados Bancários</span>
           <div class="info-grid" id="cm-banco"></div>
         </div>
-        <!-- Histórico de Propostas -->
+        <!-- Dados de Score e Crédito -->
         <div class="proposal-section">
-          <span class="section-title-mod">Histórico de Propostas</span>
-          <div class="table-container">
-            <table class="client-history-table" id="cm-history-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Valor</th>
-                  <th>Prazo</th>
-                  <th>Parcela</th>
-                  <th>Status</th>
-                  <th>Data</th>
-                </tr>
-              </thead>
-              <tbody id="cm-history-body"></tbody>
-            </table>
+          <span class="section-title-mod">Análise de Crédito e Score</span>
+          <div class="info-grid" id="cm-score"></div>
+        </div>
+        <!-- Simulador de Crédito Consignado -->
+        <div class="proposal-section" id="cm-simulador-section">
+          <span class="section-title-mod">Simulador de Crédito Consignado (Na Hora)</span>
+          <div style="background: rgba(30, 37, 68, 0.03); border: 1.5px dashed var(--gold); border-radius: 12px; padding: 20px; margin-top: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <div class="info-item">
+              <span class="info-label" style="margin-bottom: 6px; display: block;">Convênio</span>
+              <select id="cm-sim-convenio" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--nardo); font-size: 0.9rem; font-weight: 700; color: var(--navy); outline: none; background: white; cursor: pointer;">
+                <option value="inss">INSS</option>
+                <option value="mil">Forças Armadas</option>
+                <option value="est">Estadual</option>
+                <option value="mun">Municipal</option>
+                <option value="clt">CLT Privado</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <span class="info-label" style="margin-bottom: 6px; display: block;">Margem Utilizada (R$)</span>
+              <input type="text" id="cm-sim-margem" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--nardo); font-size: 0.9rem; font-weight: 700; color: var(--navy); outline: none; background: white;" placeholder="0,00">
+            </div>
+            <div class="info-item">
+              <span class="info-label" style="margin-bottom: 6px; display: block;">Prazo (Quantidade de Vezes)</span>
+              <select id="cm-sim-prazo" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--nardo); font-size: 0.9rem; font-weight: 700; color: var(--navy); outline: none; background: white; cursor: pointer;">
+                <option value="84">84x</option>
+                <option value="72">72x</option>
+                <option value="60">60x</option>
+                <option value="48">48x</option>
+                <option value="36">36x</option>
+                <option value="24">24x</option>
+                <option value="12">12x</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <span class="info-label" style="margin-bottom: 6px; display: block;">Taxa de Juros Mensal (%)</span>
+              <input type="text" id="cm-sim-taxa" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--nardo); font-size: 0.9rem; font-weight: 700; color: var(--navy); outline: none; background: white;" placeholder="0,00">
+            </div>
+            <div class="info-item" style="grid-column: span 2; display: flex; flex-direction: column; justify-content: flex-end;">
+              <button type="button" class="btn-action" id="cm-btn-calcular-sim" style="width: 100%; background: var(--cobalt); color: var(--gold); border: 1px solid var(--gold); height: 38px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition-fast);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Calcular Crédito
+              </button>
+            </div>
+            
+            <!-- Resultados da Simulação -->
+            <div style="grid-column: span 3; border-top: 1px solid rgba(24, 27, 44, 0.08); padding-top: 16px; margin-top: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: center;">
+              <div style="background: rgba(39, 174, 96, 0.06); border: 1px solid rgba(39, 174, 96, 0.2); border-radius: 8px; padding: 12px;">
+                <span class="info-label" style="font-size: 0.72rem; color: var(--green-success); font-weight: 700; text-transform: uppercase;">Valor Liberado (Empréstimo)</span>
+                <div id="cm-sim-resultado-liberado" style="font-size: 1.4rem; font-weight: 700; color: var(--green-success); margin-top: 4px;">R$ 0,00</div>
+              </div>
+              <div style="background: rgba(30, 37, 68, 0.06); border: 1px solid rgba(30, 37, 68, 0.15); border-radius: 8px; padding: 12px;">
+                <span class="info-label" style="font-size: 0.72rem; color: var(--navy); font-weight: 700; text-transform: uppercase;">Total a Pagar (com Juros)</span>
+                <div id="cm-sim-resultado-total" style="font-size: 1.4rem; font-weight: 700; color: var(--navy); margin-top: 4px;">R$ 0,00</div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+      <!-- Rodapé com ação de Atendimento -->
+      <div class="modal-footer" id="cm-footer-atendimento" style="padding: 16px 24px; border-top: 1px solid rgba(24, 27, 44, 0.08); display: flex; justify-content: flex-end; gap: 12px; background: rgba(240, 242, 245, 0.4); border-radius: 0 0 16px 16px;">
+        <button class="btn-action" id="cm-btn-atender" style="background: var(--green-success); color: white; border: none; font-weight: 700; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition-fast);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          Iniciar Atendimento e Gerar Proposta
+        </button>
       </div>
     </div>
   </div>
@@ -4180,6 +4294,12 @@
       // 3. UTILIDADES
       // ==========================================
       let activeLeadId = null;
+      let activeClientCpf = null;
+
+      const escapeHtml = (str) => {
+        if (!str || typeof str !== 'string') return str || '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      };
       let chartConvenio = null;
       let chartFunil = null;
       let chartLinha = null;
@@ -4350,7 +4470,7 @@
           ? currentConvenios
           : (typeof defaultConvenios !== 'undefined' ? defaultConvenios : {});
         // Selects com "Todos" como primeira opção (filtros)
-        const filterSelectIds = ['filter-convenio', 'dash-convenio', 'fin-convenio', 'clientes-convenio'];
+        const filterSelectIds = ['filter-convenio', 'dash-convenio', 'fin-convenio', 'clientes-convenio', 'base-convenio'];
         filterSelectIds.forEach(id => {
           const sel = document.getElementById(id);
           if (!sel) return;
@@ -4367,19 +4487,23 @@
           if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
           else sel.value = 'all';
         });
-        // Select de edição de convênio no modal de lead
+        // Select de edição de convênio no modal de lead e na calculadora
         const editSel = document.getElementById('edit-f-convenio');
-        if (editSel) {
-          const prev = editSel.value;
-          editSel.innerHTML = '';
-          Object.entries(convs).forEach(([key, conv]) => {
-            const opt = document.createElement('option');
-            opt.value = key;
-            opt.textContent = conv.tipo ? `${conv.nome} — ${conv.tipo}` : (conv.nome || key);
-            editSel.appendChild(opt);
-          });
-          if (prev && [...editSel.options].some(o => o.value === prev)) editSel.value = prev;
-        }
+        const simConvenioSel = document.getElementById('cm-sim-convenio');
+        
+        [editSel, simConvenioSel].forEach(sel => {
+          if (sel) {
+            const prev = sel.value;
+            sel.innerHTML = '';
+            Object.entries(convs).forEach(([key, conv]) => {
+              const opt = document.createElement('option');
+              opt.value = key;
+              opt.textContent = conv.tipo ? `${conv.nome} — ${conv.tipo}` : (conv.nome || key);
+              sel.appendChild(opt);
+            });
+            if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+          }
+        });
       };
       const getStatusClass = (s) => {
         if (s === 'Recebida') return 'recebida';
@@ -4388,6 +4512,7 @@
         if (s === 'Aguardando Assinatura') return 'aguard-assinatura';
         if (s === 'Recusada') return 'recusado';
         if (s === 'Paga') return 'pago';
+        if (s === 'Consulta de Margem') return 'consulta-margem';
         if (s === 'Aguardando Averbação') return 'recebida'; // compat
         return 'recebida';
       };
@@ -4576,6 +4701,7 @@
         'relatorio-financeiro': { title: 'Relatório Financeiro', sub: 'Conciliação e rentabilidade' },
         'relatorio-leads': { title: 'Relatório de Leads', sub: 'Funil de vendas e marketing' },
         'consulta-margem': { title: 'Consultar Margem', sub: 'Ficha e margem pré-aprovada do cliente' },
+        'base-geral': { title: 'Base Geral', sub: 'Todos os leads gerais da base (sem propostas iniciadas)' },
         'clientes': { title: 'Clientes', sub: 'Central de atendimento' },
         'convenios': { title: 'Convênios', sub: 'Taxas, margens e regras por convênio' },
         'configuracoes': { title: 'Configurações', sub: 'Parâmetros do sistema' },
@@ -4583,6 +4709,9 @@
       };
 
       const navigateTo = (page) => {
+        // Salva a página ativa no sessionStorage para o F5/Refresh
+        sessionStorage.setItem("walker_active_page", page);
+
         // Desativa todos
         document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -4613,6 +4742,7 @@
         if (page === 'relatorio-financeiro') renderFinanceiro();
         if (page === 'relatorio-leads') renderLeadsReport();
         if (page === 'consulta-margem') clearMargemSearch();
+        if (page === 'base-geral') renderBaseGeral();
         if (page === 'clientes') renderClientes();
         if (page === 'convenios') renderConveniosPage();
         if (page === 'configuracoes') loadConfigs();
@@ -4620,7 +4750,7 @@
       };
       window.navigateTo = navigateTo; // Expor globalmente para os atalhos onclick inline
 
-      // Clicks nos nav-items
+      // Clicks nos nav-items (restaura clique direto chamando navigateTo)
       document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
           navigateTo(item.dataset.page);
@@ -4631,29 +4761,36 @@
       // 5. MESA DE ANÁLISE (PÁGINA 1)
       // ==========================================
       const updateMesaMetrics = (leads) => {
-        document.getElementById("metric-total-leads").textContent = leads.length;
+        const filteredLeads = leads.filter(l => l.status !== "Consulta de Margem");
+        document.getElementById("metric-total-leads").textContent = filteredLeads.length;
 
-        const volume = leads.filter(l => l.status !== "Recusada").reduce((sum, l) => sum + (l.proposta?.valor_solicitado || 0), 0);
+        const volume = filteredLeads.filter(l => l.status !== "Recusada").reduce((sum, l) => sum + (l.proposta?.valor_solicitado || 0), 0);
         document.getElementById("metric-volume").textContent = formatBRL(volume);
 
-        const activeLeads = leads.filter(l => l.status !== "Recusada");
+        const activeLeads = filteredLeads.filter(l => l.status !== "Recusada");
         const ticket = activeLeads.length > 0 ? volume / activeLeads.length : 0;
         document.getElementById("metric-ticket").textContent = formatBRL(ticket);
 
-        const pagasCount = leads.filter(l => l.status === "Paga").length;
+        const pagasCount = filteredLeads.filter(l => l.status === "Paga").length;
         document.getElementById("metric-pagas").textContent = pagasCount;
 
-        const rate = leads.length > 0 ? (pagasCount / leads.length) * 100 : 0;
+        const rate = filteredLeads.length > 0 ? (pagasCount / filteredLeads.length) * 100 : 0;
         document.getElementById("metric-pagas-pct").innerHTML = `<span>✓ <strong>${rate.toFixed(0)}%</strong> de taxa de conversão</span>`;
 
         // Nav count
-        document.getElementById("nav-count-mesa").textContent = leads.length;
+        document.getElementById("nav-count-mesa").textContent = filteredLeads.length;
+
+        // Nav count Base Geral
+        const allLeadsForBase = getLeads();
+        const baseGeralCount = allLeadsForBase.filter(l => l.status === "Consulta de Margem").length;
+        const navCountBase = document.getElementById("nav-count-base");
+        if (navCountBase) navCountBase.textContent = baseGeralCount;
       };
 
       let selectedMesaStatus = 'all';
 
       const renderMesaTable = () => {
-        let leads = getLeads();
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
         const profile = getActiveProfile();
         if (profile !== "admin") {
           leads = leads.filter(l => l.operador_id === profile);
@@ -4743,11 +4880,17 @@
           // Badges de documentação
           const hasIdentidade = !!lead.arquivos?.identidade_cnh_rg || lead.id.startsWith("proposta-mock");
           const hasContracheque = !!lead.arquivos?.contracheque || lead.id.startsWith("proposta-mock");
+          const hasSms = !!lead.proposta?.assinatura_sms_validada;
+          const isManual = !!lead.proposta?.assinatura_manual_solicitada;
+          const smsBadge = isManual
+            ? `<span class="doc-badge-dot warning" title="Assinatura Manual Solicitada (Sem SMS)" style="background:rgba(212,188,110,0.15); border:1px solid var(--gold); color:var(--gold); display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; font-size:0.65rem;">✍️</span>`
+            : `<span class="doc-badge-dot ${hasSms ? 'success' : 'pending'}" title="${hasSms ? 'Assinatura SMS Validada' : 'Assinatura SMS Pendente'}" style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; font-size:0.65rem;">💬</span>`;
 
           const docBadges = `
-            <span style="display: inline-flex; gap: 6px; margin-top: 4px;">
+            <span style="display: inline-flex; gap: 6px; margin-top: 4px; align-items: center;">
               <span class="doc-badge-dot ${hasIdentidade ? 'success' : 'pending'}" title="${hasIdentidade ? 'Identidade Anexada' : 'Identidade Ausente'}">🪪</span>
               <span class="doc-badge-dot ${hasContracheque ? 'success' : 'pending'}" title="${hasContracheque ? 'Contracheque Anexado' : 'Contracheque Ausente'}">📄</span>
+              ${smsBadge}
             </span>
           `;
 
@@ -5244,7 +5387,7 @@
         credito: [
           { label: 'Valor solicitado', check: l => (l.proposta?.valor_solicitado || 0) > 0 },
           { label: 'Prazo',       check: l => (l.proposta?.prazo_meses || 0) > 0 },
-          { label: 'Assinatura SMS', check: l => !!l.proposta?.assinatura_sms_validada, optional: true },
+          { label: 'Assinatura SMS', check: l => !!l.proposta?.assinatura_sms_validada || !!l.proposta?.assinatura_manual_solicitada, optional: true },
         ],
         documentos: [
           { label: 'RG/CNH',      check: l => !!l.arquivos?.identidade_cnh_rg },
@@ -5498,7 +5641,14 @@
         document.getElementById("m-c-taxa").textContent = `${((lead.proposta?.taxa_juros_mensal || 0) * 100).toFixed(2).replace('.', ',')}% a.m.`;
         document.getElementById("m-c-cet").textContent = `${lead.proposta?.cet_anual?.toFixed(2).replace('.', ',') || '0,00'}% a.a.`;
         document.getElementById("m-c-total").textContent = formatBRL(lead.proposta?.total_financiado || 0);
-        document.getElementById("m-c-assinatura").textContent = lead.proposta?.assinatura_sms_validada ? '✓ Assinatura Eletrônica SMS Validada' : '⚠ Assinatura SMS Pendente';
+        const signatureEl = document.getElementById("m-c-assinatura");
+        if (lead.proposta?.assinatura_manual_solicitada) {
+          signatureEl.innerHTML = '<span style="color:#d4bc6e; font-weight:700;">⚠ Assinatura Manual Solicitada (Sem SMS)</span>';
+        } else if (lead.proposta?.assinatura_sms_validada) {
+          signatureEl.innerHTML = '<span style="color:var(--green-success); font-weight:700;">✓ Assinatura Eletrônica SMS Validada</span>';
+        } else {
+          signatureEl.innerHTML = '<span style="color:#e74c3c; font-weight:700;">⚠ Assinatura SMS Pendente</span>';
+        }
 
         // Checklist de completude e histórico
         const checklist = buildChecklist(lead);
@@ -5709,6 +5859,69 @@
         document.querySelectorAll(".edit-mode").forEach(el => el.style.display = "none");
       });
 
+      // Comprime e redimensiona imagens para evitar sobrecarga no banco de dados e no localStorage (dashboard)
+      const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) => {
+        return new Promise((resolve) => {
+          if (!file.type.startsWith('image/')) {
+            resolve(file);
+            return;
+          }
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                if (width > maxWidth) {
+                  height = Math.round((height * maxWidth) / width);
+                  width = maxWidth;
+                }
+              } else {
+                if (height > maxHeight) {
+                  width = Math.round((width * maxHeight) / height);
+                  height = maxHeight;
+                }
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                    type: 'image/jpeg',
+                    lastModified: Date.now()
+                  });
+                  resolve(compressedFile);
+                } else {
+                  resolve(file);
+                }
+              }, 'image/jpeg', quality);
+            };
+            img.onerror = () => resolve(file);
+          };
+          reader.onerror = () => resolve(file);
+        });
+      };
+
+      // Converte um objeto File para String Base64 (Data URL) (dashboard)
+      const fileToBase64 = (file) => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+        });
+      };
+
       // Faz upload de arquivo para o Supabase Storage (usado no dashboard ao editar lead)
       const uploadToStorage = async (file, leadId, type) => {
         const ext = file.name.split('.').pop().toLowerCase() || 'bin';
@@ -5731,11 +5944,38 @@
         let newRgPath = null;
         let newContraPath = null;
 
+        // Comprime e faz upload do RG se houver novo arquivo
         if (rgInput.files && rgInput.files[0]) {
-          try { newRgPath = await uploadToStorage(rgInput.files[0], activeLeadId, 'rg'); } catch(e) { console.error(e); showToast("Erro ao enviar documento de identidade. Verifique sua conexão.", "var(--red-error)"); }
+          let rgFile = rgInput.files[0];
+          if (rgFile.type.startsWith('image/')) {
+            try { rgFile = await compressImage(rgFile); } catch(e) { console.warn("Erro ao comprimir imagem de RG:", e); }
+          }
+          try { 
+            newRgPath = await uploadToStorage(rgFile, activeLeadId, 'rg'); 
+          } catch(e) { 
+            console.error("Erro ao enviar RG, usando fallback base64:", e); 
+            newRgPath = await fileToBase64(rgFile);
+            if (!newRgPath) {
+              showToast("Erro ao processar imagem de identidade.", "var(--red-error)");
+            }
+          }
         }
+
+        // Comprime e faz upload do contracheque se houver novo arquivo
         if (contraInput.files && contraInput.files[0]) {
-          try { newContraPath = await uploadToStorage(contraInput.files[0], activeLeadId, 'contracheque'); } catch(e) { console.error(e); showToast("Erro ao enviar contracheque. Verifique sua conexão.", "var(--red-error)"); }
+          let contraFile = contraInput.files[0];
+          if (contraFile.type.startsWith('image/')) {
+            try { contraFile = await compressImage(contraFile); } catch(e) { console.warn("Erro ao comprimir contracheque:", e); }
+          }
+          try { 
+            newContraPath = await uploadToStorage(contraFile, activeLeadId, 'contracheque'); 
+          } catch(e) { 
+            console.error("Erro ao enviar contracheque, usando fallback base64:", e); 
+            newContraPath = await fileToBase64(contraFile);
+            if (!newContraPath) {
+              showToast("Erro ao processar contracheque.", "var(--red-error)");
+            }
+          }
         }
 
         let targetLead = null;
@@ -6034,7 +6274,7 @@
       // 7. DASHBOARD GERAL (PÁGINA 2)
       // ==========================================
       const renderDashboard = () => {
-        let leads = getLeads();
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("dash-data-inicio").value;
@@ -6266,7 +6506,7 @@
       // 8. RELATÓRIO FINANCEIRO (PÁGINA 3)
       // ==========================================
       const renderFinanceiro = () => {
-        let leads = getLeads();
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("fin-data-inicio").value;
@@ -6367,7 +6607,7 @@
       // 9. RELATÓRIO DE LEADS (PÁGINA 4)
       // ==========================================
       const renderLeadsReport = () => {
-        let leads = getLeads();
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("leads-data-inicio").value;
@@ -6446,7 +6686,12 @@
             <td style="text-transform:capitalize;">${l.marketing?.utm_medium || '-'}</td>
             <td style="font-size:0.75rem;">${l.marketing?.utm_campaign || '-'}</td>
             <td>${formatDateBR(l.createdAt)}</td>
-            <td><span class="status-badge ${l.proposta?.assinatura_sms_validada ? 'aprovado' : 'aguardando'}">${l.proposta?.assinatura_sms_validada ? 'Validada' : 'Pendente'}</span></td>
+            <td>
+              ${l.proposta?.assinatura_manual_solicitada 
+                ? `<span class="status-badge" style="background:rgba(212,188,110,0.15); border:1px solid var(--gold); color:var(--gold); font-size:0.7rem; font-weight:700;">Manual</span>` 
+                : `<span class="status-badge ${l.proposta?.assinatura_sms_validada ? 'aprovado' : 'aguardando'}">${l.proposta?.assinatura_sms_validada ? 'Validada' : 'Pendente'}</span>`
+              }
+            </td>
             <td><span class="status-badge ${rfbClass}">${rfbLabel}</span></td>
             <td style="font-weight:600;color:var(--navy);">${ageLabel}</td>
           `;
@@ -6495,9 +6740,11 @@
         const filterConvenio = document.getElementById("clientes-convenio").value;
         const filterPropostasQtd = document.getElementById("clientes-propostas-qtd").value;
 
-        // Agrupar por CPF
+        // Agrupar por CPF (Filtrando para ignorar os leads que possuem apenas o status "Consulta de Margem")
         const cpfMap = {};
         leads.forEach(l => {
+          if (l.status === "Consulta de Margem") return;
+          
           let cpf = l.lead?.cpf?.replace(/\D/g, "") || l.cpf?.replace(/\D/g, "") || '';
           if (!cpf) return;
           
@@ -6599,8 +6846,217 @@
         renderClientes();
       });
 
+      // 10B. BASE GERAL DE LEADS (PAGINADA)
+      // ==========================================
+      let currentPageBase = 1;
+      const pageSizeBase = 10;
+
+      const renderBaseGeral = () => {
+        const leads = getLeads();
+        const search = document.getElementById("base-search").value.toLowerCase();
+        const filterConvenio = document.getElementById("base-convenio").value;
+
+        // Agrupar por CPF (Filtrando para mostrar apenas os leads cujo status é "Consulta de Margem")
+        const cpfMap = {};
+        leads.forEach(l => {
+          if (l.status !== "Consulta de Margem") return;
+          
+          let cpf = l.lead?.cpf?.replace(/\D/g, "") || l.cpf?.replace(/\D/g, "") || '';
+          if (!cpf) return;
+          
+          if (!cpfMap[cpf]) {
+            const leadNome = l.lead?.nome || l.nome || '-';
+            const leadNomeMae = l.lead?.nome_mae || '-';
+            const leadCelular = l.lead?.celular || l.celular || '-';
+            const leadEmail = l.lead?.email || l.email || '-';
+            const leadGenero = l.lead?.genero || '-';
+            const leadEstadoCivil = l.lead?.estado_civil || '-';
+            const leadNascimento = l.lead?.data_nascimento || '-';
+            const leadRg = l.lead?.rg || '-';
+            const leadRgOrgao = l.lead?.rg_orgao || '-';
+            const leadRgUf = l.lead?.rg_uf || '-';
+            const leadRgData = l.lead?.rg_data_emissao || '-';
+            const leadRenda = l.lead?.renda_faixa || '-';
+            const leadClasse = l.lead?.classe_economica || '-';
+
+            cpfMap[cpf] = {
+              lead: {
+                nome: leadNome,
+                nome_mae: leadNomeMae,
+                celular: leadCelular,
+                email: leadEmail,
+                genero: leadGenero,
+                estado_civil: leadEstadoCivil,
+                data_nascimento: leadNascimento,
+                rg: leadRg,
+                rg_orgao: leadRgOrgao,
+                rg_uf: leadRgUf,
+                rg_data_emissao: leadRgData,
+                renda_faixa: leadRenda,
+                classe_economica: leadClasse
+              },
+              dados_bancarios: l.dados_bancarios || {},
+              proposals: []
+            };
+          }
+          cpfMap[cpf].proposals.push(l);
+        });
+
+        let baseLeads = Object.entries(cpfMap).map(([cpf, data]) => ({ cpf, ...data }));
+
+        // Filtros avançados da Base Geral
+        if (filterConvenio !== 'all') {
+          baseLeads = baseLeads.filter(c => 
+            c.proposals.some(p => p.dados_funcionais?.convenio === filterConvenio)
+          );
+        }
+
+        // Filtro de Busca
+        if (search) {
+          baseLeads = baseLeads.filter(c => {
+            return (c.lead?.nome || '').toLowerCase().includes(search) || c.cpf.includes(search.replace(/\D/g, ''));
+          });
+        }
+
+        const navCountBase = document.getElementById("nav-count-base");
+        if (navCountBase) navCountBase.textContent = baseLeads.length;
+
+        const tbody = document.getElementById("base-table-body");
+        const empty = document.getElementById("base-empty");
+        const table = document.getElementById("base-table");
+        const pagRow = document.getElementById("base-pagination-row");
+        tbody.innerHTML = "";
+
+        if (baseLeads.length === 0) {
+          empty.style.display = "block";
+          table.style.display = "none";
+          if (pagRow) pagRow.style.display = "none";
+          return;
+        }
+        empty.style.display = "none"; 
+        table.style.display = "table";
+        if (pagRow) pagRow.style.display = "flex";
+
+        // Lógica de Paginação
+        const totalRecords = baseLeads.length;
+        const totalPages = Math.ceil(totalRecords / pageSizeBase);
+        if (currentPageBase > totalPages) {
+          currentPageBase = totalPages || 1;
+        }
+        const startIndex = (currentPageBase - 1) * pageSizeBase;
+        const endIndex = Math.min(startIndex + pageSizeBase, totalRecords);
+        const pageLeads = baseLeads.slice(startIndex, endIndex);
+
+        // Atualiza a legenda de registros
+        const pagInfo = document.getElementById("base-pagination-info");
+        if (pagInfo) {
+          pagInfo.textContent = `Mostrando ${startIndex + 1}-${endIndex} de ${totalRecords} registros`;
+        }
+
+        // Renderiza botões de controle de paginação
+        const pagControls = document.getElementById("base-pagination-controls");
+        if (pagControls) {
+          pagControls.innerHTML = "";
+          
+          // Botão Anterior
+          const btnPrev = document.createElement("button");
+          btnPrev.textContent = "Anterior";
+          btnPrev.style.cssText = "background: transparent; border: 1px solid rgba(24, 27, 44, 0.1); color: var(--navy); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;";
+          if (currentPageBase === 1) {
+            btnPrev.disabled = true;
+            btnPrev.style.opacity = "0.4";
+            btnPrev.style.cursor = "not-allowed";
+          } else {
+            btnPrev.addEventListener("click", () => {
+              currentPageBase--;
+              renderBaseGeral();
+            });
+            btnPrev.addEventListener("mouseover", () => btnPrev.style.background = "rgba(24, 27, 44, 0.05)");
+            btnPrev.addEventListener("mouseout", () => btnPrev.style.background = "transparent");
+          }
+          pagControls.appendChild(btnPrev);
+
+          // Páginas Numeradas (Mostra até 5 botões ao redor da página ativa)
+          let startPage = Math.max(1, currentPageBase - 2);
+          let endPage = Math.min(totalPages, startPage + 4);
+          if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+          }
+
+          for (let p = startPage; p <= endPage; p++) {
+            const btnPage = document.createElement("button");
+            btnPage.textContent = p;
+            if (p === currentPageBase) {
+              btnPage.style.cssText = "background: var(--navy); border: 1px solid var(--navy); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: default;";
+            } else {
+              btnPage.style.cssText = "background: transparent; border: 1px solid rgba(24, 27, 44, 0.1); color: var(--navy); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;";
+              btnPage.addEventListener("click", () => {
+                currentPageBase = p;
+                renderBaseGeral();
+              });
+              btnPage.addEventListener("mouseover", () => btnPage.style.background = "rgba(24, 27, 44, 0.05)");
+              btnPage.addEventListener("mouseout", () => btnPage.style.background = "transparent");
+            }
+            pagControls.appendChild(btnPage);
+          }
+
+          // Botão Próximo
+          const btnNext = document.createElement("button");
+          btnNext.textContent = "Próximo";
+          btnNext.style.cssText = "background: transparent; border: 1px solid rgba(24, 27, 44, 0.1); color: var(--navy); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;";
+          if (currentPageBase === totalPages) {
+            btnNext.disabled = true;
+            btnNext.style.opacity = "0.4";
+            btnNext.style.cursor = "not-allowed";
+          } else {
+            btnNext.addEventListener("click", () => {
+              currentPageBase++;
+              renderBaseGeral();
+            });
+            btnNext.addEventListener("mouseover", () => btnNext.style.background = "rgba(24, 27, 44, 0.05)");
+            btnNext.addEventListener("mouseout", () => btnNext.style.background = "transparent");
+          }
+          pagControls.appendChild(btnNext);
+        }
+
+        // Renderizar linhas da página atual
+        pageLeads.forEach(c => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><div class="lead-name-cell"><span>${escapeHtml(c.lead?.nome || '-')}</span><span class="lead-sub-cell">${escapeHtml(c.lead?.nome_mae || '')}</span></div></td>
+            <td>${formatCPF(c.cpf)}</td>
+            <td>${formatCelular(c.lead?.celular)}</td>
+            <td>${escapeHtml(c.lead?.email || '-')}</td>
+            <td style="text-transform:capitalize;">${escapeHtml(c.lead?.genero || '-')}</td>
+            <td>${escapeHtml(c.lead?.renda_faixa || '-')}</td>
+            <td>${escapeHtml(c.lead?.classe_economica || '-')}</td>
+            <td style="text-align:right;">
+              <button class="btn-action-sm" data-cpf="${c.cpf}">Ver Ficha</button>
+            </td>
+          `;
+          tr.querySelector(".btn-action-sm").addEventListener("click", () => openClientFicha(c.cpf));
+          tbody.appendChild(tr);
+        });
+      };
+
+      document.getElementById("base-search").addEventListener("input", () => {
+        currentPageBase = 1;
+        renderBaseGeral();
+      });
+      document.getElementById("base-convenio").addEventListener("change", () => {
+        currentPageBase = 1;
+        renderBaseGeral();
+      });
+      document.getElementById("base-limpar").addEventListener("click", () => {
+        document.getElementById("base-search").value = "";
+        document.getElementById("base-convenio").value = "all";
+        currentPageBase = 1;
+        renderBaseGeral();
+      });
+
       // Ficha do Cliente
       const openClientFicha = (cpf) => {
+        activeClientCpf = cpf;
         const leads = getLeads();
         const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === cpf);
         if (clientLeads.length === 0) return;
@@ -6609,48 +7065,229 @@
         document.getElementById("cm-nome").textContent = first.lead?.nome || 'Cliente';
         document.getElementById("cm-cpf").textContent = formatCPF(cpf);
 
+        // Alerta de Habilitação de Margem (BE)
+        const pdMensagem = (first.dados_funcionais?.pd_mensagem || 'OK').trim();
+        const alertaEl = document.getElementById("cm-alerta-habilitado");
+        const alertaTexto = document.getElementById("cm-alerta-mensagem-texto");
+        if (alertaEl && alertaTexto) {
+          if (pdMensagem.toUpperCase() !== "OK") {
+            alertaTexto.innerHTML = `Motivo: <strong>${escapeHtml(pdMensagem)}</strong>.<br>O operador precisa falar com o atendente para testar manualmente.`;
+            alertaEl.style.display = "flex";
+          } else {
+            alertaEl.style.display = "none";
+          }
+        }
+
+        // Exibe ou oculta o botão de atendimento se o lead ainda for apenas Consulta de Margem
+        const hasConsultaMargem = clientLeads.some(l => l.status === "Consulta de Margem");
+        const cmFooter = document.getElementById("cm-footer-atendimento");
+        if (cmFooter) {
+          if (hasConsultaMargem) {
+            cmFooter.style.display = "flex";
+          } else {
+            cmFooter.style.display = "none";
+          }
+        }
+
         // Dados cadastrais
         const dadosEl = document.getElementById("cm-dados");
         dadosEl.innerHTML = `
           <div class="info-item"><span class="info-label">Celular</span><span class="info-val">${formatCelular(first.lead?.celular)}</span></div>
-          <div class="info-item"><span class="info-label">E-mail</span><span class="info-val">${first.lead?.email || '-'}</span></div>
-          <div class="info-item"><span class="info-label">Nascimento</span><span class="info-val">${first.lead?.data_nascimento || '-'}</span></div>
-          <div class="info-item"><span class="info-label">Gênero</span><span class="info-val" style="text-transform:capitalize;">${first.lead?.genero || '-'}</span></div>
-          <div class="info-item"><span class="info-label">Estado Civil</span><span class="info-val" style="text-transform:capitalize;">${first.lead?.estado_civil || '-'}</span></div>
-          <div class="info-item"><span class="info-label">Nome da Mãe</span><span class="info-val">${first.lead?.nome_mae || '-'}</span></div>
-          <div class="info-item"><span class="info-label">RG</span><span class="info-val">${first.lead?.rg || '-'}</span></div>
-          <div class="info-item"><span class="info-label">Órgão / UF</span><span class="info-val">${(first.lead?.rg_orgao || '-')} / ${(first.lead?.rg_uf || '-')}</span></div>
-          <div class="info-item"><span class="info-label">Emissão RG</span><span class="info-val">${first.lead?.rg_data_emissao || '-'}</span></div>
+          <div class="info-item"><span class="info-label">E-mail</span><span class="info-val">${escapeHtml(first.lead?.email || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Nascimento</span><span class="info-val">${escapeHtml(first.lead?.data_nascimento || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Idade</span><span class="info-val">${first.lead?.idade ? first.lead.idade + ' anos' : '-'}</span></div>
+          <div class="info-item"><span class="info-label">Geração</span><span class="info-val">${escapeHtml(first.lead?.geracao || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Gênero</span><span class="info-val" style="text-transform:capitalize;">${escapeHtml(first.lead?.genero || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Estado Civil</span><span class="info-val" style="text-transform:capitalize;">${escapeHtml(first.lead?.estado_civil || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Nome da Mãe</span><span class="info-val">${escapeHtml(first.lead?.nome_mae || '-')}</span></div>
+          <div class="info-item"><span class="info-label">RG</span><span class="info-val">${escapeHtml(first.lead?.rg || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Órgão / UF</span><span class="info-val">${escapeHtml(first.lead?.rg_orgao || '-')} / ${escapeHtml(first.lead?.rg_uf || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Emissão RG</span><span class="info-val">${escapeHtml(first.lead?.rg_data_emissao || '-')}</span></div>
         `;
+
+        // Dados funcionais e Margem
+        const funcionaisEl = document.getElementById("cm-funcionais");
+        if (funcionaisEl) {
+          const convLabel = getConvenioLabel(first.dados_funcionais?.convenio);
+          const margemPreRaw = parseFloat(first.dados_funcionais?.margem_pre_aprovada) || 0;
+          const margemPreNegativa = margemPreRaw < 0;
+          const margemPre = first.dados_funcionais?.margem_pre_aprovada !== undefined && first.dados_funcionais.margem_pre_aprovada !== null ? formatBRL(Math.max(0, margemPreRaw)) : '-';
+          const margemCartao = first.dados_funcionais?.mg_margem_cartao !== undefined && first.dados_funcionais.mg_margem_cartao !== null ? formatBRL(first.dados_funcionais.mg_margem_cartao) : '-';
+          const margemCartaoBeneficio = first.dados_funcionais?.mg_margem_cartao_beneficio !== undefined && first.dados_funcionais.mg_margem_cartao_beneficio !== null ? formatBRL(first.dados_funcionais.mg_margem_cartao_beneficio) : '-';
+          const salarioLiq = first.dados_funcionais?.salario_liquido !== undefined && first.dados_funcionais.salario_liquido !== null ? formatBRL(first.dados_funcionais.salario_liquido) : '-';
+          const lotacao = first.dados_funcionais?.mg_lotacao || '-';
+          const vinculo = first.dados_funcionais?.mg_tipo_vinculo || '-';
+          
+          funcionaisEl.innerHTML = `
+            <div class="info-item"><span class="info-label">Convênio</span><span class="info-val" style="font-weight:700;">${escapeHtml(convLabel)}</span></div>
+            <div class="info-item"><span class="info-label">Profissão / Cargo</span><span class="info-val">${escapeHtml(first.dados_funcionais?.profissao || first.lead?.profissao_possivel || '-')}</span></div>
+            <div class="info-item"><span class="info-label">Lotação (BP)</span><span class="info-val">${escapeHtml(lotacao)}</span></div>
+            <div class="info-item"><span class="info-label">Tipo de Vínculo (BQ)</span><span class="info-val">${escapeHtml(vinculo)}</span></div>
+            <div class="info-item"><span class="info-label">Salário Líquido</span><span class="info-val">${salarioLiq}</span></div>
+            <div class="info-item"><span class="info-label">Margem Empréstimo (BR)</span><span class="info-val" style="color:${margemPreNegativa ? 'var(--red-error)' : 'var(--green-success)'}; font-weight:700;">${margemPre}${margemPreNegativa ? ' (Esgotada)' : ''}</span></div>
+            <div class="info-item"><span class="info-label">Margem Cartão Consignado (BS)</span><span class="info-val" style="font-weight:700; color:var(--navy);">${margemCartao}</span></div>
+            <div class="info-item"><span class="info-label">Margem Cartão Benefício (BT)</span><span class="info-val" style="font-weight:700; color:var(--navy);">${margemCartaoBeneficio}</span></div>
+            <div class="info-item"><span class="info-label">Renda Faixa</span><span class="info-val">${escapeHtml(first.lead?.renda_faixa || '-')}</span></div>
+            <div class="info-item"><span class="info-label">Classe Econômica</span><span class="info-val">${escapeHtml(first.lead?.classe_economica || '-')}</span></div>
+          `;
+        }
 
         // Dados bancários
         const bancoEl = document.getElementById("cm-banco");
         bancoEl.innerHTML = `
-          <div class="info-item"><span class="info-label">Banco</span><span class="info-val">${first.dados_bancarios?.banco || '-'}</span></div>
-          <div class="info-item"><span class="info-label">Tipo</span><span class="info-val" style="text-transform:capitalize;">${first.dados_bancarios?.tipo_conta || '-'}</span></div>
-          <div class="info-item"><span class="info-label">Agência / Conta</span><span class="info-val">${first.dados_bancarios?.agencia || '-'} / ${first.dados_bancarios?.conta || '-'}</span></div>
-          <div class="info-item" style="grid-column: span 2;"><span class="info-label">Chave Pix (${first.dados_bancarios?.tipo_pix ? first.dados_bancarios.tipo_pix.toUpperCase() : '-'})</span><span class="info-val">${first.dados_bancarios?.chave_pix || '-'}</span></div>
+          <div class="info-item"><span class="info-label">Banco</span><span class="info-val">${escapeHtml(first.dados_bancarios?.banco || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Tipo</span><span class="info-val" style="text-transform:capitalize;">${escapeHtml(first.dados_bancarios?.tipo_conta || '-')}</span></div>
+          <div class="info-item"><span class="info-label">Agência / Conta</span><span class="info-val">${escapeHtml(first.dados_bancarios?.agencia || '-')} / ${escapeHtml(first.dados_bancarios?.conta || '-')}</span></div>
+          <div class="info-item" style="grid-column: span 2;"><span class="info-label">Chave Pix (${first.dados_bancarios?.tipo_pix ? escapeHtml(first.dados_bancarios.tipo_pix.toUpperCase()) : '-'})</span><span class="info-val">${escapeHtml(first.dados_bancarios?.chave_pix || '-')}</span></div>
         `;
 
-        // Histórico de propostas
-        const histBody = document.getElementById("cm-history-body");
-        histBody.innerHTML = "";
-        clientLeads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(l => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td style="font-size:0.72rem;color:var(--gray-light-text);">${l.id.substring(0, 14)}</td>
-            <td style="font-weight:700;">${formatBRL(l.proposta?.valor_solicitado || 0)}</td>
-            <td>${l.proposta?.prazo_meses || 0}x</td>
-            <td>${formatBRL(l.proposta?.valor_parcela || 0)}</td>
-            <td><span class="status-badge ${getStatusClass(l.status)}">${l.status}</span></td>
-            <td>${formatDateBR(l.createdAt)}</td>
+        // Dados de score e crédito
+        const scoreEl = document.getElementById("cm-score");
+        if (scoreEl) {
+          const scoreVal = first.proposta?.score !== undefined && first.proposta.score !== null ? first.proposta.score : '-';
+          const scoreFaixa = first.proposta?.score_faixa || '-';
+          const propensao = first.proposta?.propensao || first.proposta?.propensao_pagamento || '-';
+          const fgts = first.proposta?.fgts || '-';
+          const presumido = first.proposta?.presumido ? formatBRL(first.proposta.presumido) : '-';
+          const imovel = first.proposta?.imovel || '-';
+          const veiculo = first.proposta?.veiculo || '-';
+          const persona = first.proposta?.persona || '-';
+
+          scoreEl.innerHTML = `
+            <div class="info-item"><span class="info-label">Score de Crédito</span><span class="info-val" style="font-weight:700;">${escapeHtml(String(scoreVal))}</span></div>
+            <div class="info-item"><span class="info-label">Faixa de Score</span><span class="info-val">${escapeHtml(scoreFaixa)}</span></div>
+            <div class="info-item"><span class="info-label">Propensão a Pagamento</span><span class="info-val">${escapeHtml(String(propensao))}</span></div>
+            <div class="info-item"><span class="info-label">Renda Presumida</span><span class="info-val">${presumido}</span></div>
+            <div class="info-item"><span class="info-label">Possui Imóvel?</span><span class="info-val">${escapeHtml(String(imovel))}</span></div>
+            <div class="info-item"><span class="info-label">Possui Veículo?</span><span class="info-val">${escapeHtml(String(veiculo))}</span></div>
+            <div class="info-item"><span class="info-label">Flag FGTS?</span><span class="info-val">${escapeHtml(String(fgts))}</span></div>
+            <div class="info-item"><span class="info-label">Persona de Crédito</span><span class="info-val">${escapeHtml(persona)}</span></div>
           `;
-          histBody.appendChild(tr);
-        });
+        }
+
+        // Inicialização do Simulador de Crédito no Modal
+        const convenioSelect = document.getElementById("cm-sim-convenio");
+        const margemInput = document.getElementById("cm-sim-margem");
+        const taxaInput = document.getElementById("cm-sim-taxa");
+        const prazoSelect = document.getElementById("cm-sim-prazo");
+
+        if (margemInput && taxaInput && prazoSelect && convenioSelect) {
+          const convenioKey = first.dados_funcionais?.convenio || 'inss';
+          convenioSelect.value = convenioKey;
+
+          let margemInicial = 0;
+          if (first.dados_funcionais?.margem_pre_aprovada !== undefined && first.dados_funcionais.margem_pre_aprovada !== null) {
+            margemInicial = Math.max(0, parseFloat(first.dados_funcionais.margem_pre_aprovada) || 0);
+          } else {
+            const salario = parseFloat(first.dados_funcionais?.salario_liquido || 0);
+            const configs = getConfigs();
+            const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { margem: 30 };
+            const margemPorcentagem = parseFloat(convCfg.margem) || 30;
+            margemInicial = salario * (margemPorcentagem / 100);
+          }
+
+          const configs = getConfigs();
+          const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { taxa: 1.80 };
+          const taxaInicial = parseFloat(convCfg.taxa) || 1.80;
+
+          margemInput.value = formatBRL(margemInicial).replace("R$ ", "");
+          taxaInput.value = taxaInicial.toFixed(2).replace(".", ",") + "%";
+          prazoSelect.value = "84";
+
+          setTimeout(() => calculateClientSim(), 50);
+        }
 
         clientModal.classList.add("active");
         document.body.style.overflow = "hidden";
       };
+
+      const calculateClientSim = () => {
+        const margemInput = document.getElementById("cm-sim-margem");
+        const taxaInput = document.getElementById("cm-sim-taxa");
+        const prazoSelect = document.getElementById("cm-sim-prazo");
+
+        if (!margemInput || !taxaInput || !prazoSelect) return;
+
+        const margemVal = Math.max(0, parseFloat(margemInput.value.replace(/[^\d,]/g, "").replace(",", ".")) || 0);
+        const taxaVal = Math.max(0, parseFloat(taxaInput.value.replace(",", ".").replace(/[^\d.]/g, "")) || 0);
+        const prazoVal = parseInt(prazoSelect.value) || 84;
+
+        const taxaMensal = (taxaVal / 100);
+
+        let valorLiberado = 0;
+        let totalFinanciado = margemVal * prazoVal;
+
+        if (taxaMensal > 0) {
+          const taxaPow = Math.pow(1 + taxaMensal, prazoVal);
+          valorLiberado = margemVal * (taxaPow - 1) / (taxaMensal * taxaPow);
+        } else {
+          valorLiberado = margemVal * prazoVal;
+        }
+
+        document.getElementById("cm-sim-resultado-liberado").textContent = formatBRL(valorLiberado);
+        document.getElementById("cm-sim-resultado-total").textContent = formatBRL(totalFinanciado);
+      };
+      window.calculateClientSim = calculateClientSim;
+
+      // Listeners da Calculadora no Modal
+      setTimeout(() => {
+        const simMargemInput = document.getElementById("cm-sim-margem");
+        if (simMargemInput) {
+          simMargemInput.addEventListener("input", (e) => {
+            let v = e.target.value.replace(/\D/g, "");
+            v = (v / 100).toFixed(2) + '';
+            v = v.replace(".", ",");
+            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+            e.target.value = v;
+            calculateClientSim();
+          });
+        }
+
+        const simTaxaInput = document.getElementById("cm-sim-taxa");
+        if (simTaxaInput) {
+          simTaxaInput.addEventListener("input", (e) => {
+            let v = e.target.value.replace(/[^\d,.]/g, "");
+            e.target.value = v;
+            calculateClientSim();
+          });
+          simTaxaInput.addEventListener("blur", (e) => {
+            let v = e.target.value.replace(/[^\d,.]/g, "").replace(",", ".");
+            let parsed = parseFloat(v) || 1.80;
+            e.target.value = parsed.toFixed(2).replace(".", ",") + "%";
+            calculateClientSim();
+          });
+        }
+
+        const simPrazoSelect = document.getElementById("cm-sim-prazo");
+        if (simPrazoSelect) {
+          simPrazoSelect.addEventListener("change", () => {
+            calculateClientSim();
+          });
+        }
+
+        const simConvenioSelect = document.getElementById("cm-sim-convenio");
+        if (simConvenioSelect) {
+          simConvenioSelect.addEventListener("change", (e) => {
+            const convenioKey = e.target.value;
+            const configs = getConfigs();
+            const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { taxa: 1.80 };
+            const taxaInicial = parseFloat(convCfg.taxa) || 1.80;
+
+            const taxaInput = document.getElementById("cm-sim-taxa");
+            if (taxaInput) {
+              taxaInput.value = taxaInicial.toFixed(2).replace(".", ",") + "%";
+            }
+            calculateClientSim();
+          });
+        }
+
+        const btnCalcularSim = document.getElementById("cm-btn-calcular-sim");
+        if (btnCalcularSim) {
+          btnCalcularSim.addEventListener("click", () => {
+            calculateClientSim();
+          });
+        }
+      }, 500);
 
       document.getElementById("close-client-modal").addEventListener("click", () => {
         clientModal.classList.remove("active");
@@ -6658,6 +7295,124 @@
       });
       clientModal.addEventListener("click", (e) => {
         if (e.target === clientModal) { clientModal.classList.remove("active"); document.body.style.overflow = ""; }
+      });
+
+      document.getElementById("cm-btn-atender").addEventListener("click", async () => {
+        if (!activeClientCpf) return;
+        const btn = document.getElementById("cm-btn-atender");
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.textContent = "Iniciando...";
+
+        const leads = getLeads();
+        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && l.status === "Consulta de Margem");
+
+        if (clientLeads.length > 0) {
+          const user = getActiveUserObj();
+          const profile = getActiveProfile();
+
+          // Obter valores simulados ativos no modal
+          const convenioSelect = document.getElementById("cm-sim-convenio");
+          const margemInput = document.getElementById("cm-sim-margem");
+          const taxaInput = document.getElementById("cm-sim-taxa");
+          const prazoSelect = document.getElementById("cm-sim-prazo");
+
+          let convenioVal = "";
+          if (convenioSelect) {
+            convenioVal = convenioSelect.value;
+          }
+
+          let margemVal = 0;
+          let taxaVal = 0;
+          let prazoVal = 84;
+          let valorLiberado = 0;
+          let totalFinanciado = 0;
+
+          if (margemInput && taxaInput && prazoSelect) {
+            margemVal = parseFloat(margemInput.value.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+            taxaVal = parseFloat(taxaInput.value.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+            prazoVal = parseInt(prazoSelect.value) || 84;
+
+            const taxaMensal = (taxaVal / 100);
+            if (taxaMensal > 0) {
+              const taxaPow = Math.pow(1 + taxaMensal, prazoVal);
+              valorLiberado = margemVal * (taxaPow - 1) / (taxaMensal * taxaPow);
+            } else {
+              valorLiberado = margemVal * prazoVal;
+            }
+            totalFinanciado = margemVal * prazoVal;
+          }
+
+          const updatedLeads = leads.map(l => {
+            if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && l.status === "Consulta de Margem") {
+              l.status = "Recebida";
+              if (profile !== "admin") {
+                l.operador_id = user.id;
+                l.operador_nome = user.nome;
+              }
+              if (convenioVal) {
+                if (!l.dados_funcionais) l.dados_funcionais = {};
+                l.dados_funcionais.convenio = convenioVal;
+                l.convenio = convenioVal;
+              }
+              // Atualizar proposta com os dados simulados
+              l.proposta = {
+                ...(l.proposta || {}),
+                valor_solicitado: valorLiberado,
+                prazo_meses: prazoVal,
+                valor_parcela: margemVal,
+                taxa_juros_mensal: taxaVal / 100,
+                total_financiado: totalFinanciado
+              };
+            }
+            return l;
+          });
+
+          currentLeads = updatedLeads;
+          safeSaveLeads(currentLeads);
+
+          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+            try {
+              for (const clientLead of clientLeads) {
+                const updatedLead = currentLeads.find(l => l.id === clientLead.id);
+                if (updatedLead) {
+                  await supabaseClient.from('leads').upsert({
+                    id: updatedLead.id,
+                    created_at: updatedLead.createdAt,
+                    nome: updatedLead.lead?.nome,
+                    cpf: updatedLead.lead?.cpf,
+                    status: updatedLead.status,
+                    convenio: updatedLead.dados_funcionais?.convenio,
+                    valor_solicitado: updatedLead.proposta?.valor_solicitado || 0,
+                    payload: updatedLead
+                  });
+                }
+              }
+            } catch (err) {
+              console.error("[Walker Bank] Erro ao sincronizar com Supabase:", err);
+            }
+          }
+
+          clientLeads.forEach(clientLead => {
+            const updatedLead = currentLeads.find(l => l.id === clientLead.id);
+            if (updatedLead) {
+              recordLog('status_change', `Iniciado atendimento do lead. Status → Recebida`, updatedLead, { de: "Consulta de Margem", para: "Recebida" });
+            }
+          });
+
+          showToast("Atendimento iniciado! O lead foi enviado para a Mesa de Crédito.", "var(--green-success)");
+          
+          clientModal.classList.remove("active");
+          document.body.style.overflow = "";
+
+          renderBaseGeral();
+          renderMesaTable();
+          renderInicioHome();
+          renderDashboard();
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
       });
 
       // ==========================================
@@ -7606,10 +8361,10 @@
         const profile = getActiveProfile();
         const user = getActiveUserObj();
         
-        // Filtragem por Operador
-        let userLeads = leads;
+        // Filtragem por Operador (excluindo leads frios da base geral que não foram atendidos)
+        let userLeads = leads.filter(l => l.status !== "Consulta de Margem");
         if (profile !== "admin") {
-          userLeads = leads.filter(l => l.operador_id === profile);
+          userLeads = userLeads.filter(l => l.operador_id === profile);
         }
         
         // 1. Saudação Dinâmica baseada no horário e no nome do perfil ativo
@@ -8015,7 +8770,8 @@
           updateSidebarUserUI();
 
           // Renderiza local cache primeiro
-          navigateTo('inicio');
+          const initPage = sessionStorage.getItem("walker_active_page") || 'inicio';
+          navigateTo(initPage);
 
           // Carrega configurações
           try {
@@ -8039,7 +8795,7 @@
           knownLeadIds = new Set(getLeads().map(l => l.id));
 
           // Renderiza a mesa e páginas com dados do Supabase
-          navigateTo('inicio');
+          navigateTo(sessionStorage.getItem("walker_active_page") || 'inicio');
 
           // Configuração de listeners adicionais para filtros do Dashboard Geral
           ['dash-data-inicio', 'dash-data-fim', 'dash-convenio'].forEach(id => {
