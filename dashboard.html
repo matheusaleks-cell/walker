@@ -3186,8 +3186,6 @@
           <select class="filter-select" id="log-filter-op">
             <option value="all">Todos os Operadores</option>
             <option value="admin">Administrador</option>
-            <option value="op-joao">João Silva</option>
-            <option value="op-maria">Maria Santos</option>
           </select>
           <select class="filter-select" id="log-filter-tipo">
             <option value="all">Todos os Tipos</option>
@@ -3197,6 +3195,8 @@
             <option value="wpp_sent">WhatsApp Enviado</option>
             <option value="nova_proposta">Nova Proposta</option>
             <option value="consulta_margem">Consulta de Margem</option>
+            <option value="prospeccao_tentativa">Prospecção (Tentativa)</option>
+            <option value="prospeccao_prospectado">Prospecção (Prospectado)</option>
             <option value="config_save">Configurações Salvas</option>
             <option value="profile_switch">Troca de Perfil</option>
           </select>
@@ -4252,14 +4252,17 @@
       };
 
       const LOG_TYPE_LABELS = {
-        status_change:   '📋 Mudança de Status',
-        lead_edit:       '✏️ Edição de Proposta',
-        lead_assign:     '👤 Atribuição',
-        wpp_sent:        '💬 WhatsApp',
-        profile_switch:  '🔑 Troca de Perfil',
-        config_save:     '⚙️ Configs',
-        nova_proposta:   '🆕 Nova Proposta',
-        consulta_margem: '🔍 Consulta Margem'
+        status_change:           '📋 Mudança de Status',
+        lead_edit:               '✏️ Edição de Proposta',
+        lead_assign:             '👤 Atribuição',
+        wpp_sent:                '💬 WhatsApp',
+        profile_switch:          '🔑 Troca de Perfil',
+        config_save:             '⚙️ Configs',
+        nova_proposta:           '🆕 Nova Proposta',
+        consulta_margem:         '🔍 Consulta Margem',
+        prospeccao_tentativa:    '📞 Prospecção',
+        prospeccao_prospectado:  '✅ Prospectado',
+        lead_created:            '➕ Lead Criado'
       };
 
       const getLogOperatorAvatar = (operadorId) => {
@@ -4800,23 +4803,30 @@
           return;
         }
         try {
-          // Otimização de Egress: Busca apenas colunas de metadados leves na listagem geral.
-          // O payload pesado com anexos Base64 será buscado sob demanda (Lazy Loading).
           const { data, error } = await supabaseClient
             .from('leads')
-            .select('id, created_at, nome, cpf, status, convenio, valor_solicitado')
+            .select('id, created_at, nome, cpf, status, convenio, valor_solicitado, payload')
             .order('created_at', { ascending: false });
 
           if (error) throw error;
           if (data) {
-            // Mapeamos de volta para o formato de payload esperado pela UI
             currentLeads = data.map(row => {
               let statusMapped = row.status;
               if (statusMapped === "Aguardando Averbação") {
                 statusMapped = "Recebida";
               }
 
-              // Otimização: Tenta obter dados completos que já existem localmente em cache para não sobrescrevê-los com nulos
+              // Se o payload JSONB estiver disponível, usa ele como fonte primária
+              let parsed = {};
+              if (row.payload) {
+                if (typeof row.payload === 'string') {
+                  try { parsed = JSON.parse(row.payload); } catch(e) {}
+                } else if (typeof row.payload === 'object') {
+                  parsed = row.payload;
+                }
+              }
+
+              // Fallback: cache local para campos que o payload pode não ter
               const existing = (typeof currentLeads !== 'undefined' && currentLeads)
                 ? currentLeads.find(l => l.id === row.id)
                 : null;
@@ -4825,42 +4835,64 @@
                 id: row.id,
                 createdAt: row.created_at,
                 status: statusMapped,
-                operador_id: existing?.operador_id || null,
-                operador_nome: existing?.operador_nome || null,
-                justificativa: existing?.justificativa || '',
-                rfb: existing?.rfb || null,
+                operador_id: parsed.operador_id || existing?.operador_id || null,
+                operador_nome: parsed.operador_nome || existing?.operador_nome || null,
+                justificativa: parsed.justificativa || existing?.justificativa || '',
+                rfb: parsed.rfb || existing?.rfb || null,
+                historico_contatos: parsed.historico_contatos || existing?.historico_contatos || null,
                 lead: {
-                  nome: row.nome,
-                  cpf: row.cpf,
-                  celular: existing?.lead?.celular || '',
-                  email: existing?.lead?.email || '',
-                  genero: existing?.lead?.genero || '',
-                  estado_civil: existing?.lead?.estado_civil || '',
-                  data_nascimento: existing?.lead?.data_nascimento || '',
-                  nome_mae: existing?.lead?.nome_mae || '',
-                  rg: existing?.lead?.rg || '',
-                  rg_orgao: existing?.lead?.rg_orgao || '',
-                  rg_data_emissao: existing?.lead?.rg_data_emissao || '',
-                  rg_uf: existing?.lead?.rg_uf || ''
+                  nome: parsed.lead?.nome || row.nome,
+                  cpf: parsed.lead?.cpf || row.cpf,
+                  celular: parsed.lead?.celular || existing?.lead?.celular || '',
+                  email: parsed.lead?.email || existing?.lead?.email || '',
+                  genero: parsed.lead?.genero || existing?.lead?.genero || '',
+                  estado_civil: parsed.lead?.estado_civil || existing?.lead?.estado_civil || '',
+                  data_nascimento: parsed.lead?.data_nascimento || existing?.lead?.data_nascimento || '',
+                  nome_mae: parsed.lead?.nome_mae || existing?.lead?.nome_mae || '',
+                  rg: parsed.lead?.rg || existing?.lead?.rg || '',
+                  rg_orgao: parsed.lead?.rg_orgao || existing?.lead?.rg_orgao || '',
+                  rg_data_emissao: parsed.lead?.rg_data_emissao || existing?.lead?.rg_data_emissao || '',
+                  rg_uf: parsed.lead?.rg_uf || existing?.lead?.rg_uf || '',
+                  idade: parsed.lead?.idade || existing?.lead?.idade || null,
+                  geracao: parsed.lead?.geracao || existing?.lead?.geracao || '',
+                  renda_faixa: parsed.lead?.renda_faixa || existing?.lead?.renda_faixa || '',
+                  classe_economica: parsed.lead?.classe_economica || existing?.lead?.classe_economica || '',
+                  profissao_possivel: parsed.lead?.profissao_possivel || existing?.lead?.profissao_possivel || ''
                 },
                 dados_funcionais: {
-                  convenio: row.convenio,
-                  profissao: existing?.dados_funcionais?.profissao || '',
-                  matricula: existing?.dados_funcionais?.matricula || '',
-                  salario_liquido: existing?.dados_funcionais?.salario_liquido || 0
+                  convenio: row.convenio || parsed.dados_funcionais?.convenio || '',
+                  profissao: parsed.dados_funcionais?.profissao || existing?.dados_funcionais?.profissao || '',
+                  matricula: parsed.dados_funcionais?.matricula || existing?.dados_funcionais?.matricula || '',
+                  salario_liquido: parsed.dados_funcionais?.salario_liquido || existing?.dados_funcionais?.salario_liquido || 0,
+                  margem_pre_aprovada: parsed.dados_funcionais?.margem_pre_aprovada !== undefined ? parsed.dados_funcionais.margem_pre_aprovada : (existing?.dados_funcionais?.margem_pre_aprovada),
+                  mg_margem_cartao: parsed.dados_funcionais?.mg_margem_cartao !== undefined ? parsed.dados_funcionais.mg_margem_cartao : (existing?.dados_funcionais?.mg_margem_cartao || 0),
+                  mg_margem_cartao_beneficio: parsed.dados_funcionais?.mg_margem_cartao_beneficio !== undefined ? parsed.dados_funcionais.mg_margem_cartao_beneficio : (existing?.dados_funcionais?.mg_margem_cartao_beneficio || 0),
+                  mg_tipo_vinculo: parsed.dados_funcionais?.mg_tipo_vinculo || existing?.dados_funcionais?.mg_tipo_vinculo || '',
+                  mg_lotacao: parsed.dados_funcionais?.mg_lotacao || existing?.dados_funcionais?.mg_lotacao || '',
+                  mg_orgao: parsed.dados_funcionais?.mg_orgao || existing?.dados_funcionais?.mg_orgao || '',
+                  pd_mensagem: parsed.dados_funcionais?.pd_mensagem || existing?.dados_funcionais?.pd_mensagem || ''
                 },
-                dados_bancarios: existing?.dados_bancarios || null,
+                dados_bancarios: parsed.dados_bancarios || existing?.dados_bancarios || null,
                 proposta: {
-                  valor_solicitado: row.valor_solicitado,
-                  prazo_meses: existing?.proposta?.prazo_meses || 0,
-                  valor_parcela: existing?.proposta?.valor_parcela || 0,
-                  taxa_juros_mensal: existing?.proposta?.taxa_juros_mensal || 0,
-                  total_financiado: existing?.proposta?.total_financiado || 0,
-                  cet_anual: existing?.proposta?.cet_anual || 0,
-                  assinatura_sms_validada: existing?.proposta?.assinatura_sms_validada || false
+                  valor_solicitado: row.valor_solicitado || parsed.proposta?.valor_solicitado || 0,
+                  prazo_meses: parsed.proposta?.prazo_meses || existing?.proposta?.prazo_meses || 0,
+                  valor_parcela: parsed.proposta?.valor_parcela || existing?.proposta?.valor_parcela || 0,
+                  taxa_juros_mensal: parsed.proposta?.taxa_juros_mensal || existing?.proposta?.taxa_juros_mensal || 0,
+                  total_financiado: parsed.proposta?.total_financiado || existing?.proposta?.total_financiado || 0,
+                  cet_anual: parsed.proposta?.cet_anual || existing?.proposta?.cet_anual || 0,
+                  assinatura_sms_validada: parsed.proposta?.assinatura_sms_validada || existing?.proposta?.assinatura_sms_validada || false,
+                  assinatura_manual_solicitada: parsed.proposta?.assinatura_manual_solicitada || existing?.proposta?.assinatura_manual_solicitada || false,
+                  score: parsed.proposta?.score !== undefined ? parsed.proposta.score : (existing?.proposta?.score),
+                  score_faixa: parsed.proposta?.score_faixa || existing?.proposta?.score_faixa || '',
+                  persona: parsed.proposta?.persona || existing?.proposta?.persona || '',
+                  propensao: parsed.proposta?.propensao || existing?.proposta?.propensao || '',
+                  fgts: parsed.proposta?.fgts || existing?.proposta?.fgts || '',
+                  presumido: parsed.proposta?.presumido || existing?.proposta?.presumido || 0,
+                  imovel: parsed.proposta?.imovel || existing?.proposta?.imovel || '',
+                  veiculo: parsed.proposta?.veiculo || existing?.proposta?.veiculo || ''
                 },
-                marketing: existing?.marketing || { utm_source: '', utm_medium: '' },
-                arquivos: existing?.arquivos || { identidade_cnh_rg: null, contracheque: null }
+                marketing: parsed.marketing || existing?.marketing || { utm_source: '', utm_medium: '' },
+                arquivos: parsed.arquivos || existing?.arquivos || { identidade_cnh_rg: null, contracheque: null }
               };
 
               return item;
@@ -9511,6 +9543,17 @@
       // 13. LOGS DE ATIVIDADE (PÁGINA 7)
       // ==========================================
       const renderLogs = () => {
+        // Popular select de operadores dinamicamente
+        const opSel = document.getElementById("log-filter-op");
+        if (opSel && opSel.options.length <= 2) {
+          OPERADORES.forEach(op => {
+            const opt = document.createElement('option');
+            opt.value = op.id;
+            opt.textContent = op.nome;
+            opSel.appendChild(opt);
+          });
+        }
+
         const allLogs = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
         const filterTipo = document.getElementById("log-filter-tipo")?.value || 'all';
         const filterOp   = document.getElementById("log-filter-op")?.value || 'all';
