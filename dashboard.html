@@ -2658,19 +2658,33 @@
         <!-- Resultado da Consulta (Inicia Oculto) -->
         <div id="margem-result-card" style="display: none; animation: pageFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
           
-          <!-- Bloco Principal de Destaque da Margem -->
-          <div class="panel-card highlight" style="background: linear-gradient(135deg, var(--navy) 0%, var(--cobalt) 100%); color: white; padding: 32px; border: 1.5px solid var(--gold); border-radius: 16px; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: var(--shadow-lg);">
-            <span class="metric-label" style="color: rgba(255, 255, 255, 0.75); font-size: 0.8rem; letter-spacing: 0.08em; font-weight: 700;">Margem Consignável Disponível</span>
-            <div class="metric-value" id="margem-show-valor" style="color: var(--gold); font-size: 2.8rem; font-weight: 700; margin: 12px 0; line-height: 1.1;">R$ 0,00</div>
-            <div id="margem-show-status" style="font-size: 0.85rem; font-weight: 700; color: var(--green-success); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+          <!-- Bloco Principal de Destaque das 3 Margens -->
+          <div class="panel-card highlight" style="background: linear-gradient(135deg, var(--navy) 0%, var(--cobalt) 100%); color: white; padding: 32px; border: 1.5px solid var(--gold); border-radius: 16px; margin-bottom: 24px; box-shadow: var(--shadow-lg);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; text-align: center; margin-bottom: 20px;">
+              <div>
+                <span style="color: rgba(255,255,255,0.65); font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 6px;">Margem Empréstimo</span>
+                <div id="margem-show-valor" style="color: var(--gold); font-size: 2.2rem; font-weight: 700; line-height: 1.1;">R$ 0,00</div>
+              </div>
+              <div style="border-left: 1px solid rgba(255,255,255,0.15); border-right: 1px solid rgba(255,255,255,0.15); padding: 0 16px;">
+                <span style="color: rgba(255,255,255,0.65); font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 6px;">Margem Cartão Consignado</span>
+                <div id="margem-show-cartao" style="color: white; font-size: 2.2rem; font-weight: 700; line-height: 1.1;">R$ 0,00</div>
+              </div>
+              <div>
+                <span style="color: rgba(255,255,255,0.65); font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 6px;">Margem Cartão Benefício</span>
+                <div id="margem-show-beneficio" style="color: white; font-size: 2.2rem; font-weight: 700; line-height: 1.1;">R$ 0,00</div>
+              </div>
+            </div>
+            <div id="margem-show-status" style="font-size: 0.85rem; font-weight: 700; color: var(--green-success); display: flex; align-items: center; justify-content: center; gap: 6px;">
               <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green-success); animation: pulse 1.5s infinite;"></span>
               Margem pré-aprovada disponível para contratação
             </div>
-            
-            <button class="btn-action" id="margem-btn-simular" style="background: var(--gold); color: var(--navy); margin-top: 24px; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(212, 188, 110, 0.3); transition: var(--transition-smooth); border: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              Iniciar Simulação / Proposta
-            </button>
+
+            <div style="text-align: center; margin-top: 20px;">
+              <button class="btn-action" id="margem-btn-simular" style="background: var(--gold); color: var(--navy); padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(212, 188, 110, 0.3); transition: var(--transition-smooth); border: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Iniciar Simulação / Proposta
+              </button>
+            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
@@ -8421,18 +8435,24 @@
         // Se estiver em modo de demonstração offline
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
           const leads = getLeads();
-          foundLead = leads.find(l => l.lead?.cpf?.replace(/\D/g, "") === cpfVal);
-          await new Promise(r => setTimeout(r, 600)); // Simulando delay de rede
+          const matches = leads.filter(l => l.lead?.cpf?.replace(/\D/g, "") === cpfVal);
+          if (matches.length > 0) {
+            matches.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            foundLead = matches[0];
+          }
+          await new Promise(r => setTimeout(r, 600));
         } else {
           try {
-            // Busca o lead inteiro com payload completo do Supabase
-            const { data, error } = await supabaseClient
+            // Busca o lead mais recente com payload completo do Supabase
+            const { data: rows, error } = await supabaseClient
               .from('leads')
               .select('*')
               .eq('cpf', cpfVal)
-              .maybeSingle();
+              .order('created_at', { ascending: false })
+              .limit(1);
 
             if (error) throw error;
+            const data = rows && rows.length > 0 ? rows[0] : null;
             if (data) {
               let parsedPayload = {};
               if (data.payload) {
@@ -8484,7 +8504,28 @@
             margemConsignavel = salario * (margemPorcentagem / 100);
           }
 
-          document.getElementById("margem-show-valor").textContent = formatBRL(margemConsignavel);
+          const margemCartaoVal = parseFloat(foundLead.dados_funcionais?.mg_margem_cartao) || 0;
+          const margemBeneficioVal = parseFloat(foundLead.dados_funcionais?.mg_margem_cartao_beneficio) || 0;
+
+          document.getElementById("margem-show-valor").textContent = formatBRL(Math.max(0, margemConsignavel));
+          document.getElementById("margem-show-cartao").textContent = formatBRL(Math.max(0, margemCartaoVal));
+          document.getElementById("margem-show-beneficio").textContent = formatBRL(Math.max(0, margemBeneficioVal));
+
+          if (margemConsignavel > 0) {
+            document.getElementById("margem-show-valor").style.color = 'var(--gold)';
+          } else {
+            document.getElementById("margem-show-valor").style.color = '#e74c3c';
+          }
+
+          const statusEl = document.getElementById("margem-show-status");
+          if (margemConsignavel > 0 || margemCartaoVal > 0 || margemBeneficioVal > 0) {
+            statusEl.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green-success); animation: pulse 1.5s infinite;"></span> Margem pré-aprovada disponível para contratação';
+            statusEl.style.color = 'var(--green-success)';
+          } else {
+            statusEl.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#e74c3c;"></span> Nenhuma margem disponível (esgotada)';
+            statusEl.style.color = '#e74c3c';
+          }
+
           document.getElementById("margem-show-nome").innerHTML = makeCopyable(foundLead.lead?.nome || 'Cliente Sem Nome');
           const cpVal = foundLead.lead?.cpf || '';
           document.getElementById("margem-show-cpf").innerHTML = makeCopyable(formatCPF(cpVal), cpVal.replace(/\D/g, ''));
@@ -8661,14 +8702,16 @@
           await new Promise(r => setTimeout(r, 400));
         } else {
           try {
-            const { data, error } = await supabaseClient
+            const { data: prospRows, error } = await supabaseClient
               .from('leads')
               .select('*')
               .eq('cpf', cpfVal)
               .eq('status', 'Consulta de Margem')
-              .maybeSingle();
+              .order('created_at', { ascending: false })
+              .limit(1);
 
             if (error) throw error;
+            const data = prospRows && prospRows.length > 0 ? prospRows[0] : null;
             if (data) {
               let parsedPayload = {};
               if (data.payload) {
