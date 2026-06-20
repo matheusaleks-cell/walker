@@ -1852,6 +1852,10 @@
         <span>Base Geral</span>
         <span class="nav-count" id="nav-count-base">0</span>
       </div>
+      <div class="nav-item" data-page="prospeccao" id="nav-prospeccao">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg></span>
+        <span>Prospecção</span>
+      </div>
       <div class="nav-item" data-page="clientes" id="nav-clientes">
         <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
         <span>Clientes</span>
@@ -2094,6 +2098,9 @@
             <option value="Recusada">Recusada</option>
             <option value="Paga">Paga</option>
           </select>
+          <select class="filter-select" id="filter-operador">
+            <option value="all">Todos os Operadores</option>
+          </select>
           <button class="btn-filter" id="btn-clear-filters">Limpar Filtros</button>
           <button type="button" id="btn-new-lead" style="margin-left:auto; background:var(--gold); color:var(--navy); border:none; padding:10px 18px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; font-family:Arial; transition:var(--transition-fast);">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -2330,6 +2337,18 @@
             <option value="regular">Regular</option>
             <option value="irregular">Irregular</option>
           </select>
+          <select class="filter-select" id="leads-convenio">
+            <option value="all">Todos os Convênios</option>
+          </select>
+          <select class="filter-select" id="leads-status">
+            <option value="all">Todos os Status</option>
+            <option value="Recebida">Recebida</option>
+            <option value="Em Análise">Em Análise</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Aguardando Assinatura">Ag. Assinatura</option>
+            <option value="Recusada">Recusada</option>
+            <option value="Paga">Paga</option>
+          </select>
           <button class="btn-filter" id="leads-limpar">Limpar</button>
           <button class="btn-export" id="leads-export-csv">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -2380,6 +2399,15 @@
             <option value="1">Pelo menos 1 proposta</option>
             <option value="2">Mais de 1 proposta (Fidelidade)</option>
           </select>
+          <select class="filter-select" id="clientes-status">
+            <option value="all">Último Status</option>
+            <option value="Recebida">Recebida</option>
+            <option value="Em Análise">Em Análise</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Aguardando Assinatura">Ag. Assinatura</option>
+            <option value="Recusada">Recusada</option>
+            <option value="Paga">Paga</option>
+          </select>
           <button class="btn-filter" id="clientes-limpar">Limpar</button>
         </div>
         <div class="panel-card">
@@ -2419,6 +2447,26 @@
           <select class="filter-select" id="base-convenio">
             <option value="all">Todos os Convênios</option>
           </select>
+          <select class="filter-select" id="base-classe">
+            <option value="all">Todas as Classes</option>
+            <option value="A">Classe A</option>
+            <option value="B">Classe B</option>
+            <option value="C">Classe C</option>
+            <option value="D">Classe D</option>
+            <option value="E">Classe E</option>
+          </select>
+          <select class="filter-select" id="base-score">
+            <option value="all">Todas Faixas de Score</option>
+            <option value="RISCO MUITO BAIXO">Risco Muito Baixo</option>
+            <option value="RISCO BAIXO">Risco Baixo</option>
+            <option value="RISCO MÉDIO">Risco Médio</option>
+            <option value="RISCO ALTO">Risco Alto</option>
+          </select>
+          <select class="filter-select" id="base-margem">
+            <option value="all">Margem Disponível</option>
+            <option value="com">Com Margem (> R$ 0)</option>
+            <option value="sem">Sem Margem (= R$ 0)</option>
+          </select>
           <button class="btn-filter" id="base-limpar">Limpar</button>
         </div>
         <div class="panel-card">
@@ -2455,8 +2503,133 @@
       </section>
 
       <!-- ========================================
-           PAGE 5B: CONSULTA DE MARGEM
+           PAGE 5C: PROSPECÇÃO COMERCIAL
       ======================================== -->
+      <section class="page-section" id="sec-prospeccao">
+        <div class="panel-card" style="padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 6px;">Prospecção de Clientes</h2>
+          <p style="font-size: 0.85rem; color: var(--gray-light-text); margin-bottom: 20px;">Busque um cliente por CPF ou inicie a fila randômica de prospecção comercial.</p>
+
+          <!-- Barra de Ações: Busca por CPF e Botão Randômico -->
+          <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+            <!-- Busca por CPF -->
+            <div style="display: flex; gap: 8px; flex: 1; min-width: 280px; max-width: 400px;">
+              <div class="search-input-wrapper" style="flex: 1; min-width: auto; margin-bottom: 0;">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="prosp-search-cpf" placeholder="Pesquisar CPF na Base..." style="font-weight: 700;">
+              </div>
+              <button class="btn-action" id="btn-prosp-buscar-cpf" style="padding: 0 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; height: 38px;">Buscar</button>
+            </div>
+            
+            <span style="color: var(--gray-light-text); font-weight: 700; font-size: 0.8rem;">OU</span>
+
+            <!-- Botão Randômico -->
+            <button class="btn-action" id="btn-prosp-random" style="background: var(--navy); border-color: var(--navy); color: white; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; height: 38px; padding: 0 20px; border-radius: 8px; cursor: pointer;">
+              ⚡ Buscar Próximo Lead (Fila Randômica)
+            </button>
+          </div>
+        </div>
+
+        <!-- Estado Vazio / Inicial -->
+        <div id="prosp-empty-state" class="panel-card" style="text-align: center; padding: 60px 24px; border: 2px dashed rgba(24, 27, 44, 0.15); background: transparent; box-shadow: none;">
+          <div style="font-size: 2.5rem; margin-bottom: 12px;">📞</div>
+          <h3 style="font-size: 1.1rem; color: var(--navy); font-weight: 700;">Aguardando Ação</h3>
+          <p style="font-size: 0.85rem; color: var(--gray-light-text); max-width: 360px; margin: 4px auto 0 auto;">Digite um CPF ao lado para consultar a ficha ou clique em "Buscar Próximo Lead" para sortear um cliente da base.</p>
+        </div>
+
+        <!-- Card de Exibição do Lead Ativo (Inicia Oculto) -->
+        <div id="prosp-lead-card" style="display: none; animation: pageFadeIn 0.3s ease;">
+          <div class="proposta-grid" style="display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; align-items: flex-start;">
+            
+            <!-- Coluna 1: Dados do Cliente e Simulador -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+              <!-- Ficha Cadastral e Margens -->
+              <div class="panel-card" style="padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(24, 27, 44, 0.08); padding-bottom: 14px; margin-bottom: 16px;">
+                  <div>
+                    <h3 id="prosp-card-nome" style="font-size: 1.25rem; font-weight: 700; color: var(--navy);">Nome do Cliente</h3>
+                    <span id="prosp-card-cpf" style="font-size: 0.85rem; color: var(--gray-light-text); font-weight: 700;">000.000.000-00</span>
+                  </div>
+                  <span id="prosp-card-convenio" class="status-badge" style="background: rgba(212, 188, 110, 0.15); color: var(--gold); border: 1px solid var(--gold); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; text-transform: uppercase;">INSS</span>
+                </div>
+
+                <!-- Grid de Informações Cadastrais -->
+                <div id="prosp-card-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                  <!-- Injetado via JS -->
+                </div>
+
+                <!-- Grid de Valores de Margem -->
+                <div style="background: rgba(24, 27, 44, 0.02); border: 1px solid rgba(24, 27, 44, 0.06); border-radius: 12px; padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                  <div>
+                    <span style="font-size: 0.725rem; color: var(--gray-light-text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Salário Líquido</span>
+                    <strong id="prosp-card-salario" style="font-size: 1.15rem; color: var(--navy);">R$ 0,00</strong>
+                  </div>
+                  <div>
+                    <span style="font-size: 0.725rem; color: var(--gray-light-text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Margem Empréstimo</span>
+                    <strong id="prosp-card-margem-emp" style="font-size: 1.15rem; color: var(--green-success);">R$ 0,00</strong>
+                  </div>
+                  <div>
+                    <span style="font-size: 0.725rem; color: var(--gray-light-text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Margem Cartão</span>
+                    <strong id="prosp-card-margem-cartao" style="font-size: 1.15rem; color: var(--navy);">R$ 0,00</strong>
+                  </div>
+                  <div>
+                    <span style="font-size: 0.725rem; color: var(--gray-light-text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Margem Benefício</span>
+                    <strong id="prosp-card-margem-beneficio" style="font-size: 1.15rem; color: var(--navy);">R$ 0,00</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Registro de Interação (Formulário) -->
+              <div class="panel-card" style="padding: 24px;">
+                <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: var(--navy);">Registrar Interação</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+                  <label for="prosp-obs" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--navy);">Observações do Contato / Detalhes (Opcional)</label>
+                  <textarea id="prosp-obs" placeholder="Escreva o que aconteceu durante a tentativa de contato (Ex: Cliente informou que vai analisar a taxa de juros e pediu para retornar amanhã)..." style="width: 100%; height: 80px; padding: 10px 14px; border: 1.5px solid var(--nardo); border-radius: 8px; font-family: var(--font-body); font-size: 0.85rem; outline: none; transition: border-color 0.2s ease; resize: none;"></textarea>
+                </div>
+
+                <!-- Botões de Ação de Prospecção -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+                  <button type="button" class="btn-action" id="btn-prosp-nao-atendeu" style="background: rgba(192, 57, 43, 0.15); border: 1px solid var(--red-error); color: var(--red-error); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
+                    🔴 Não Atendeu
+                  </button>
+                  <button type="button" class="btn-action" id="btn-prosp-ocupado" style="background: rgba(212, 188, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
+                    🟡 Ocupado
+                  </button>
+                  <button type="button" class="btn-action" id="btn-prosp-prospectado" style="background: var(--green-success); border-color: var(--green-success); color: white; font-size: 0.85rem; font-weight: 700; padding: 0 20px; height: 38px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    🟢 Prospectado (Abrir Simulação)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna 2: Histórico de Tentativas e Ações Rápidas -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+              <!-- Ações Rápidas (WhatsApp) -->
+              <div class="panel-card" style="padding: 20px; text-align: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; color: var(--navy);">Contatar Cliente</h3>
+                <a href="#" id="btn-prosp-wpp" target="_blank" rel="noopener noreferrer" style="background: #25d366; color: white; text-decoration: none; border-radius: 8px; padding: 10px 16px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%; box-shadow: 0 4px 12px rgba(37,211,102,0.25);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.5-5.739-1.45L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.725 1.45 5.523 0 10.017-4.493 10.02-10.016a9.78 9.78 0 00-2.88-7.02 9.756 9.756 0 00-7.04-2.872c-5.522 0-10.015 4.493-10.018 10.016-.002 1.902.503 3.756 1.464 5.421l-.96 3.507 3.689-.966z"/></svg>
+                  Chamar no WhatsApp
+                </a>
+              </div>
+
+              <!-- Timeline de Histórico Interno -->
+              <div class="panel-card" style="padding: 20px;">
+                <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; color: var(--navy); border-bottom: 1px solid rgba(24, 27, 44, 0.08); padding-bottom: 8px;">Histórico de Prospecção</h3>
+                <div id="prosp-timeline-container" style="display: flex; flex-direction: column; gap: 14px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
+                  <!-- Timeline renderizada pelo JS -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE 5B: CONSULTA DE MARGEM
+  ```,StartLine:2450,TargetContent:    ======================================== -->
       <section class="page-section" id="sec-consulta-margem">
         <!-- Campo de Busca pelo CPF -->
         <div class="panel-card" style="padding: 32px; text-align: center; max-width: 600px; margin: 0 auto 32px auto;">
@@ -2958,6 +3131,33 @@
             <span class="metric-label">Edições de Proposta</span>
             <div class="metric-value" id="log-kpi-edit">0</div>
             <div class="metric-sub"><span style="color:rgba(255,255,255,0.6)">dados alterados por operadores</span></div>
+          </div>
+        </div>
+
+        <!-- Resumo de Atividades dos Operadores -->
+        <div class="panel-card" style="margin-bottom: 24px; padding: 20px;" id="sec-logs-atividades-container">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1.5px solid rgba(24, 27, 44, 0.08); padding-bottom: 8px;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; margin: 0;">
+              📊 Resumo de Atividades por Operador (Hoje)
+            </h3>
+            <span style="font-size: 0.75rem; color: var(--gray-light-text); font-weight: 600;" id="log-resumo-data">-</span>
+          </div>
+          <div class="table-container" style="max-height: 240px; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+              <thead>
+                <tr style="border-bottom: 2px solid rgba(24, 27, 44, 0.06); text-align: left;">
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy);">Operador</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Consultas Margem</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Prospecções</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Simulações Iniciadas</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">WhatsApps</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Total Ações</th>
+                </tr>
+              </thead>
+              <tbody id="logs-atividades-tbody">
+                <!-- Injetado dinamicamente -->
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -3992,14 +4192,16 @@
         const logsNav = document.getElementById("nav-logs");
         const cfgNav = document.getElementById("nav-config");
         const convNav = document.getElementById("nav-convenios");
+        const baseGeralNav = document.getElementById("nav-base-geral");
         const isAdmin = !isRealOperator;
         if (logsNav) logsNav.style.display = isAdmin ? "" : "none";
         if (cfgNav) cfgNav.style.display = isAdmin ? "" : "none";
         if (convNav) convNav.style.display = isAdmin ? "" : "none";
+        if (baseGeralNav) baseGeralNav.style.display = isAdmin ? "" : "none";
 
         // Se operador estiver numa página restrita, redireciona para início
         const activeSection = document.querySelector(".page-section.active");
-        const pagesRestritasAdmin = ["sec-logs", "sec-configuracoes", "sec-convenios"];
+        const pagesRestritasAdmin = ["sec-logs", "sec-configuracoes", "sec-convenios", "sec-base-geral"];
         if (isRealOperator && activeSection && pagesRestritasAdmin.includes(activeSection.id)) {
           navigateTo("inicio");
         }
@@ -4470,7 +4672,7 @@
           ? currentConvenios
           : (typeof defaultConvenios !== 'undefined' ? defaultConvenios : {});
         // Selects com "Todos" como primeira opção (filtros)
-        const filterSelectIds = ['filter-convenio', 'dash-convenio', 'fin-convenio', 'clientes-convenio', 'base-convenio'];
+        const filterSelectIds = ['filter-convenio', 'dash-convenio', 'fin-convenio', 'clientes-convenio', 'base-convenio', 'leads-convenio'];
         filterSelectIds.forEach(id => {
           const sel = document.getElementById(id);
           if (!sel) return;
@@ -4513,6 +4715,7 @@
         if (s === 'Recusada') return 'recusado';
         if (s === 'Paga') return 'pago';
         if (s === 'Consulta de Margem') return 'consulta-margem';
+        if (s === 'Descartado') return 'recusado';
         if (s === 'Aguardando Averbação') return 'recebida'; // compat
         return 'recebida';
       };
@@ -4561,7 +4764,7 @@
           // O payload pesado com anexos Base64 será buscado sob demanda (Lazy Loading).
           const { data, error } = await supabaseClient
             .from('leads')
-            .select('id, created_at, nome, cpf, status, convenio, profissao, valor_solicitado')
+            .select('id, created_at, nome, cpf, status, convenio, valor_solicitado')
             .order('created_at', { ascending: false });
 
           if (error) throw error;
@@ -4602,7 +4805,7 @@
                 },
                 dados_funcionais: {
                   convenio: row.convenio,
-                  profissao: row.profissao,
+                  profissao: existing?.dados_funcionais?.profissao || '',
                   matricula: existing?.dados_funcionais?.matricula || '',
                   salario_liquido: existing?.dados_funcionais?.salario_liquido || 0
                 },
@@ -4701,6 +4904,7 @@
         'relatorio-financeiro': { title: 'Relatório Financeiro', sub: 'Conciliação e rentabilidade' },
         'relatorio-leads': { title: 'Relatório de Leads', sub: 'Funil de vendas e marketing' },
         'consulta-margem': { title: 'Consultar Margem', sub: 'Ficha e margem pré-aprovada do cliente' },
+        'prospeccao': { title: 'Prospecção Comercial', sub: 'Pesquise CPFs ou use a fila de distribuição randômica' },
         'base-geral': { title: 'Base Geral', sub: 'Todos os leads gerais da base (sem propostas iniciadas)' },
         'clientes': { title: 'Clientes', sub: 'Central de atendimento' },
         'convenios': { title: 'Convênios', sub: 'Taxas, margens e regras por convênio' },
@@ -4747,6 +4951,16 @@
         if (page === 'convenios') renderConveniosPage();
         if (page === 'configuracoes') loadConfigs();
         if (page === 'logs') renderLogs();
+
+        if (page === 'prospeccao') {
+          const prospCard = document.getElementById("prosp-lead-card");
+          const prospEmpty = document.getElementById("prosp-empty-state");
+          const searchCpf = document.getElementById("prosp-search-cpf");
+          if (prospCard) prospCard.style.display = "none";
+          if (prospEmpty) prospEmpty.style.display = "block";
+          if (searchCpf) searchCpf.value = "";
+          prospActiveLead = null;
+        }
       };
       window.navigateTo = navigateTo; // Expor globalmente para os atalhos onclick inline
 
@@ -4761,7 +4975,7 @@
       // 5. MESA DE ANÁLISE (PÁGINA 1)
       // ==========================================
       const updateMesaMetrics = (leads) => {
-        const filteredLeads = leads.filter(l => l.status !== "Consulta de Margem");
+        const filteredLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
         document.getElementById("metric-total-leads").textContent = filteredLeads.length;
 
         const volume = filteredLeads.filter(l => l.status !== "Recusada").reduce((sum, l) => sum + (l.proposta?.valor_solicitado || 0), 0);
@@ -4790,17 +5004,34 @@
       let selectedMesaStatus = 'all';
 
       const renderMesaTable = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") {
           leads = leads.filter(l => l.operador_id === profile);
         }
         const filterConvenio = document.getElementById("filter-convenio").value;
+        const filterOperador = document.getElementById("filter-operador").value;
         const filterStatus = selectedMesaStatus;
         const dataInicio = document.getElementById("filter-data-inicio").value;
         const dataFim = document.getElementById("filter-data-fim").value;
         const searchVal = document.getElementById("search-input").value.toLowerCase().replace(/\D/g, "");
         const searchValText = document.getElementById("search-input").value.toLowerCase();
+
+        // Popula select de operadores (apenas para admin)
+        const opSelect = document.getElementById("filter-operador");
+        if (opSelect && profile === "admin") {
+          opSelect.style.display = "";
+          if (opSelect.options.length <= 1) {
+            OPERADORES.forEach(op => {
+              const opt = document.createElement('option');
+              opt.value = op.id;
+              opt.textContent = op.nome;
+              opSelect.appendChild(opt);
+            });
+          }
+        } else if (opSelect) {
+          opSelect.style.display = "none";
+        }
 
         // 1. Renderizar os Chips de Status Dinâmicos
         const totalCount = leads.length;
@@ -4844,6 +5075,7 @@
 
         const filtered = leads.filter(lead => {
           if (filterConvenio !== "all" && lead.dados_funcionais?.convenio !== filterConvenio) return false;
+          if (filterOperador !== "all" && lead.operador_id !== filterOperador) return false;
           if (filterStatus !== "all" && lead.status !== filterStatus) return false;
           if (dataInicio && new Date(lead.createdAt) < new Date(dataInicio)) return false;
           if (dataFim) {
@@ -4973,6 +5205,7 @@
 
       // Mesa Filtros
       document.getElementById("filter-convenio").addEventListener("change", renderMesaTable);
+      document.getElementById("filter-operador").addEventListener("change", renderMesaTable);
       document.getElementById("filter-status").addEventListener("change", (e) => {
         selectedMesaStatus = e.target.value;
         renderMesaTable();
@@ -4984,6 +5217,7 @@
       document.getElementById("btn-clear-filters").addEventListener("click", () => {
         document.getElementById("filter-convenio").value = "all";
         document.getElementById("filter-status").value = "all";
+        document.getElementById("filter-operador").value = "all";
         selectedMesaStatus = "all";
         document.getElementById("filter-data-inicio").value = "";
         document.getElementById("filter-data-fim").value = "";
@@ -5467,6 +5701,24 @@
           }
           entries.push({ data: log.timestamp, acao: log.descricao, dot, usuario: log.operador_nome });
         });
+
+        // Adiciona histórico de prospecção comercial se existir
+        if (lead.historico_contatos && Array.isArray(lead.historico_contatos)) {
+          lead.historico_contatos.forEach(contato => {
+            const dotMap = {
+              "Não Atendeu": "dot-recusada",
+              "Ocupado": "dot-analise",
+              "Prospectado": "dot-aprovada"
+            };
+            const dot = dotMap[contato.status] || "dot-default";
+            entries.push({
+              data: contato.data,
+              acao: `Prospecção Comercial: ${escapeHtml(contato.status)}${contato.observacao ? ` - ${escapeHtml(contato.observacao)}` : ''}`,
+              dot: dot,
+              usuario: escapeHtml(contato.operador)
+            });
+          });
+        }
 
         // Ordena do mais antigo para o mais novo
         entries.sort((a, b) => new Date(a.data) - new Date(b.data));
@@ -6274,7 +6526,7 @@
       // 7. DASHBOARD GERAL (PÁGINA 2)
       // ==========================================
       const renderDashboard = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("dash-data-inicio").value;
@@ -6506,7 +6758,7 @@
       // 8. RELATÓRIO FINANCEIRO (PÁGINA 3)
       // ==========================================
       const renderFinanceiro = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("fin-data-inicio").value;
@@ -6607,7 +6859,7 @@
       // 9. RELATÓRIO DE LEADS (PÁGINA 4)
       // ==========================================
       const renderLeadsReport = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("leads-data-inicio").value;
@@ -6615,9 +6867,13 @@
         const origem = document.getElementById("leads-origem").value;
         const sms = document.getElementById("leads-sms").value;
         const rfb = document.getElementById("leads-rfb").value;
+        const leadsConvenio = document.getElementById("leads-convenio").value;
+        const leadsStatus = document.getElementById("leads-status").value;
 
         const filtered = leads.filter(l => {
           if (origem !== 'all' && (l.marketing?.utm_source || '').toLowerCase() !== origem) return false;
+          if (leadsConvenio !== 'all' && l.dados_funcionais?.convenio !== leadsConvenio) return false;
+          if (leadsStatus !== 'all' && l.status !== leadsStatus) return false;
           if (sms !== 'all') {
             const smsVal = l.proposta?.assinatura_sms_validada ? 'true' : 'false';
             if (smsVal !== sms) return false;
@@ -6700,7 +6956,7 @@
       };
 
       // Filtros Leads
-      ['leads-data-inicio', 'leads-data-fim', 'leads-origem', 'leads-sms', 'leads-rfb'].forEach(id => {
+      ['leads-data-inicio', 'leads-data-fim', 'leads-origem', 'leads-sms', 'leads-rfb', 'leads-convenio', 'leads-status'].forEach(id => {
         document.getElementById(id).addEventListener("change", renderLeadsReport);
       });
       document.getElementById("leads-limpar").addEventListener("click", () => {
@@ -6709,6 +6965,8 @@
         document.getElementById("leads-origem").value = "all";
         document.getElementById("leads-sms").value = "all";
         document.getElementById("leads-rfb").value = "all";
+        document.getElementById("leads-convenio").value = "all";
+        document.getElementById("leads-status").value = "all";
         renderLeadsReport();
       });
 
@@ -6739,11 +6997,12 @@
         const search = document.getElementById("clientes-search").value.toLowerCase();
         const filterConvenio = document.getElementById("clientes-convenio").value;
         const filterPropostasQtd = document.getElementById("clientes-propostas-qtd").value;
+        const filterClienteStatus = document.getElementById("clientes-status").value;
 
         // Agrupar por CPF (Filtrando para ignorar os leads que possuem apenas o status "Consulta de Margem")
         const cpfMap = {};
         leads.forEach(l => {
-          if (l.status === "Consulta de Margem") return;
+          if (l.status === "Consulta de Margem" || l.status === "Descartado") return;
           
           let cpf = l.lead?.cpf?.replace(/\D/g, "") || l.cpf?.replace(/\D/g, "") || '';
           if (!cpf) return;
@@ -6798,6 +7057,12 @@
             clients = clients.filter(c => c.proposals.length >= 1);
           }
         }
+        if (filterClienteStatus !== 'all') {
+          clients = clients.filter(c => {
+            const lastProposal = c.proposals.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+            return lastProposal && lastProposal.status === filterClienteStatus;
+          });
+        }
 
         // Filtro de Busca
         if (search) {
@@ -6836,13 +7101,14 @@
       document.getElementById("clientes-search").addEventListener("input", renderClientes);
       
       // Filtros adicionais de clientes
-      ['clientes-convenio', 'clientes-propostas-qtd'].forEach(id => {
+      ['clientes-convenio', 'clientes-propostas-qtd', 'clientes-status'].forEach(id => {
         document.getElementById(id).addEventListener("change", renderClientes);
       });
       document.getElementById("clientes-limpar").addEventListener("click", () => {
         document.getElementById("clientes-search").value = "";
         document.getElementById("clientes-convenio").value = "all";
         document.getElementById("clientes-propostas-qtd").value = "all";
+        document.getElementById("clientes-status").value = "all";
         renderClientes();
       });
 
@@ -6855,6 +7121,9 @@
         const leads = getLeads();
         const search = document.getElementById("base-search").value.toLowerCase();
         const filterConvenio = document.getElementById("base-convenio").value;
+        const filterClasse = document.getElementById("base-classe").value;
+        const filterScore = document.getElementById("base-score").value;
+        const filterMargem = document.getElementById("base-margem").value;
 
         // Agrupar por CPF (Filtrando para mostrar apenas os leads cujo status é "Consulta de Margem")
         const cpfMap = {};
@@ -6906,9 +7175,26 @@
 
         // Filtros avançados da Base Geral
         if (filterConvenio !== 'all') {
-          baseLeads = baseLeads.filter(c => 
+          baseLeads = baseLeads.filter(c =>
             c.proposals.some(p => p.dados_funcionais?.convenio === filterConvenio)
           );
+        }
+        if (filterClasse !== 'all') {
+          baseLeads = baseLeads.filter(c => c.lead?.classe_economica === filterClasse);
+        }
+        if (filterScore !== 'all') {
+          baseLeads = baseLeads.filter(c =>
+            c.proposals.some(p => p.proposta?.score_faixa === filterScore)
+          );
+        }
+        if (filterMargem !== 'all') {
+          baseLeads = baseLeads.filter(c => {
+            const margem = c.proposals.reduce((max, p) => {
+              const m = parseFloat(p.dados_funcionais?.margem_pre_aprovada) || 0;
+              return Math.max(max, m);
+            }, 0);
+            return filterMargem === 'com' ? margem > 0 : margem <= 0;
+          });
         }
 
         // Filtro de Busca
@@ -7020,8 +7306,13 @@
         }
 
         // Renderizar linhas da página atual
+        const profile = getActiveProfile();
         pageLeads.forEach(c => {
           const tr = document.createElement("tr");
+          const btnDescartarHTML = profile === "admin"
+            ? `<button class="btn-action-sm descartar-btn" data-cpf="${c.cpf}" style="background: rgba(192, 57, 43, 0.15); border: 1px solid var(--red-error); color: var(--red-error); margin-left: 6px;">Descartar</button>`
+            : '';
+
           tr.innerHTML = `
             <td><div class="lead-name-cell"><span>${escapeHtml(c.lead?.nome || '-')}</span><span class="lead-sub-cell">${escapeHtml(c.lead?.nome_mae || '')}</span></div></td>
             <td>${formatCPF(c.cpf)}</td>
@@ -7031,10 +7322,14 @@
             <td>${escapeHtml(c.lead?.renda_faixa || '-')}</td>
             <td>${escapeHtml(c.lead?.classe_economica || '-')}</td>
             <td style="text-align:right;">
-              <button class="btn-action-sm" data-cpf="${c.cpf}">Ver Ficha</button>
+              <button class="btn-action-sm ver-ficha-btn" data-cpf="${c.cpf}">Ver Ficha</button>
+              ${btnDescartarHTML}
             </td>
           `;
-          tr.querySelector(".btn-action-sm").addEventListener("click", () => openClientFicha(c.cpf));
+          tr.querySelector(".ver-ficha-btn").addEventListener("click", () => openClientFicha(c.cpf));
+          if (profile === "admin") {
+            tr.querySelector(".descartar-btn").addEventListener("click", () => descartarLeadPeloAdmin(c.cpf));
+          }
           tbody.appendChild(tr);
         });
       };
@@ -7047,9 +7342,24 @@
         currentPageBase = 1;
         renderBaseGeral();
       });
+      document.getElementById("base-classe").addEventListener("change", () => {
+        currentPageBase = 1;
+        renderBaseGeral();
+      });
+      document.getElementById("base-score").addEventListener("change", () => {
+        currentPageBase = 1;
+        renderBaseGeral();
+      });
+      document.getElementById("base-margem").addEventListener("change", () => {
+        currentPageBase = 1;
+        renderBaseGeral();
+      });
       document.getElementById("base-limpar").addEventListener("click", () => {
         document.getElementById("base-search").value = "";
         document.getElementById("base-convenio").value = "all";
+        document.getElementById("base-classe").value = "all";
+        document.getElementById("base-score").value = "all";
+        document.getElementById("base-margem").value = "all";
         currentPageBase = 1;
         renderBaseGeral();
       });
@@ -7409,11 +7719,72 @@
           renderMesaTable();
           renderInicioHome();
           renderDashboard();
+          navigateTo('mesa-analise');
         }
 
         btn.disabled = false;
         btn.innerHTML = originalHTML;
       });
+
+      // Descartar lead pelo Administrador (Mecanismo "Leads Mortos")
+      const descartarLeadPeloAdmin = async (cpf) => {
+        const cpfClean = cpf.replace(/\D/g, "");
+        if (!confirm(`Deseja realmente descartar o lead com CPF ${formatCPF(cpfClean)}? Ele será removido permanentemente da base de prospecção e da base geral.`)) {
+          return;
+        }
+
+        let leads = getLeads();
+        // Filtrar todos os leads locais com esse CPF e status "Consulta de Margem"
+        const leadsParaAtualizar = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === cpfClean && l.status === "Consulta de Margem");
+
+        if (leadsParaAtualizar.length === 0) {
+          alert("Nenhum lead elegível para descarte encontrado.");
+          return;
+        }
+
+        const updatedLeads = leads.map(l => {
+          if ((l.lead?.cpf?.replace(/\D/g, "") || '') === cpfClean && l.status === "Consulta de Margem") {
+            l.status = "Descartado";
+          }
+          return l;
+        });
+
+        currentLeads = updatedLeads;
+        safeSaveLeads(currentLeads);
+
+        // Sincronizar com Supabase se não estiver em demo mode
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            for (const lead of leadsParaAtualizar) {
+              const updatedLead = currentLeads.find(l => l.id === lead.id);
+              if (updatedLead) {
+                await supabaseClient.from('leads').upsert({
+                  id: updatedLead.id,
+                  created_at: updatedLead.createdAt,
+                  nome: updatedLead.lead?.nome,
+                  cpf: updatedLead.lead?.cpf,
+                  status: updatedLead.status,
+                  convenio: updatedLead.dados_funcionais?.convenio,
+                  valor_solicitado: updatedLead.proposta?.valor_solicitado || 0,
+                  payload: updatedLead
+                });
+              }
+            }
+          } catch (err) {
+            console.error("[Walker Bank] Erro ao descartar lead no Supabase:", err);
+            showToast("Erro ao descartar no banco de dados. Foi descartado localmente.", "var(--red-error)");
+          }
+        }
+
+        // Grava log
+        recordLog('status_change', `Lead com CPF ${formatCPF(cpfClean)} descartado (removido da prospecção) pelo administrador.`, leadsParaAtualizar[0], { de: "Consulta de Margem", para: "Descartado" });
+
+        showToast("Lead descartado com sucesso!", "var(--gold)");
+        renderBaseGeral();
+        renderMesaTable();
+        renderInicioHome();
+        renderDashboard();
+      };
 
       // ==========================================
       // 11. CONFIGURAÇÕES (PÁGINA 6) — GERENCIAMENTO DINÂMICO
@@ -8159,7 +8530,84 @@
           const btnSimular = document.getElementById("margem-btn-simular");
           const newBtnSimular = btnSimular.cloneNode(true);
           btnSimular.parentNode.replaceChild(newBtnSimular, btnSimular);
-          newBtnSimular.addEventListener("click", () => {
+          newBtnSimular.addEventListener("click", async () => {
+            const user = getActiveUserObj();
+            const profile = getActiveProfile();
+
+            foundLead.status = "Recebida";
+            if (profile !== "admin") {
+              foundLead.operador_id = user.id;
+              foundLead.operador_nome = user.nome;
+            }
+
+            // Calcula valores com base na margem pré-aprovada padrão para simulação inicial
+            let margemPre = 0;
+            if (foundLead.dados_funcionais?.margem_pre_aprovada !== undefined) {
+              margemPre = Math.max(0, parseFloat(foundLead.dados_funcionais.margem_pre_aprovada) || 0);
+            } else {
+              const salario = parseFloat(foundLead.dados_funcionais?.salario_liquido || 0);
+              const convenioKey = foundLead.dados_funcionais?.convenio || 'inss';
+              const configs = getConfigs();
+              const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { margem: 30 };
+              const margemPorcentagem = parseFloat(convCfg.margem) || 30;
+              margemPre = salario * (margemPorcentagem / 100);
+            }
+
+            const convenioKey = foundLead.dados_funcionais?.convenio || 'inss';
+            const configs = getConfigs();
+            const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { taxa: 1.80 };
+            const taxaInicial = parseFloat(convCfg.taxa) || 1.80;
+            const prazoVal = 84; // prazo padrão inicial
+
+            const taxaMensal = (taxaInicial / 100);
+            let valorLiberado = 0;
+            if (taxaMensal > 0) {
+              const taxaPow = Math.pow(1 + taxaMensal, prazoVal);
+              valorLiberado = margemPre * (taxaPow - 1) / (taxaMensal * taxaPow);
+            } else {
+              valorLiberado = margemPre * prazoVal;
+            }
+            const totalFinanciado = margemPre * prazoVal;
+
+            if (!foundLead.proposta) foundLead.proposta = {};
+            foundLead.proposta = {
+              ...foundLead.proposta,
+              valor_solicitado: valorLiberado,
+              prazo_meses: prazoVal,
+              valor_parcela: margemPre,
+              taxa_juros_mensal: taxaMensal,
+              total_financiado: totalFinanciado
+            };
+
+            let leads = getLeads();
+            const updatedLeads = leads.map(l => l.id === foundLead.id ? foundLead : l);
+            currentLeads = updatedLeads;
+            safeSaveLeads(currentLeads);
+
+            if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+              try {
+                await supabaseClient.from("leads").upsert({
+                  id: foundLead.id,
+                  created_at: foundLead.createdAt,
+                  nome: foundLead.lead?.nome,
+                  cpf: foundLead.lead?.cpf,
+                  status: foundLead.status,
+                  convenio: foundLead.dados_funcionais?.convenio,
+                  valor_solicitado: foundLead.proposta?.valor_solicitado || 0,
+                  payload: foundLead
+                });
+              } catch (err) {
+                console.error("[Walker Bank] Erro ao salvar conversão no Supabase:", err);
+              }
+            }
+
+            recordLog('status_change', `Iniciado atendimento do lead na busca simples. Status → Recebida`, foundLead, { de: "Consulta de Margem", para: "Recebida" });
+            showToast("Atendimento iniciado! Proposta enviada para a Mesa de Crédito.", "var(--green-success)");
+
+            renderMesaTable();
+            renderInicioHome();
+            renderDashboard();
+
             navigateTo("mesa-analise");
             openLeadDetails(foundLead.id);
           });
@@ -8177,6 +8625,447 @@
         if (e.key === "Enter") searchLeadByCPF();
       });
       applyMask(document.getElementById("margem-search-cpf"), maskCPF);
+
+      // ==========================================
+      // LÓGICA DO FLUXO DE PROSPECÇÃO COMERCIAL
+      // ==========================================
+      let prospActiveLead = null;
+
+      const prospBuscarCPF = async () => {
+        if (prospActiveLead) {
+          alert("Você possui um lead ativo em prospecção. Por favor, registre uma tentativa de contato ('Não Atendeu', 'Ocupado') ou marque como 'Prospectado' antes de buscar outro.");
+          return;
+        }
+        const cpfInput = document.getElementById("prosp-search-cpf");
+        if (!cpfInput) return;
+        const cpfValRaw = cpfInput.value;
+        const cpfVal = cpfValRaw.replace(/\D/g, "");
+        const emptyState = document.getElementById("prosp-empty-state");
+        const cardLead = document.getElementById("prosp-lead-card");
+
+        if (cpfVal.length !== 11) {
+          alert("Por favor, digite um CPF válido com 11 dígitos.");
+          return;
+        }
+
+        const btn = document.getElementById("btn-prosp-buscar-cpf");
+        const originalText = btn.textContent;
+        btn.textContent = "⏳...";
+        btn.disabled = true;
+
+        let foundLead = null;
+
+        if (sessionStorage.getItem("walker_demo_mode") === "true") {
+          const leads = getLeads();
+          foundLead = leads.find(l => l.lead?.cpf?.replace(/\D/g, "") === cpfVal && l.status === "Consulta de Margem");
+          await new Promise(r => setTimeout(r, 400));
+        } else {
+          try {
+            const { data, error } = await supabaseClient
+              .from('leads')
+              .select('*')
+              .eq('cpf', cpfVal)
+              .eq('status', 'Consulta de Margem')
+              .maybeSingle();
+
+            if (error) throw error;
+            if (data) {
+              let parsedPayload = {};
+              if (data.payload) {
+                if (typeof data.payload === 'string') {
+                  parsedPayload = JSON.parse(data.payload);
+                } else if (typeof data.payload === 'object') {
+                  parsedPayload = data.payload;
+                }
+              }
+              foundLead = {
+                id: data.id,
+                createdAt: data.created_at,
+                status: data.status,
+                ...parsedPayload
+              };
+              // Fallbacks
+              if (!foundLead.lead) foundLead.lead = {};
+              if (!foundLead.lead.nome && data.nome) foundLead.lead.nome = data.nome;
+              if (!foundLead.lead.cpf && data.cpf) foundLead.lead.cpf = data.cpf;
+              if (!foundLead.dados_funcionais) foundLead.dados_funcionais = {};
+              if (!foundLead.dados_funcionais.convenio && data.convenio) foundLead.dados_funcionais.convenio = data.convenio;
+            }
+          } catch (err) {
+            console.error("[Walker Bank] Erro na prospecção por CPF:", err);
+          }
+        }
+
+        btn.textContent = originalText;
+        btn.disabled = false;
+
+        if (foundLead) {
+          prospActiveLead = foundLead;
+          prospRenderCard(foundLead);
+        } else {
+          prospActiveLead = null;
+          if (cardLead) cardLead.style.display = "none";
+          if (emptyState) emptyState.style.display = "block";
+          alert("Nenhum lead com status 'Consulta de Margem' encontrado para este CPF.");
+        }
+      };
+
+      const prospBuscarRandom = async () => {
+        if (prospActiveLead) {
+          alert("Você possui um lead ativo em prospecção. Por favor, registre uma tentativa de contato ('Não Atendeu', 'Ocupado') ou marque como 'Prospectado' antes de buscar outro.");
+          return;
+        }
+        const emptyState = document.getElementById("prosp-empty-state");
+        const cardLead = document.getElementById("prosp-lead-card");
+        const btn = document.getElementById("btn-prosp-random");
+        if (!btn) return;
+
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "⏳ Buscando...";
+        btn.disabled = true;
+
+        let foundLead = null;
+
+        if (sessionStorage.getItem("walker_demo_mode") === "true") {
+          const leads = getLeads().filter(l => l.status === "Consulta de Margem");
+          if (leads.length > 0) {
+            const idx = Math.floor(Math.random() * leads.length);
+            foundLead = leads[idx];
+          }
+          await new Promise(r => setTimeout(r, 500));
+        } else {
+          try {
+            const { data, error } = await supabaseClient
+              .from('leads')
+              .select('id')
+              .eq('status', 'Consulta de Margem');
+
+            if (error) throw error;
+            if (data && data.length > 0) {
+              const idx = Math.floor(Math.random() * data.length);
+              const selectedId = data[idx].id;
+
+              const { data: leadData, error: leadErr } = await supabaseClient
+                .from('leads')
+                .select('*')
+                .eq('id', selectedId)
+                .single();
+
+              if (leadErr) throw leadErr;
+              if (leadData) {
+                let parsedPayload = {};
+                if (leadData.payload) {
+                  if (typeof leadData.payload === 'string') {
+                    parsedPayload = JSON.parse(leadData.payload);
+                  } else if (typeof leadData.payload === 'object') {
+                    parsedPayload = leadData.payload;
+                  }
+                }
+                foundLead = {
+                  id: leadData.id,
+                  createdAt: leadData.created_at,
+                  status: leadData.status,
+                  ...parsedPayload
+                };
+                if (!foundLead.lead) foundLead.lead = {};
+                if (!foundLead.lead.nome && leadData.nome) foundLead.lead.nome = leadData.nome;
+                if (!foundLead.lead.cpf && leadData.cpf) foundLead.lead.cpf = leadData.cpf;
+                if (!foundLead.dados_funcionais) foundLead.dados_funcionais = {};
+                if (!foundLead.dados_funcionais.convenio && leadData.convenio) foundLead.dados_funcionais.convenio = leadData.convenio;
+              }
+            }
+          } catch (err) {
+            console.error("[Walker Bank] Erro na prospecção randômica:", err);
+          }
+        }
+
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+        if (foundLead) {
+          prospActiveLead = foundLead;
+          prospRenderCard(foundLead);
+        } else {
+          prospActiveLead = null;
+          if (cardLead) cardLead.style.display = "none";
+          if (emptyState) emptyState.style.display = "block";
+          alert("Não há leads disponíveis com status 'Consulta de Margem' para prospecção.");
+        }
+      };
+
+      const prospRenderCard = (lead) => {
+        const emptyState = document.getElementById("prosp-empty-state");
+        const cardLead = document.getElementById("prosp-lead-card");
+        if (emptyState) emptyState.style.display = "none";
+        if (cardLead) cardLead.style.display = "block";
+
+        const nomeEl = document.getElementById("prosp-card-nome");
+        const cpfEl = document.getElementById("prosp-card-cpf");
+        const convenioEl = document.getElementById("prosp-card-convenio");
+
+        if (nomeEl) nomeEl.textContent = lead.lead?.nome || 'Cliente sem nome';
+        if (cpfEl) cpfEl.textContent = formatCPF(lead.lead?.cpf || '');
+        if (convenioEl) convenioEl.textContent = getConvenioLabelFull(lead.dados_funcionais?.convenio);
+
+        // Limpa observações
+        const obsEl = document.getElementById("prosp-obs");
+        if (obsEl) obsEl.value = "";
+
+        // Renderizar Info Grid
+        const grid = document.getElementById("prosp-card-info-grid");
+        if (grid) {
+          grid.innerHTML = `
+            <div class="info-item">
+              <span class="info-label">Celular</span>
+              <span class="info-val">${formatCelular(lead.lead?.celular)}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-val">${escapeHtml(lead.lead?.email || 'Não informado')}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Data Nasc.</span>
+              <span class="info-val">${escapeHtml(lead.lead?.data_nascimento || 'Não informado')}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Profissão</span>
+              <span class="info-val">${escapeHtml(lead.dados_funcionais?.profissao || 'Não informado')}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Matrícula</span>
+              <span class="info-val">${escapeHtml(lead.dados_funcionais?.matricula || 'Não informado')}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Chave PIX</span>
+              <span class="info-val">${escapeHtml(lead.dados_bancarios?.chave_pix || 'Não informado')}</span>
+            </div>
+          `;
+        }
+
+        // Valores de Margem
+        let margemConsignavelRaw = 0;
+        if (lead.dados_funcionais?.margem_pre_aprovada !== undefined) {
+          margemConsignavelRaw = parseFloat(lead.dados_funcionais.margem_pre_aprovada) || 0;
+        } else {
+          const salario = parseFloat(lead.dados_funcionais?.salario_liquido || 0);
+          const convenioKey = lead.dados_funcionais?.convenio || 'inss';
+          const configs = getConfigs();
+          const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { margem: 30 };
+          const margemPorcentagem = parseFloat(convCfg.margem) || 30;
+          margemConsignavelRaw = salario * (margemPorcentagem / 100);
+        }
+        const margemConsignavelNegativa = margemConsignavelRaw < 0;
+        const margemConsignavel = Math.max(0, margemConsignavelRaw);
+
+        const salEl = document.getElementById("prosp-card-salario");
+        const margEmpEl = document.getElementById("prosp-card-margem-emp");
+        const margCardEl = document.getElementById("prosp-card-margem-cartao");
+        const margBenEl = document.getElementById("prosp-card-margem-beneficio");
+
+        if (salEl) salEl.textContent = formatBRL(lead.dados_funcionais?.salario_liquido || 0);
+        if (margEmpEl) {
+          margEmpEl.textContent = formatBRL(margemConsignavel) + (margemConsignavelNegativa ? ' (Esgotada)' : '');
+          margEmpEl.style.color = margemConsignavelNegativa ? 'var(--red-error)' : 'var(--green-success)';
+        }
+        if (margCardEl) margCardEl.textContent = formatBRL(lead.dados_funcionais?.mg_margem_cartao || 0);
+        if (margBenEl) margBenEl.textContent = formatBRL(lead.dados_funcionais?.mg_margem_cartao_beneficio || 0);
+
+        // Link Whatsapp
+        const celClean = (lead.lead?.celular || "").replace(/\D/g, "");
+        const btnWpp = document.getElementById("btn-prosp-wpp");
+        if (btnWpp) {
+          if (celClean.length >= 10) {
+            const nomeShort = lead.lead?.nome ? lead.lead.nome.trim().split(" ")[0] : "Cliente";
+            const textWpp = `Olá, ${nomeShort}! Entramos em contato do Walker Bank sobre sua margem consignada disponível. Podemos conversar?`;
+            btnWpp.href = `https://wa.me/55${celClean}?text=${encodeURIComponent(textWpp)}`;
+            btnWpp.style.opacity = "1";
+            btnWpp.style.pointerEvents = "auto";
+          } else {
+            btnWpp.removeAttribute("href");
+            btnWpp.style.opacity = "0.5";
+            btnWpp.style.pointerEvents = "none";
+          }
+        }
+
+        // Renderizar Timeline de Histórico de Prospecção Comercial Interno
+        prospRenderTimeline(lead);
+      };
+
+      const prospRenderTimeline = (lead) => {
+        const container = document.getElementById("prosp-timeline-container");
+        if (!container) return;
+
+        if (!lead.historico_contatos || !Array.isArray(lead.historico_contatos) || lead.historico_contatos.length === 0) {
+          container.innerHTML = `<div style="font-size:0.75rem; color:var(--gray-light-text); text-align:center; padding:12px 0;">Nenhuma tentativa de prospecção registrada.</div>`;
+          return;
+        }
+
+        const sorted = [...lead.historico_contatos].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+        container.innerHTML = sorted.map(c => {
+          const d = new Date(c.data);
+          const dateStr = d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+          
+          const dotMap = {
+            "Não Atendeu": { class: "dot-recusada", icon: "✖" },
+            "Ocupado": { class: "dot-analise", icon: "⏳" },
+            "Prospectado": { class: "dot-aprovada", icon: "✔" }
+          };
+          const config = dotMap[c.status] || { class: "dot-default", icon: "•" };
+
+          return `
+            <div class="history-item" style="padding-bottom: 16px;">
+              <div class="history-dot ${config.class}" style="font-size:0.6rem; width:18px; height:18px; line-height:18px;">${config.icon}</div>
+              <div class="history-content">
+                <div class="history-action" style="font-size:0.75rem; font-weight:700; color:var(--navy); margin-bottom: 2px;">${escapeHtml(c.status)}</div>
+                ${c.observacao ? `<div style="font-size:0.7rem; color:var(--gray-text); margin: 2px 0 4px 0; line-height:1.3; font-weight:500;">${escapeHtml(c.observacao)}</div>` : ''}
+                <div class="history-meta" style="font-size:0.65rem; color:var(--gray-light-text); font-weight:600;">${dateStr} · por ${escapeHtml(c.operador)}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      const prospRegistrarTentativa = async (status) => {
+        if (!prospActiveLead) return;
+
+        const obsInput = document.getElementById("prosp-obs");
+        const observacao = obsInput ? obsInput.value.trim() : "";
+        const user = getActiveUserObj();
+
+        const novaTentativa = {
+          data: new Date().toISOString(),
+          operador: user.nome,
+          status: status,
+          observacao: observacao
+        };
+
+        if (!prospActiveLead.historico_contatos) {
+          prospActiveLead.historico_contatos = [];
+        }
+        prospActiveLead.historico_contatos.push(novaTentativa);
+
+        // Salva local e Supabase mantendo Consulta de Margem
+        let leads = getLeads();
+        const updatedLeads = leads.map(l => l.id === prospActiveLead.id ? prospActiveLead : l);
+        currentLeads = updatedLeads;
+        safeSaveLeads(currentLeads);
+
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            await supabaseClient.from("leads").upsert({
+              id: prospActiveLead.id,
+              created_at: prospActiveLead.createdAt,
+              nome: prospActiveLead.lead?.nome,
+              cpf: prospActiveLead.lead?.cpf,
+              status: "Consulta de Margem",
+              convenio: prospActiveLead.dados_funcionais?.convenio,
+              valor_solicitado: prospActiveLead.proposta?.valor_solicitado || 0,
+              payload: prospActiveLead
+            });
+          } catch (err) {
+            console.error("[Walker Bank] Erro ao salvar tentativa no Supabase:", err);
+          }
+        }
+
+        recordLog("prospeccao_tentativa", `Tentativa de contato - ${status}. Obs: ${observacao || 'Nenhuma'}`, prospActiveLead, { status, observacao });
+
+        showToast(`Tentativa de contato (${status}) registrada com sucesso!`, "var(--gold)");
+
+        // Reseta
+        const cardLead = document.getElementById("prosp-lead-card");
+        const emptyState = document.getElementById("prosp-empty-state");
+        const prospCpf = document.getElementById("prosp-search-cpf");
+        if (cardLead) cardLead.style.display = "none";
+        if (emptyState) emptyState.style.display = "block";
+        if (prospCpf) prospCpf.value = "";
+        prospActiveLead = null;
+      };
+
+      const prospRegistrarProspectado = async () => {
+        if (!prospActiveLead) return;
+
+        const lead = prospActiveLead;
+        const cpfClean = (lead.lead?.cpf || '').replace(/\D/g, "");
+        const user = getActiveUserObj();
+        const obsInput = document.getElementById("prosp-obs");
+        const observacao = obsInput ? obsInput.value.trim() : "";
+
+        const novaTentativa = {
+          data: new Date().toISOString(),
+          operador: user.nome,
+          status: "Prospectado",
+          observacao: observacao || "Conversa iniciada, aberto simulador."
+        };
+
+        if (!lead.historico_contatos) {
+          lead.historico_contatos = [];
+        }
+        lead.historico_contatos.push(novaTentativa);
+
+        let leads = getLeads();
+        const updatedLeads = leads.map(l => l.id === lead.id ? lead : l);
+        currentLeads = updatedLeads;
+        safeSaveLeads(currentLeads);
+
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            await supabaseClient.from("leads").upsert({
+              id: lead.id,
+              created_at: lead.createdAt,
+              nome: lead.lead?.nome,
+              cpf: lead.lead?.cpf,
+              status: "Consulta de Margem",
+              convenio: lead.dados_funcionais?.convenio,
+              valor_solicitado: lead.proposta?.valor_solicitado || 0,
+              payload: lead
+            });
+          } catch (err) {
+            console.error("[Walker Bank] Erro ao registrar Prospectado:", err);
+          }
+        }
+
+        recordLog("prospeccao_prospectado", `Lead Prospectado. Aberto simulador. Obs: ${observacao || 'Nenhuma'}`, lead, { observacao });
+
+        // Preenche na tela de consulta de margem
+        const inputMargemCpf = document.getElementById("margem-search-cpf");
+        if (inputMargemCpf) {
+          inputMargemCpf.value = formatCPF(cpfClean);
+        }
+        activeClientCpf = cpfClean;
+
+        // Reseta estado da prospecção
+        prospActiveLead = null;
+        const cardLead = document.getElementById("prosp-lead-card");
+        const emptyState = document.getElementById("prosp-empty-state");
+        const prospCpf = document.getElementById("prosp-search-cpf");
+        if (cardLead) cardLead.style.display = "none";
+        if (emptyState) emptyState.style.display = "block";
+        if (prospCpf) prospCpf.value = "";
+
+        navigateTo("consulta-margem");
+        searchLeadByCPF();
+      };
+
+      // Inicializa escutadores da tela de prospecção comercial
+      const btnProspBuscar = document.getElementById("btn-prosp-buscar-cpf");
+      const inputProspCpf = document.getElementById("prosp-search-cpf");
+      const btnProspRandom = document.getElementById("btn-prosp-random");
+      const btnProspNaoAtendeu = document.getElementById("btn-prosp-nao-atendeu");
+      const btnProspOcupado = document.getElementById("btn-prosp-ocupado");
+      const btnProspProspectado = document.getElementById("btn-prosp-prospectado");
+
+      if (btnProspBuscar) btnProspBuscar.addEventListener("click", () => prospBuscarCPF());
+      if (inputProspCpf) {
+        inputProspCpf.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") prospBuscarCPF();
+        });
+        applyMask(inputProspCpf, maskCPF);
+      }
+      if (btnProspRandom) btnProspRandom.addEventListener("click", () => prospBuscarRandom());
+      if (btnProspNaoAtendeu) btnProspNaoAtendeu.addEventListener("click", () => prospRegistrarTentativa("Não Atendeu"));
+      if (btnProspOcupado) btnProspOcupado.addEventListener("click", () => prospRegistrarTentativa("Ocupado"));
+      if (btnProspProspectado) btnProspProspectado.addEventListener("click", () => prospRegistrarProspectado());
 
       // ==========================================
       // MONITORAMENTO E NOTIFICAÇÕES EM TEMPO REAL
@@ -8362,7 +9251,7 @@
         const user = getActiveUserObj();
         
         // Filtragem por Operador (excluindo leads frios da base geral que não foram atendidos)
-        let userLeads = leads.filter(l => l.status !== "Consulta de Margem");
+        let userLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
         if (profile !== "admin") {
           userLeads = userLeads.filter(l => l.operador_id === profile);
         }
@@ -8550,6 +9439,95 @@
         document.getElementById("log-kpi-status").textContent = allLogs.filter(l => l.tipo === 'status_change').length;
         document.getElementById("log-kpi-wpp").textContent    = allLogs.filter(l => l.tipo === 'wpp_sent').length;
         document.getElementById("log-kpi-edit").textContent   = allLogs.filter(l => l.tipo === 'lead_edit').length;
+
+        // Renderizar a tabela consolidada de atividades diárias
+        const atividadesTbody = document.getElementById("logs-atividades-tbody");
+        if (atividadesTbody) {
+          // Filtrar os logs de hoje
+          const hoje = new Date();
+          hoje.setHours(0,0,0,0);
+          
+          const logsHoje = allLogs.filter(log => {
+            const dtLog = new Date(log.timestamp);
+            return dtLog >= hoje;
+          });
+
+          // Atualizar o título com a data de hoje formatada
+          const dataResumoEl = document.getElementById("log-resumo-data");
+          if (dataResumoEl) {
+            dataResumoEl.textContent = new Date().toLocaleDateString("pt-BR");
+          }
+
+          // Agrupar por operador
+          const resumoOps = {};
+          
+          // Inicializar com todos os operadores cadastrados
+          OPERADORES.forEach(op => {
+            resumoOps[op.id] = {
+              nome: op.nome,
+              consultas: 0,
+              prospeccoes: 0,
+              simulacoes: 0,
+              whatsapps: 0,
+              total: 0
+            };
+          });
+
+          // Também inicializar o admin caso ele faça ações
+          if (!resumoOps["admin"]) {
+            resumoOps["admin"] = {
+              nome: "Administrador Geral",
+              consultas: 0,
+              prospeccoes: 0,
+              simulacoes: 0,
+              whatsapps: 0,
+              total: 0
+            };
+          }
+
+          // Contabilizar logs
+          logsHoje.forEach(log => {
+            const opId = log.operador_id || "admin";
+            if (!resumoOps[opId]) {
+              resumoOps[opId] = {
+                nome: log.operador_nome || "Desconhecido",
+                consultas: 0,
+                prospeccoes: 0,
+                simulacoes: 0,
+                whatsapps: 0,
+                total: 0
+              };
+            }
+
+            resumoOps[opId].total++;
+
+            if (log.tipo === "consulta_margem") {
+              resumoOps[opId].consultas++;
+            } else if (log.tipo === "prospeccao_tentativa" || log.tipo === "prospeccao_prospectado") {
+              resumoOps[opId].prospeccoes++;
+            } else if (log.tipo === "status_change" && log.meta?.para === "Recebida") {
+              resumoOps[opId].simulacoes++;
+            } else if (log.tipo === "wpp_sent") {
+              resumoOps[opId].whatsapps++;
+            }
+          });
+
+          // Renderizar linhas
+          const rows = Object.values(resumoOps).map(r => {
+            return `
+              <tr style="border-bottom: 1px solid rgba(24, 27, 44, 0.04);">
+                <td style="padding: 8px; font-weight: 600; color: var(--navy);">${r.nome}</td>
+                <td style="padding: 8px; text-align: center; color: var(--cobalt); font-weight: 700;">${r.consultas}</td>
+                <td style="padding: 8px; text-align: center; color: var(--gold); font-weight: 700;">${r.prospeccoes}</td>
+                <td style="padding: 8px; text-align: center; color: var(--green-success); font-weight: 700;">${r.simulacoes}</td>
+                <td style="padding: 8px; text-align: center; color: #25d366; font-weight: 700;">${r.whatsapps}</td>
+                <td style="padding: 8px; text-align: center; font-weight: 700; color: var(--navy); background: rgba(24, 27, 44, 0.02); border-radius: 4px;">${r.total}</td>
+              </tr>
+            `;
+          }).join('');
+
+          atividadesTbody.innerHTML = rows || `<tr><td colspan="6" style="text-align:center; padding:12px; color:var(--gray-light-text);">Nenhuma atividade registrada hoje.</td></tr>`;
+        }
 
         const tbody = document.getElementById("logs-table-body");
         const empty = document.getElementById("logs-empty");
