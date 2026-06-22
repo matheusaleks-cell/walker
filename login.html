@@ -364,6 +364,12 @@
         return;
       }
 
+      // Feedback de bloqueio administrativo
+      if (window.location.search.includes("blocked=true")) {
+        errorMsg.textContent = "Sua conta foi inativada pelo administrador. Entre em contato com o suporte.";
+        errorMsg.style.display = "block";
+      }
+
       // Se já estiver no modo demonstrativo offline, redireciona diretamente
       if (sessionStorage.getItem("walker_demo_mode") === "true" && sessionStorage.getItem("walker_admin_session") === "true") {
         window.location.href = "dashboard.html";

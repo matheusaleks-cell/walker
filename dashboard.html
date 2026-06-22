@@ -3337,6 +3337,38 @@
     </div>
   </div>
 
+  <!-- ========================================
+       MODAL: AUDITORIA DE OPERADOR (Admin)
+  ======================================== -->
+  <div class="modal-overlay" id="op-logs-modal">
+    <div class="modal-container" style="max-width: 800px; width: 90%;">
+      <div class="modal-header" style="background: var(--navy); border-bottom: 1px solid rgba(212, 188, 110, 0.2); border-top-left-radius: 12px; border-top-right-radius: 12px; padding: 18px 24px; display: flex; align-items: center;">
+        <div class="modal-title-group" style="display: flex; flex-direction: column;">
+          <span class="modal-title" style="color: var(--white); font-weight: 700; font-size: 1.2rem;">Auditoria de Operador</span>
+          <span style="font-size: 0.725rem; color: var(--gold); font-weight: 600; text-transform: uppercase; margin-top: 4px;" id="op-logs-modal-subtitle">Atividades do Operador</span>
+        </div>
+        <button class="close-modal" id="close-op-logs-modal" onclick="closeOpLogsModal()" style="background: transparent; border: none; color: var(--gold); font-size: 2rem; cursor: pointer; transition: var(--transition-fast); margin-left: auto; line-height: 1; outline: none;">&times;</button>
+      </div>
+      
+      <div class="modal-body" style="padding: 24px; background: var(--white); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; max-height: 75vh; overflow-y: auto;">
+        <div class="table-container" style="border: 1px solid rgba(24,27,44,0.08); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-md);">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;" id="op-logs-table">
+            <thead>
+              <tr style="background: var(--navy); border-bottom: 2px solid var(--gold); color: var(--white);">
+                <th style="text-align: left; padding: 12px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; width: 160px;">Data / Hora</th>
+                <th style="text-align: left; padding: 12px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; width: 120px;">Ação</th>
+                <th style="text-align: left; padding: 12px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Descrição da Atividade</th>
+              </tr>
+            </thead>
+            <tbody id="op-logs-table-body" style="background: var(--white);">
+              <!-- Renderização Dinâmica -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="details-modal">
     <div class="modal-container">
 
@@ -4104,7 +4136,7 @@
               }
             });
             
-            OPERADORES = Array.from(opsMap.values());
+            OPERADORES = Array.from(opsMap.values()).filter(op => !localOps[op.id]?.excluido);
             console.log("[Walker Bank] Operadores carregados localmente (Modo Demo):", OPERADORES);
           } catch (demoErr) {
             console.error("[Walker Bank] Erro ao carregar operadores locais no modo demo:", demoErr);
@@ -4133,6 +4165,9 @@
                 funcao,
                 role
               };
+            }).filter(op => {
+              const ov = cfgOverrides[op.id] || {};
+              return ov.excluido !== true;
             });
           }
         } catch(e) {
@@ -8011,22 +8046,42 @@
         if (!container) return;
         const cfg = getConfigs();
         const overrides = cfg.operadores_config || {};
-        if (OPERADORES.length === 0) {
+        
+        let currentUserId = "";
+        try {
+          const userProf = JSON.parse(sessionStorage.getItem("walker_user_profile") || "null");
+          if (userProf) currentUserId = userProf.id;
+        } catch(e) {}
+
+        const activeOps = OPERADORES.filter(op => {
+          const ov = overrides[op.id] || {};
+          return ov.excluido !== true;
+        });
+
+        if (activeOps.length === 0) {
           container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--gray-light-text); font-size:0.85rem; border:1px dashed rgba(24,27,44,0.15); border-radius:8px;">Nenhum operador encontrado. Crie operadores em Authentication → Users no Supabase e clique em "Atualizar Lista".</div>`;
           return;
         }
-        container.innerHTML = OPERADORES.map(op => {
+        
+        container.innerHTML = activeOps.map(op => {
           const ov = overrides[op.id] || {};
           const nome = ov.nome !== undefined ? ov.nome : op.nome;
           const meta = ov.meta_mensal !== undefined ? ov.meta_mensal : op.meta;
           const funcao = ov.funcao !== undefined ? ov.funcao : (op.funcao || "Operador");
           const opRole = ov.role !== undefined ? ov.role : (op.role || "operador");
+          const isAtivo = ov.ativo !== false;
+          const isSelf = op.id === currentUserId;
+
           const badge = opRole === 'admin'
             ? `<span style="background: rgba(212, 188, 110, 0.15); color: var(--gold); padding: 1.5px 5px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(212, 188, 110, 0.4); margin-left: 6px;">Admin</span>`
             : `<span style="background: rgba(30, 37, 68, 0.08); color: var(--navy); padding: 1.5px 5px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(24,27,44,0.12); margin-left: 6px;">Op</span>`;
 
+          const statusBtnStyle = isAtivo 
+            ? 'background: rgba(46, 204, 113, 0.1); color: var(--green-success); border: 1px solid rgba(46, 204, 113, 0.2);' 
+            : 'background: rgba(231, 76, 60, 0.1); color: var(--red-error); border: 1px solid rgba(231, 76, 60, 0.2);';
+
           return `
-            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:grid;grid-template-columns:48px 1.2fr 1fr 1fr 130px;gap:16px;align-items:center;">
+            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:grid;grid-template-columns:40px 1.2fr 1fr 1fr 120px 150px;gap:12px;align-items:center;">
               <div style="width:40px;height:40px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:0.85rem;flex-shrink:0;">${op.avatar}</div>
               <div class="config-field">
                 <label style="display:flex; align-items:center;">Nome do Operador ${badge}</label>
@@ -8047,14 +8102,228 @@
                   <option value="admin" ${opRole === 'admin' ? 'selected' : ''}>Admin</option>
                 </select>
               </div>
+              <div class="config-field" style="display:flex; flex-direction:column; gap:4px;">
+                <label style="text-align:right; margin-right:4px;">Ações</label>
+                <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                  <!-- Ativar/Desativar -->
+                  <button type="button" class="btn-op-status" data-id="${op.id}" data-active="${isAtivo}" ${isSelf ? 'disabled style="opacity:0.4; cursor:not-allowed; ' + statusBtnStyle + '"' : 'style="cursor:pointer; ' + statusBtnStyle + '"'} title="${isSelf ? 'Você não pode inativar a si mesmo' : (isAtivo ? 'Bloquear Acesso' : 'Liberar Acesso')}" style="padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; transition: all 0.2s ease;">
+                    ${isAtivo 
+                      ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
+                      : `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`
+                    }
+                  </button>
+
+                  <!-- Redefinir Senha -->
+                  <button type="button" class="btn-op-reset" data-id="${op.id}" data-email="${op.email || ''}" data-nome="${nome}" title="Redefinir Senha (E-mail)" style="background: rgba(52, 152, 219, 0.1); color: var(--blue-info); border: 1px solid rgba(52, 152, 219, 0.2); cursor:pointer; padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+                  </button>
+
+                  <!-- Ver Logs -->
+                  <button type="button" class="btn-op-logs" data-id="${op.id}" data-nome="${nome}" title="Ver Auditoria" style="background: rgba(24, 27, 44, 0.06); color: var(--navy); border: 1px solid rgba(24, 27, 44, 0.1); cursor:pointer; padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  </button>
+
+                  <!-- Excluir/Soft Delete -->
+                  <button type="button" class="btn-op-delete" data-id="${op.id}" data-nome="${nome}" ${isSelf ? 'disabled style="opacity:0.4; cursor:not-allowed; background:rgba(231,76,60,0.1); color:var(--red-error); border:1px solid rgba(231,76,60,0.2);"' : 'style="cursor:pointer; background: rgba(231, 76, 60, 0.1); color: var(--red-error); border: 1px solid rgba(231, 76, 60, 0.2);"'} title="${isSelf ? 'Você não pode desvincular a si mesmo' : 'Desvincular do Sistema'}" style="padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  </button>
+                </div>
+              </div>
             </div>
           `;
         }).join('');
 
-        // Vincula a máscara de moeda em tempo real aos inputs gerados
         container.querySelectorAll(".op-cfg-meta").forEach(input => {
           input.addEventListener("input", mascaraMoeda);
         });
+
+        initOperadoresActionListeners();
+      };
+
+      const initOperadoresActionListeners = () => {
+        const container = document.getElementById("operadores-config-container");
+        if (!container) return;
+
+        container.querySelectorAll(".btn-op-status").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const opId = btn.dataset.id;
+            const currentActive = btn.dataset.active === "true";
+            const newActive = !currentActive;
+            
+            const cfg = getConfigs();
+            if (!cfg.operadores_config) cfg.operadores_config = {};
+            if (!cfg.operadores_config[opId]) {
+              const op = OPERADORES.find(o => o.id === opId);
+              cfg.operadores_config[opId] = { nome: op?.nome || '', meta_mensal: op?.meta || 100000, role: op?.role || 'operador', avatar: op?.avatar || 'OP' };
+            }
+            cfg.operadores_config[opId].ativo = newActive;
+            
+            safeSaveConfigs(cfg);
+            
+            if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+              try {
+                await supabaseClient.from('configs').upsert({ id: 'default', data: cfg });
+              } catch(e) {
+                console.error("Erro ao salvar status do operador no Supabase:", e);
+              }
+            }
+            
+            showToast(newActive ? "Acesso do operador liberado!" : "Acesso do operador bloqueado!", newActive ? "var(--green-success)" : "var(--red-error)");
+            renderOperadoresConfigList();
+          });
+        });
+
+        container.querySelectorAll(".btn-op-reset").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const opEmail = btn.dataset.email;
+            const opNome = btn.dataset.nome;
+            if (!opEmail) {
+              showToast("E-mail do operador não configurado ou mock!", "var(--red-error)");
+              return;
+            }
+            
+            if (sessionStorage.getItem("walker_demo_mode") === "true") {
+              showToast(`[DEMO] Link de recuperação enviado para ${opEmail}!`, "var(--green-success)");
+              return;
+            }
+
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = "⏳";
+            btn.disabled = true;
+            try {
+              const { error } = await supabaseClient.auth.resetPasswordForEmail(opEmail, {
+                redirectTo: window.location.origin + "/login.html"
+              });
+              if (error) throw error;
+              showToast(`Link de redefinição enviado para o e-mail de ${opNome}!`, "var(--green-success)");
+            } catch(err) {
+              console.error("Erro ao redefinir senha do operador:", err);
+              showToast(`Erro ao redefinir senha: ${err.message || err}`, "var(--red-error)");
+            } finally {
+              btn.innerHTML = originalContent;
+              btn.disabled = false;
+            }
+          });
+        });
+
+        container.querySelectorAll(".btn-op-delete").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const opId = btn.dataset.id;
+            const opNome = btn.dataset.nome;
+            
+            if (!confirm(`Tem certeza que deseja desvincular o operador "${opNome}" do sistema?\n\nEle perderá acesso imediato e será ocultado da lista administrativa. O histórico de propostas criadas por ele será preservado.`)) {
+              return;
+            }
+
+            const cfg = getConfigs();
+            if (!cfg.operadores_config) cfg.operadores_config = {};
+            if (!cfg.operadores_config[opId]) {
+              const op = OPERADORES.find(o => o.id === opId);
+              cfg.operadores_config[opId] = { nome: op?.nome || '', meta_mensal: op?.meta || 100000, role: op?.role || 'operador', avatar: op?.avatar || 'OP' };
+            }
+            cfg.operadores_config[opId].excluido = true;
+            cfg.operadores_config[opId].ativo = false;
+            
+            safeSaveConfigs(cfg);
+            
+            if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+              try {
+                await supabaseClient.from('configs').upsert({ id: 'default', data: cfg });
+              } catch(e) {
+                console.error("Erro ao salvar exclusão lógica no Supabase:", e);
+              }
+            }
+
+            OPERADORES = OPERADORES.filter(o => o.id !== opId);
+            
+            showToast(`Operador ${opNome} desvinculado com sucesso!`, "var(--green-success)");
+            renderOperadoresConfigList();
+            updateProfileSelectorOptions();
+          });
+        });
+
+        container.querySelectorAll(".btn-op-logs").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const opId = btn.dataset.id;
+            const opNome = btn.dataset.nome;
+            
+            document.getElementById("op-logs-modal-subtitle").textContent = `Atividades recentes de ${opNome}`;
+            const tableBody = document.getElementById("op-logs-table-body");
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:16px; color:var(--gray-light-text);">⏳ Carregando histórico de ações...</td></tr>`;
+            
+            document.getElementById("op-logs-modal").classList.add("active");
+            
+            if (sessionStorage.getItem("walker_demo_mode") === "true") {
+              setTimeout(() => {
+                tableBody.innerHTML = `
+                  <tr style="border-bottom: 1px solid rgba(24,27,44,0.06);">
+                    <td style="padding:12px; color:var(--navy); font-weight:500;">${new Date().toLocaleString()}</td>
+                    <td style="padding:12px;"><span class="log-type-badge log-type-proposta_status_change" style="background:rgba(230,126,34,0.1); color:#e67e22; padding:2px 6px; border-radius:4px; font-size:0.7rem;">Simulação</span></td>
+                    <td style="padding:12px; color:var(--gray-text);">Criou nova proposta de crédito para o cliente Aldo Fernandes.</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid rgba(24,27,44,0.06);">
+                    <td style="padding:12px; color:var(--navy); font-weight:500;">${new Date(Date.now() - 3600000).toLocaleString()}</td>
+                    <td style="padding:12px;"><span class="log-type-badge log-type-sms_send" style="background:rgba(155,89,182,0.1); color:#9b59b6; padding:2px 6px; border-radius:4px; font-size:0.7rem;">SMS</span></td>
+                    <td style="padding:12px; color:var(--gray-text);">Disparou link de assinatura digital para o celular do cliente.</td>
+                  </tr>
+                `;
+              }, 400);
+              return;
+            }
+
+            try {
+              const { data: logs, error } = await supabaseClient
+                .from('audit_log')
+                .select('*')
+                .eq('operador_id', opId)
+                .order('created_at', { ascending: false })
+                .limit(50);
+                
+              if (error) throw error;
+              
+              if (!logs || logs.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:16px; color:var(--gray-light-text);">Nenhuma atividade registrada para este operador.</td></tr>`;
+                return;
+              }
+              
+              tableBody.innerHTML = logs.map(log => {
+                const dateLabel = new Date(log.created_at).toLocaleString('pt-BR');
+                let typeLabel = log.tipo || 'Ação';
+                let typeColor = 'background: rgba(30, 37, 68, 0.08); color: var(--navy);';
+                
+                if (log.tipo === 'config_save') {
+                  typeColor = 'background: rgba(46, 204, 113, 0.1); color: var(--green-success);';
+                  typeLabel = 'Configurações';
+                } else if (log.tipo?.includes('status')) {
+                  typeColor = 'background: rgba(230, 126, 34, 0.1); color: #e67e22;';
+                  typeLabel = 'Status';
+                } else if (log.tipo?.includes('sms')) {
+                  typeColor = 'background: rgba(155, 89, 182, 0.1); color: #9b59b6;';
+                  typeLabel = 'SMS / Contato';
+                } else if (log.tipo?.includes('document')) {
+                  typeColor = 'background: rgba(52, 152, 219, 0.1); color: var(--blue-info);';
+                  typeLabel = 'Documentos';
+                }
+                
+                return `
+                  <tr style="border-bottom: 1px solid rgba(24,27,44,0.06);">
+                    <td style="padding:12px; color:var(--navy); font-weight:600;">${dateLabel}</td>
+                    <td style="padding:12px;"><span style="${typeColor} padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:700; text-transform:uppercase;">${typeLabel}</span></td>
+                    <td style="padding:12px; color:var(--gray-text);">${log.descricao || ''}</td>
+                  </tr>
+                `;
+              }).join('');
+              
+            } catch(err) {
+              console.error("Erro ao carregar logs do operador:", err);
+              tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:16px; color:var(--red-error);">Erro ao carregar histórico de logs.</td></tr>`;
+            }
+          });
+        });
+      };
+
+      window.closeOpLogsModal = () => {
+        document.getElementById("op-logs-modal").classList.remove("active");
       };
 
       const loadConfigs = () => {
@@ -10216,6 +10485,23 @@
 
           // Carrega lista de operadores (seja do banco ou local storage no modo demo) antes de qualquer render
           await fetchOperadoresFromSupabase();
+
+          // Valida se o operador logado atual está ativo
+          const profileCheck = getCurrentUserProfile();
+          if (profileCheck) {
+            const cfg = getConfigs();
+            const overrides = cfg.operadores_config || {};
+            const opCfg = overrides[profileCheck.id] || {};
+            if (opCfg.ativo === false) {
+              sessionStorage.removeItem("walker_admin_session");
+              sessionStorage.removeItem("walker_user_profile");
+              if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+                try { await supabaseClient.auth.signOut(); } catch(se) {}
+              }
+              window.location.href = "login.html?blocked=true";
+              return;
+            }
+          }
 
           // Auto-set do perfil baseado no usuário real logado
           const realProfile = getCurrentUserProfile();
