@@ -178,3 +178,27 @@ CREATE POLICY "Exclusão de leads autenticados"
   TO authenticated
   USING (true);
 
+-- 9. Tabela de auditoria (log de acessos a dados sensíveis - LGPD)
+CREATE TABLE IF NOT EXISTS public.audit_log (
+  id           BIGSERIAL   PRIMARY KEY,
+  tipo         TEXT        NOT NULL,
+  operador_id  TEXT,
+  proposta_id  TEXT,
+  detalhes     JSONB       DEFAULT '{}',
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Inserção de audit_log autenticados" ON public.audit_log;
+CREATE POLICY "Inserção de audit_log autenticados"
+  ON public.audit_log FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Leitura de audit_log autenticados" ON public.audit_log;
+CREATE POLICY "Leitura de audit_log autenticados"
+  ON public.audit_log FOR SELECT
+  TO authenticated
+  USING (true);
+

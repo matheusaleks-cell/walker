@@ -1781,6 +1781,9 @@
     .log-type-config_save    { background: rgba(231, 76, 60, 0.1); color: #c0392b; }
     .log-type-nova_proposta  { background: rgba(46, 204, 113, 0.12); color: #27ae60; }
     .log-type-consulta_margem{ background: rgba(52, 152, 219, 0.08); color: #2471a3; }
+    .log-type-prospeccao_tentativa { background: rgba(230, 126, 34, 0.1); color: #e67e22; }
+    .log-type-prospeccao_prospectado { background: rgba(39, 174, 96, 0.12); color: #27ae60; }
+    .log-type-lead_created   { background: rgba(155, 89, 182, 0.1); color: #9b59b6; }
 
     .log-operator-avatar {
       width: 28px; height: 28px;
@@ -4446,7 +4449,7 @@
             tr.style.borderBottom = "1px solid rgba(24,27,44,0.05)";
             tr.innerHTML = `
               <td style="padding: 12px;">
-                <div style="font-weight: 700; color: var(--navy);">${l.lead?.nome || 'Cliente Sem Nome'}</div>
+                <div style="font-weight: 700; color: var(--navy);">${escapeHtml(l.lead?.nome || 'Cliente Sem Nome')}</div>
                 <div style="font-size: 0.75rem; color: var(--gray-light-text);">${formatCPF(l.lead?.cpf || '')}</div>
               </td>
               <td style="padding: 12px;">
@@ -4992,7 +4995,7 @@
         el.className = "toast-notification";
         el.style.background = color || "var(--green-success)";
         el.style.color = "white";
-        el.innerHTML = message;
+        el.textContent = message;
         document.body.appendChild(el);
         setTimeout(() => { el.style.animation = "fadeOut 0.3s ease forwards"; setTimeout(() => el.remove(), 300); }, 3000);
       };
@@ -5260,7 +5263,7 @@
           } else {
             operatorCol = `
               <td style="font-size:0.8rem; font-weight:500; color:var(--gray-text);">
-                ${lead.operador_nome || '<span style="color:rgba(24,27,44,0.35);">Não atribuído</span>'}
+                ${lead.operador_nome ? escapeHtml(lead.operador_nome) : '<span style="color:rgba(24,27,44,0.35);">Não atribuído</span>'}
               </td>
             `;
           }
@@ -5270,7 +5273,7 @@
             <td>
               <div class="lead-name-cell">
                 <span style="display: flex; align-items: center; gap: 8px; font-weight:700;">
-                  ${lead.lead?.nome || 'Cliente Sem Nome'}
+                  ${escapeHtml(lead.lead?.nome || 'Cliente Sem Nome')}
                   ${docBadges}
                 </span>
                 <span class="lead-sub-cell">${formatCPF(lead.lead?.cpf || '')}</span>
@@ -5598,10 +5601,11 @@
 
       const makeCopyable = (valText, cleanText) => {
         if (!valText || valText === '-') return '-';
-        const rawText = cleanText || valText;
+        const rawText = escapeHtml(cleanText || valText);
+        const safeVal = escapeHtml(valText);
         return `
-          <span>${valText}</span>
-          <button class="btn-copy" onclick="copyToClipboard('${rawText}', this)" title="Copiar '${valText}'">
+          <span>${safeVal}</span>
+          <button class="btn-copy" onclick="copyToClipboard('${rawText.replace(/'/g, "\\'")}', this)" title="Copiar">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           </button>
         `;
@@ -6949,7 +6953,7 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td style="font-size:0.75rem;color:var(--gray-light-text);">${l.id.substring(0, 12)}</td>
-            <td><div class="lead-name-cell"><span>${l.lead?.nome || '-'}</span></div></td>
+            <td><div class="lead-name-cell"><span>${escapeHtml(l.lead?.nome || '-')}</span></div></td>
             <td>${getConvenioLabel(l.dados_funcionais?.convenio)}</td>
             <td style="font-weight:700;">${formatBRL(l.proposta?.valor_solicitado || 0)}</td>
             <td>${formatBRL(l.proposta?.total_financiado || 0)}</td>
@@ -7076,11 +7080,11 @@
 
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td><div class="lead-name-cell"><span>${l.lead?.nome || '-'}</span></div></td>
+            <td><div class="lead-name-cell"><span>${escapeHtml(l.lead?.nome || '-')}</span></div></td>
             <td>${formatCPF(l.lead?.cpf || '')}</td>
-            <td style="text-transform:capitalize;">${l.marketing?.utm_source || 'Direto'}</td>
-            <td style="text-transform:capitalize;">${l.marketing?.utm_medium || '-'}</td>
-            <td style="font-size:0.75rem;">${l.marketing?.utm_campaign || '-'}</td>
+            <td style="text-transform:capitalize;">${escapeHtml(l.marketing?.utm_source || 'Direto')}</td>
+            <td style="text-transform:capitalize;">${escapeHtml(l.marketing?.utm_medium || '-')}</td>
+            <td style="font-size:0.75rem;">${escapeHtml(l.marketing?.utm_campaign || '-')}</td>
             <td>${formatDateBR(l.createdAt)}</td>
             <td>
               ${l.proposta?.assinatura_manual_solicitada 
@@ -10009,7 +10013,7 @@
         
         const saudacaoEl = document.getElementById("inicio-saudacao");
         if (saudacaoEl) {
-          saudacaoEl.innerHTML = `Olá, <strong>${user.nome}</strong>! ${greeting}.`;
+          saudacaoEl.innerHTML = `Olá, <strong>${escapeHtml(user.nome)}</strong>! ${greeting}.`;
         }
         
         // 2. Propostas Pendentes (Mesa)
@@ -10134,7 +10138,7 @@
               tr.innerHTML = `
                 <td>
                   <div class="lead-name-cell">
-                    <span>${l.lead?.nome || 'Cliente Sem Nome'}</span>
+                    <span>${escapeHtml(l.lead?.nome || 'Cliente Sem Nome')}</span>
                     <span class="lead-sub-cell">${formatCPF(l.lead?.cpf || '')}</span>
                   </div>
                 </td>
@@ -10272,7 +10276,7 @@
           const rows = Object.values(resumoOps).map(r => {
             return `
               <tr style="border-bottom: 1px solid rgba(24, 27, 44, 0.04);">
-                <td style="padding: 8px; font-weight: 600; color: var(--navy);">${r.nome}</td>
+                <td style="padding: 8px; font-weight: 600; color: var(--navy);">${escapeHtml(r.nome)}</td>
                 <td style="padding: 8px; text-align: center; color: var(--cobalt); font-weight: 700;">${r.consultas}</td>
                 <td style="padding: 8px; text-align: center; color: var(--gold); font-weight: 700;">${r.prospeccoes}</td>
                 <td style="padding: 8px; text-align: center; color: var(--green-success); font-weight: 700;">${r.simulacoes}</td>
@@ -10310,14 +10314,14 @@
             <td>
               <div style="display:flex; align-items:center; gap:8px;">
                 <div class="log-operator-avatar">${avatar}</div>
-                <span style="font-size:0.8rem; font-weight:600; color:var(--navy);">${log.operador_nome}</span>
+                <span style="font-size:0.8rem; font-weight:600; color:var(--navy);">${escapeHtml(log.operador_nome)}</span>
               </div>
             </td>
             <td><span class="log-type-badge log-type-${log.tipo}">${typeLabel}</span></td>
-            <td style="font-size:0.8rem; color:var(--gray-text); max-width:320px;">${log.descricao}</td>
+            <td style="font-size:0.8rem; color:var(--gray-text); max-width:320px;">${escapeHtml(log.descricao)}</td>
             <td style="font-size:0.75rem; color:var(--navy); font-weight:500;">
               ${log.lead_nome
-                ? `<span style="display:flex; flex-direction:column; gap:1px;"><span style="font-weight:700;">${log.lead_nome}</span><span style="color:var(--gray-light-text); font-size:0.68rem;">${log.lead_id ? log.lead_id.substring(0,14) + '…' : ''}</span></span>`
+                ? `<span style="display:flex; flex-direction:column; gap:1px;"><span style="font-weight:700;">${escapeHtml(log.lead_nome)}</span><span style="color:var(--gray-light-text); font-size:0.68rem;">${log.lead_id ? escapeHtml(log.lead_id.substring(0,14)) + '…' : ''}</span></span>`
                 : '<span style="color:rgba(24,27,44,0.25);">—</span>'}
             </td>
           `;
@@ -10356,6 +10360,7 @@
         if (document.getElementById("sec-dashboard-geral").classList.contains("active")) renderDashboard();
         if (document.getElementById("sec-relatorio-financeiro").classList.contains("active")) renderFinanceiro();
         if (document.getElementById("sec-relatorio-leads").classList.contains("active")) renderLeadsReport();
+        if (document.getElementById("sec-base-geral").classList.contains("active")) renderBaseGeral();
         if (document.getElementById("sec-clientes").classList.contains("active")) renderClientes();
         if (document.getElementById("sec-logs").classList.contains("active")) renderLogs();
       };

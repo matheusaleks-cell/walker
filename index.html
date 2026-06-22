@@ -2557,7 +2557,7 @@
             document.querySelectorAll(".convenio-select-item").forEach(el => el.classList.remove("selected"));
             item.classList.add("selected");
             
-            closeDropdown();
+            window.closeDropdown();
             updateSliderLimits(activeConvenio);
             calculatePrice();
           });
