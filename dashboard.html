@@ -7122,8 +7122,11 @@
 
         // Filtro de Busca
         if (search) {
+          const searchDigits = search.replace(/\D/g, '');
           clients = clients.filter(c => {
-            return (c.lead?.nome || '').toLowerCase().includes(search) || c.cpf.includes(search.replace(/\D/g, ''));
+            const matchNome = (c.lead?.nome || '').toLowerCase().includes(search);
+            const matchCpf = searchDigits ? c.cpf.includes(searchDigits) : false;
+            return matchNome || matchCpf;
           });
         }
 
@@ -7257,8 +7260,11 @@
 
         // Filtro de Busca
         if (search) {
+          const searchDigits = search.replace(/\D/g, '');
           baseLeads = baseLeads.filter(c => {
-            return (c.lead?.nome || '').toLowerCase().includes(search) || c.cpf.includes(search.replace(/\D/g, ''));
+            const matchNome = (c.lead?.nome || '').toLowerCase().includes(search);
+            const matchCpf = searchDigits ? c.cpf.includes(searchDigits) : false;
+            return matchNome || matchCpf;
           });
         }
 
