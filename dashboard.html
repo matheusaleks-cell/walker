@@ -21,6 +21,9 @@
   <!-- Supabase JS Client (Local) -->
   <script src="supabase.js"></script>
 
+  <!-- SheetJS CDN (Leitura de Excel) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   
   <style>
     /* Custom Fonts declarations */
@@ -2919,6 +2922,7 @@
               <button type="button" class="config-tab-btn" data-config-target="cfg-tab-convenios">Parâmetros por Convênio</button>
               <button type="button" class="config-tab-btn" data-config-target="cfg-tab-comissoes">Taxas & Comissões</button>
               <button type="button" class="config-tab-btn" data-config-target="cfg-tab-operadores">Gestão de Operadores</button>
+              <button type="button" class="config-tab-btn" data-config-target="cfg-tab-importador">Importar Planilha (Excel)</button>
             </div>
 
             <!-- CONTEÚDOS DAS ABAS -->
@@ -3106,6 +3110,50 @@
 
                 <div id="operadores-config-container" style="display: flex; flex-direction: column; gap: 12px;">
                   <!-- Gerado dinamicamente -->
+                </div>
+              </div>
+            </div>
+
+            <!-- ABA 5: Importador de Leads (Excel) -->
+            <div id="cfg-tab-importador" class="config-tab-content" style="display: none;">
+              <div class="config-section">
+                <h4 style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 12px; font-family: Arial, sans-serif;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  Importar Planilha de Margens (Excel)
+                </h4>
+                <p style="font-size: 0.8rem; color: var(--gray-light-text); margin-bottom: 20px; font-family: Arial, sans-serif;">
+                  Faça o upload do arquivo Excel com o formato correto de colunas (CPF, NOME, mg_margem, mg_margem_bruta, etc.) para atualizar as margens e salários líquidos dos leads no banco de dados do Supabase e no mock local automaticamente.
+                </p>
+                
+                <div style="background: rgba(24, 27, 44, 0.02); border: 2px dashed var(--nardo); border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px; position: relative;" id="excel-drop-zone">
+                  <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span style="font-size: 0.9rem; font-weight: 700; color: var(--navy); font-family: Arial, sans-serif;" id="excel-file-label">Arraste a planilha aqui ou clique para selecionar</span>
+                    <span style="font-size: 0.75rem; color: var(--gray-light-text); font-family: Arial, sans-serif;">Formatos aceitos: .xlsx, .xls</span>
+                  </div>
+                </div>
+
+                <!-- Painel de Progresso da Importação -->
+                <div id="excel-import-progress-card" style="display: none; background: rgba(24, 27, 44, 0.03); border: 1px solid rgba(24, 27, 44, 0.08); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.85rem; font-weight: 700; color: var(--navy); font-family: Arial, sans-serif;" id="excel-progress-status">Processando planilha...</span>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--gold); font-family: Arial, sans-serif;" id="excel-progress-percent">0%</span>
+                  </div>
+                  <div style="background: rgba(24, 27, 44, 0.08); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+                    <div id="excel-progress-bar" style="background: var(--gold); height: 100%; width: 0%; transition: width 0.1s ease;"></div>
+                  </div>
+                  <div id="excel-progress-details" style="font-size: 0.75rem; color: var(--gray-light-text); max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-family: monospace; padding: 8px; background: #fff; border: 1px solid rgba(24,27,44,0.06); border-radius: 4px;"></div>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <button type="button" id="btn-excel-importar" class="btn-action" style="background: var(--navy); color: var(--gold); font-size: 0.85rem; padding: 12px 24px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; opacity: 0.5; cursor: not-allowed;" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Iniciar Importação e Sincronização
+                  </button>
+                  <button type="button" id="btn-excel-cancelar" class="btn-filter" style="display: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; border: 1.5px solid var(--nardo); font-family: Arial, sans-serif;">
+                    Cancelar
+                  </button>
                 </div>
               </div>
             </div>
@@ -8449,6 +8497,338 @@
           showToast("💾 Configurações salvas localmente!", "var(--green-success)");
         }
       });
+
+      // ==========================================
+      // 11.5 IMPORTADOR DE LEADS (EXCEL)
+      // ==========================================
+      let excelParsedLeads = {};
+      let importCancelled = false;
+
+      const resetExcelImportState = () => {
+        excelParsedLeads = {};
+        document.getElementById('excel-file-input').value = '';
+        document.getElementById('excel-file-label').textContent = 'Arraste a planilha aqui ou clique para selecionar';
+        const btnImportar = document.getElementById('btn-excel-importar');
+        if (btnImportar) {
+          btnImportar.disabled = true;
+          btnImportar.style.opacity = '0.5';
+          btnImportar.style.cursor = 'not-allowed';
+        }
+        const progressCard = document.getElementById('excel-import-progress-card');
+        if (progressCard) progressCard.style.display = 'none';
+        const btnCancelar = document.getElementById('btn-excel-cancelar');
+        if (btnCancelar) btnCancelar.style.display = 'none';
+      };
+
+      const handleExcelFile = (file) => {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            let sheetName = workbook.SheetNames.find(name => name.toLowerCase() === 'base unificada') || workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(sheet);
+            
+            excelParsedLeads = {};
+            let count = 0;
+            
+            const cleanVal = (val) => {
+              if (val === null || val === undefined) return 0.0;
+              if (typeof val === 'number') return val;
+              let valStr = String(val).trim().replace(/\./g, '').replace(',', '.');
+              let f = parseFloat(valStr);
+              return isNaN(f) ? 0.0 : f;
+            };
+            
+            json.forEach(row => {
+              let cpfKey = Object.keys(row).find(k => k.toUpperCase() === 'CPF');
+              let nomeKey = Object.keys(row).find(k => k.toUpperCase() === 'NOME');
+              if (!cpfKey) return;
+              
+              let cpfRaw = String(row[cpfKey]).replace(/\D/g, '');
+              if (!cpfRaw || cpfRaw === 'nan' || cpfRaw === 'undefined') return;
+              let cpfNorm = cpfRaw.padStart(11, '0');
+              
+              let nome = nomeKey ? row[nomeKey] : '';
+              
+              let mgMargem = cleanVal(row['mg_margem']);
+              let mgMargemCartao = cleanVal(row['mg_margem_cartao']);
+              let mgMargemCartaoBeneficio = cleanVal(row['mg_margem_cartao_beneficio']);
+              let mgMargemBruta = cleanVal(row['mg_margem_bruta']);
+              let mgMargemCartaoBruta = cleanVal(row['mg_margem_cartao_bruta']);
+              let mgMargemCartaoBeneficioBruta = cleanVal(row['mg_margem_cartao_beneficio_bruta']);
+              
+              excelParsedLeads[cpfNorm] = {
+                nome: nome,
+                mg_margem: mgMargem,
+                mg_margem_cartao: mgMargemCartao,
+                mg_margem_cartao_beneficio: mgMargemCartaoBeneficio,
+                mg_margem_bruta: mgMargemBruta,
+                mg_margem_cartao_bruta: mgMargemCartaoBruta,
+                mg_margem_cartao_beneficio_bruta: mgMargemCartaoBeneficioBruta,
+                salario_liquido: mgMargemBruta
+              };
+              count++;
+            });
+            
+            if (count > 0) {
+              document.getElementById('excel-file-label').textContent = `Planilha carregada: ${count} registros encontrados`;
+              const btnImportar = document.getElementById('btn-excel-importar');
+              if (btnImportar) {
+                btnImportar.disabled = false;
+                btnImportar.style.opacity = '1';
+                btnImportar.style.cursor = 'pointer';
+              }
+            } else {
+              alert("Nenhum lead com CPF válido foi encontrado na planilha.");
+              resetExcelImportState();
+            }
+          } catch(err) {
+            console.error("Erro ao ler o arquivo Excel:", err);
+            alert("Erro ao ler o arquivo Excel. Verifique se o formato está correto.");
+            resetExcelImportState();
+          }
+        };
+        reader.readAsBinaryString(file);
+      };
+
+      const initExcelImportListeners = () => {
+        const dropZone = document.getElementById('excel-drop-zone');
+        const fileInput = document.getElementById('excel-file-input');
+        
+        if (dropZone && fileInput) {
+          fileInput.addEventListener('change', (e) => {
+            handleExcelFile(e.target.files[0]);
+          });
+
+          dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.background = 'rgba(24, 27, 44, 0.05)';
+            dropZone.style.borderColor = 'var(--gold)';
+          });
+
+          dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.background = 'rgba(24, 27, 44, 0.02)';
+            dropZone.style.borderColor = 'var(--nardo)';
+          });
+
+          dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.background = 'rgba(24, 27, 44, 0.02)';
+            dropZone.style.borderColor = 'var(--nardo)';
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              fileInput.files = e.dataTransfer.files;
+              handleExcelFile(e.dataTransfer.files[0]);
+            }
+          });
+        }
+
+        const btnImportar = document.getElementById('btn-excel-importar');
+        const btnCancelar = document.getElementById('btn-excel-cancelar');
+
+        if (btnImportar) {
+          btnImportar.addEventListener('click', async () => {
+            const progressCard = document.getElementById('excel-import-progress-card');
+            const progressBar = document.getElementById('excel-progress-bar');
+            const progressPercent = document.getElementById('excel-progress-percent');
+            const progressStatus = document.getElementById('excel-progress-status');
+            const progressDetails = document.getElementById('excel-progress-details');
+            
+            btnImportar.disabled = true;
+            btnImportar.style.opacity = '0.5';
+            btnImportar.style.cursor = 'not-allowed';
+            if (btnCancelar) btnCancelar.style.display = 'inline-block';
+            if (progressCard) progressCard.style.display = 'block';
+            if (progressDetails) progressDetails.innerHTML = '';
+            importCancelled = false;
+            
+            const logProgress = (msg, color = 'var(--gray-light-text)') => {
+              if (!progressDetails) return;
+              const logItem = document.createElement('div');
+              logItem.style.color = color;
+              logItem.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+              progressDetails.appendChild(logItem);
+              progressDetails.scrollTop = progressDetails.scrollHeight;
+            };
+            
+            logProgress('Iniciando processo de importação...', 'var(--navy)');
+            
+            const cpfsToImport = Object.keys(excelParsedLeads);
+            const total = cpfsToImport.length;
+            
+            if (total === 0) {
+              logProgress('Nenhum dado para importar.', 'red');
+              if (btnCancelar) btnCancelar.style.display = 'none';
+              return;
+            }
+            
+            let successCount = 0;
+            let failCount = 0;
+            
+            if (sessionStorage.getItem("walker_demo_mode") === "true") {
+              logProgress('Modo de demonstração ativo. Atualizando cache local...', 'orange');
+              
+              let leads = [];
+              try {
+                leads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+              } catch(e) {
+                leads = [];
+              }
+              
+              for (let i = 0; i < leads.length; i++) {
+                if (importCancelled) {
+                  logProgress('Importação cancelada pelo usuário.', 'orange');
+                  break;
+                }
+                
+                let lead = leads[i];
+                let cpfRaw = lead.lead?.cpf || '';
+                let cpfNorm = cpfRaw.replace(/\D/g, "").padStart(11, '0');
+                
+                if (excelParsedLeads[cpfNorm]) {
+                  const ex = excelParsedLeads[cpfNorm];
+                  if (!lead.dados_funcionais) lead.dados_funcionais = {};
+                  
+                  lead.dados_funcionais.margem_pre_aprovada = ex.mg_margem;
+                  lead.dados_funcionais.mg_margem = ex.mg_margem;
+                  lead.dados_funcionais.mg_margem_cartao = ex.mg_margem_cartao;
+                  lead.dados_funcionais.mg_margem_cartao_beneficio = ex.mg_margem_cartao_beneficio;
+                  lead.dados_funcionais.mg_margem_bruta = ex.mg_margem_bruta;
+                  lead.dados_funcionais.mg_margem_cartao_bruta = ex.mg_margem_cartao_bruta;
+                  lead.dados_funcionais.mg_margem_cartao_beneficio_bruta = ex.mg_margem_cartao_beneficio_bruta;
+                  lead.dados_funcionais.salario_liquido = ex.salario_liquido;
+                  
+                  if (!lead.lead) lead.lead = {};
+                  if (!lead.lead.nome) lead.lead.nome = ex.nome;
+                  
+                  successCount++;
+                  logProgress(`[LOCAL] Lead CPF ${cpfNorm} (${ex.nome}) atualizado.`, 'var(--green-success)');
+                }
+                
+                const percent = Math.round(((i + 1) / leads.length) * 100);
+                if (progressBar) progressBar.style.width = `${percent}%`;
+                if (progressPercent) progressPercent.textContent = `${percent}%`;
+                if (progressStatus) progressStatus.textContent = `Processando local: ${i + 1}/${leads.length}`;
+              }
+              
+              if (!importCancelled) {
+                localStorage.setItem("walker_leads", JSON.stringify(leads));
+                currentLeads = leads;
+                logProgress(`Concluído! ${successCount} leads atualizados localmente.`, 'var(--navy)');
+                showToast(`Sincronizados ${successCount} leads offline!`, 'var(--green-success)');
+                renderActivePage();
+              }
+            } else {
+              logProgress('Conectando ao Supabase...', 'var(--navy)');
+              
+              try {
+                const { data: supabaseRows, error: getErr } = await supabaseClient
+                  .from('leads')
+                  .select('id, cpf');
+                  
+                if (getErr) throw getErr;
+                
+                logProgress(`Encontrados ${supabaseRows.length} registros no Supabase. Iniciando cruzamento...`, 'var(--navy)');
+                
+                for (let i = 0; i < supabaseRows.length; i++) {
+                  if (importCancelled) {
+                    logProgress('Importação cancelada pelo usuário.', 'orange');
+                    break;
+                  }
+                  
+                  const row = supabaseRows[i];
+                  const leadId = row.id;
+                  const cpfRaw = String(row.cpf || '').replace(/\D/g, "");
+                  const cpfNorm = cpfRaw.padStart(11, '0');
+                  
+                  if (excelParsedLeads[cpfNorm]) {
+                    const ex = excelParsedLeads[cpfNorm];
+                    logProgress(`Atualizando lead CPF ${cpfNorm} (${ex.nome})...`, 'var(--gray-light-text)');
+                    
+                    try {
+                      const { data: singleData, error: singleErr } = await supabaseClient
+                        .from('leads')
+                        .select('payload')
+                        .eq('id', leadId)
+                        .single();
+                        
+                      if (singleErr) throw singleErr;
+                      
+                      let payload = singleData?.payload || {};
+                      if (typeof payload === 'string') {
+                        try { payload = JSON.parse(payload); } catch(e) { payload = {}; }
+                      }
+                      
+                      if (!payload.dados_funcionais) payload.dados_funcionais = {};
+                      const df_func = payload.dados_funcionais;
+                      
+                      df_func.margem_pre_aprovada = ex.mg_margem;
+                      df_func.mg_margem = ex.mg_margem;
+                      df_func.mg_margem_cartao = ex.mg_margem_cartao;
+                      df_func.mg_margem_cartao_beneficio = ex.mg_margem_cartao_beneficio;
+                      df_func.mg_margem_bruta = ex.mg_margem_bruta;
+                      df_func.mg_margem_cartao_bruta = ex.mg_margem_cartao_bruta;
+                      df_func.mg_margem_cartao_beneficio_bruta = ex.mg_margem_cartao_beneficio_bruta;
+                      df_func.salario_liquido = ex.salario_liquido;
+                      
+                      if (!payload.lead) payload.lead = {};
+                      if (!payload.lead.nome) payload.lead.nome = ex.nome;
+                      
+                      const { error: updErr } = await supabaseClient
+                        .from('leads')
+                        .update({ payload: payload })
+                        .eq('id', leadId);
+                        
+                      if (updErr) throw updErr;
+                      
+                      successCount++;
+                      logProgress(`Lead CPF ${cpfNorm} atualizado no Supabase com sucesso.`, 'var(--green-success)');
+                    } catch(err) {
+                      failCount++;
+                      logProgress(`Erro ao atualizar CPF ${cpfNorm}: ${err.message || err}`, 'red');
+                      console.error(`Erro ao atualizar CPF ${cpfNorm}:`, err);
+                    }
+                  }
+                  
+                  const percent = Math.round(((i + 1) / supabaseRows.length) * 100);
+                  if (progressBar) progressBar.style.width = `${percent}%`;
+                  if (progressPercent) progressPercent.textContent = `${percent}%`;
+                  if (progressStatus) progressStatus.textContent = `Processando: ${i + 1}/${supabaseRows.length}`;
+                }
+                
+                if (!importCancelled) {
+                  logProgress(`Sincronização concluída! Sucesso: ${successCount}, Falhas: ${failCount}.`, 'var(--navy)');
+                  showToast(`Importação concluída! ${successCount} atualizados.`, 'var(--green-success)');
+                  
+                  logProgress('Atualizando painel com os novos dados...', 'var(--navy)');
+                  await fetchLeadsFromSupabase();
+                  renderActivePage();
+                }
+                
+              } catch(err) {
+                logProgress(`Erro geral na sincronização: ${err.message || err}`, 'red');
+                console.error("Erro geral na importação:", err);
+              }
+            }
+            
+            if (btnCancelar) btnCancelar.style.display = 'none';
+            btnImportar.disabled = false;
+            btnImportar.style.opacity = '1';
+            btnImportar.style.cursor = 'pointer';
+          });
+        }
+
+        if (btnCancelar) {
+          btnCancelar.addEventListener('click', () => {
+            importCancelled = true;
+          });
+        }
+      };
+
+      initExcelImportListeners();
 
       // ==========================================
       // 12. CENTRAL DE CONSULTA DE MARGEM
