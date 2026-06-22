@@ -2420,7 +2420,7 @@
                   <th>Celular</th>
                   <th>E-mail</th>
                   <th>Gênero</th>
-                  <th>Estado Civil</th>
+                  <th>Margem</th>
                   <th>Propostas</th>
                   <th style="text-align:right;">Ação</th>
                 </tr>
@@ -7139,6 +7139,12 @@
 
         const frag = document.createDocumentFragment();
         clients.forEach(c => {
+          const maxMargem = c.proposals.reduce((max, p) => {
+            const m = parseFloat(p.dados_funcionais?.margem_pre_aprovada) || 0;
+            return Math.max(max, m);
+          }, 0);
+          const margemFormatada = formatBRL(maxMargem);
+
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td><div class="lead-name-cell"><span>${c.lead?.nome || '-'}</span><span class="lead-sub-cell">${c.lead?.nome_mae || ''}</span></div></td>
@@ -7146,7 +7152,7 @@
             <td>${formatCelular(c.lead?.celular)}</td>
             <td>${c.lead?.email || '-'}</td>
             <td style="text-transform:capitalize;">${c.lead?.genero || '-'}</td>
-            <td style="text-transform:capitalize;">${c.lead?.estado_civil || '-'}</td>
+            <td style="font-weight:700; color:var(--green-success);">${margemFormatada}</td>
             <td style="font-weight:700;text-align:center;">${c.proposals.length}</td>
             <td style="text-align:right;">
               <button class="btn-action-sm" data-cpf="${c.cpf}">Ficha Completa</button>
