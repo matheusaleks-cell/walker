@@ -589,7 +589,8 @@
     .status-badge.em-analise { background: rgba(230, 126, 34, 0.1); color: #e67e22; }
     .status-badge.aguard-assinatura { background: rgba(155, 89, 182, 0.1); color: #9b59b6; }
     .status-badge.consulta-margem { background: rgba(52, 152, 219, 0.1); color: #2471a3; }
-    
+    .status-badge.importado { background: rgba(22, 160, 133, 0.1); color: #16a085; }
+
     /* Botões de Ação */
     .btn-action {
       background: var(--navy);
@@ -3083,7 +3084,7 @@
                     </div>
                     <div class="config-field">
                       <label>Meta Comercial Mensal (R$)</label>
-                      <input type="number" id="new-op-meta" placeholder="Ex: 100000" style="padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); width: 100%; font-size: 0.85rem; outline: none; font-family: Arial;">
+                      <input type="text" id="new-op-meta" inputmode="numeric" placeholder="R$ 0,00" style="padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); width: 100%; font-size: 0.85rem; outline: none; font-family: Arial;">
                     </div>
                     <div class="config-field">
                       <label>Perfil de Acesso</label>
@@ -3390,6 +3391,9 @@
           <button class="btn-action" id="m-btn-editar" style="background:rgba(212,188,110,0.15);border:1px solid var(--gold);color:var(--gold);font-size:0.75rem;padding:6px 12px;border-radius:4px;display:inline-flex;align-items:center;gap:6px;font-weight:700;cursor:pointer;">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
             Editar Dados
+          </button>
+          <button class="btn-action" id="m-btn-excluir" style="background:rgba(192, 57, 43, 0.1);border:1px solid rgba(192, 57, 43, 0.3);color:var(--red-error);font-size:0.75rem;padding:6px 12px;border-radius:4px;display:none;align-items:center;gap:6px;font-weight:700;cursor:pointer;">
+            🗑️ Excluir Lead
           </button>
           <button class="btn-action" id="m-btn-salvar" style="background:var(--green-success);border:none;color:white;font-size:0.75rem;padding:6px 12px;border-radius:4px;display:none;align-items:center;gap:6px;font-weight:700;cursor:pointer;">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -3763,6 +3767,19 @@
 
     </div><!-- /modal-container -->
   </div><!-- /details-modal -->
+
+  <!-- Modal de Confirmação Customizado (Anti-bloqueio de pop-up) -->
+  <div class="modal-overlay" id="confirm-modal" style="z-index: 2000;">
+    <div class="modal-container" style="max-width: 480px; padding: 24px; border-radius: 12px; text-align: center; background: var(--white); box-shadow: var(--shadow-lg); border: 1px solid rgba(212, 188, 110, 0.2);">
+      <div style="font-size: 2.5rem; margin-bottom: 16px;" id="confirm-modal-icon">⚠️</div>
+      <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 12px;" id="confirm-modal-title">Confirmar Ação</h3>
+      <p style="font-size: 0.875rem; color: var(--gray-text); margin-bottom: 24px; line-height: 1.4;" id="confirm-modal-message">Tem certeza que deseja prosseguir com esta ação?</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn-action" id="confirm-modal-btn-cancel" style="background: var(--light-gray); border: 1.5px solid var(--nardo); color: var(--navy); font-size: 0.8rem; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancelar</button>
+        <button class="btn-action" id="confirm-modal-btn-confirm" style="background: var(--red-error); border: none; color: white; font-size: 0.8rem; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">Confirmar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================
        MODAL: NOVA PROPOSTA (CADASTRO MANUAL)
@@ -4358,7 +4375,7 @@
         return op ? op.avatar : "??";
       };
 
-      const assignLeadOperator = (leadId, operadorId) => {
+      const assignLeadOperator = async (leadId, operadorId) => {
         const leads = getLeads();
         const lead = leads.find(l => l.id === leadId);
         if (lead) {
@@ -4371,10 +4388,29 @@
             lead.operador_nome = op.nome;
           }
           safeSaveLeads(leads);
-          
+
           currentLeads = leads;
           renderMesaTable();
-          
+
+          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+            try {
+              const sanitizedLead = await sanitizeLeadPayload(lead);
+              currentLeads = currentLeads.map(l => l.id === sanitizedLead.id ? sanitizedLead : l);
+              await supabaseClient.from('leads').upsert({
+                id: sanitizedLead.id,
+                created_at: sanitizedLead.createdAt,
+                nome: sanitizedLead.lead?.nome,
+                cpf: sanitizedLead.lead?.cpf,
+                status: sanitizedLead.status,
+                convenio: sanitizedLead.dados_funcionais?.convenio,
+                valor_solicitado: sanitizedLead.proposta?.valor_solicitado || 0,
+                payload: sanitizedLead
+              });
+            } catch (err) {
+              console.error("[Walker Bank] Erro ao sincronizar atribuição de operador:", err);
+            }
+          }
+
           recordLog('lead_assign',
             `Proposta atribuída a ${lead.operador_nome || 'Sem Operador'}`,
             lead,
@@ -4652,6 +4688,107 @@
         try { return await getStorageUrl(val); } catch(e) { console.error('Storage URL error:', e); return null; }
       };
 
+      const base64ToBlob = (base64Str) => {
+        try {
+          const parts = base64Str.split(';base64,');
+          const contentType = parts[0].split(':')[1];
+          const raw = window.atob(parts[1]);
+          const uInt8Array = new Uint8Array(raw.length);
+          for (let i = 0; i < raw.length; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+          }
+          return new Blob([uInt8Array], { type: contentType });
+        } catch (e) {
+          console.error("[Walker Bank] Erro ao converter base64 para Blob:", e);
+          return null;
+        }
+      };
+
+      const uploadBase64ToStorage = async (base64Str, leadId, type) => {
+        if (!base64Str || !base64Str.startsWith('data:')) return base64Str;
+        try {
+          const blob = base64ToBlob(base64Str);
+          if (!blob) return base64Str;
+          let ext = 'jpg';
+          if (blob.type === 'application/pdf') ext = 'pdf';
+          else if (blob.type === 'image/png') ext = 'png';
+          else if (blob.type === 'image/jpeg') ext = 'jpg';
+          else if (blob.type === 'image/webp') ext = 'webp';
+          
+          const path = `leads/${leadId}/${type}.${ext}`;
+          console.log(`[Walker Bank] Enviando arquivo convertido para o storage no caminho: ${path}`);
+          const { error } = await supabaseClient.storage
+            .from('walkerbank-docs')
+            .upload(path, blob, { upsert: true, contentType: blob.type });
+            
+          if (error) throw error;
+          return path;
+        } catch (err) {
+          console.error("[Walker Bank] Erro ao migrar base64 para storage:", err);
+          return base64Str;
+        }
+      };
+
+      const sanitizeLeadPayload = async (leadObj) => {
+        if (!leadObj) return leadObj;
+        try {
+          // Faz uma cópia profunda simples
+          const lead = JSON.parse(JSON.stringify(leadObj));
+          if (lead.arquivos) {
+            if (lead.arquivos.identidade_cnh_rg && lead.arquivos.identidade_cnh_rg.startsWith('data:')) {
+              console.log(`[Walker Bank] Higienizando identidade_cnh_rg base64 para o lead ${lead.id}...`);
+              lead.arquivos.identidade_cnh_rg = await uploadBase64ToStorage(lead.arquivos.identidade_cnh_rg, lead.id, 'rg');
+            }
+            if (lead.arquivos.contracheque && lead.arquivos.contracheque.startsWith('data:')) {
+              console.log(`[Walker Bank] Higienizando contracheque base64 para o lead ${lead.id}...`);
+              lead.arquivos.contracheque = await uploadBase64ToStorage(lead.arquivos.contracheque, lead.id, 'contracheque');
+            }
+          }
+          return lead;
+        } catch (e) {
+          console.error("[Walker Bank] Erro ao sanitizar payload do lead:", e);
+          return leadObj;
+        }
+      };
+
+      const openConfirmModal = (message, title = "Atenção", icon = "⚠️", confirmColor = "var(--red-error)", confirmText = "Confirmar") => {
+        return new Promise((resolve) => {
+          const modal = document.getElementById("confirm-modal");
+          const titleEl = document.getElementById("confirm-modal-title");
+          const msgEl = document.getElementById("confirm-modal-message");
+          const iconEl = document.getElementById("confirm-modal-icon");
+          const btnConfirm = document.getElementById("confirm-modal-btn-confirm");
+          const btnCancel = document.getElementById("confirm-modal-btn-cancel");
+
+          titleEl.textContent = title;
+          msgEl.textContent = message;
+          iconEl.textContent = icon;
+          btnConfirm.style.backgroundColor = confirmColor;
+          btnConfirm.textContent = confirmText;
+
+          const cleanup = () => {
+            modal.classList.remove("active");
+            // Remove listeners clonando os botões para limpar eventos duplicados
+            const newConfirm = btnConfirm.cloneNode(true);
+            const newCancel = btnCancel.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
+            btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+          };
+
+          document.getElementById("confirm-modal-btn-confirm").addEventListener("click", () => {
+            cleanup();
+            resolve(true);
+          });
+
+          document.getElementById("confirm-modal-btn-cancel").addEventListener("click", () => {
+            cleanup();
+            resolve(false);
+          });
+
+          modal.classList.add("active");
+        });
+      };
+
       // Baixa um documento (aceita base64 ou URL assinada do Storage)
       const downloadDocument = async (fileVal, filename) => {
         if (!fileVal) { alert("Nenhum arquivo anexado para download."); return; }
@@ -4845,6 +4982,7 @@
         if (s === 'Recusada') return 'recusado';
         if (s === 'Paga') return 'pago';
         if (s === 'Consulta de Margem') return 'consulta-margem';
+        if (s === 'Importado') return 'importado';
         if (s === 'Descartado') return 'recusado';
         if (s === 'Aguardando Averbação') return 'recebida'; // compat
         return 'recebida';
@@ -4890,9 +5028,26 @@
           return;
         }
         try {
+          // Query leve: extrai campos estruturados diretamente do JSONB sem carregar as imagens base64 de 'arquivos' para evitar estouro de memória
           const { data, error } = await supabaseClient
             .from('leads')
-            .select('id, created_at, nome, cpf, status, convenio, valor_solicitado, payload')
+            .select(`
+              id,
+              created_at,
+              nome,
+              cpf,
+              status,
+              convenio,
+              valor_solicitado,
+              lead:payload->lead,
+              dados_funcionais:payload->dados_funcionais,
+              dados_bancarios:payload->dados_bancarios,
+              proposta:payload->proposta,
+              marketing:payload->marketing,
+              historico_contatos:payload->historico_contatos,
+              operador_id:payload->>operador_id,
+              operador_nome:payload->>operador_nome
+            `)
             .order('created_at', { ascending: false });
 
           if (error) throw error;
@@ -4903,41 +5058,49 @@
                 statusMapped = "Recebida";
               }
 
-              // Se o payload JSONB estiver disponível, usa ele como fonte primária
-              let parsed = {};
-              if (row.payload) {
-                if (typeof row.payload === 'string') {
-                  try { parsed = JSON.parse(row.payload); } catch(e) {}
-                } else if (typeof row.payload === 'object') {
-                  parsed = row.payload;
-                }
-              }
-
-              // Fallback: cache local para campos que o payload pode não ter
+              // Fallback: cache local para dados que não estão no banco (se existirem)
               const existing = (typeof currentLeads !== 'undefined' && currentLeads)
                 ? currentLeads.find(l => l.id === row.id)
                 : null;
 
-              // Usa o payload completo como base, com fallbacks das colunas SQL
-              const base = Object.keys(parsed).length > 0 ? parsed : (existing || {});
+              // Reconstrói o item estruturado leve trazendo tudo que veio do banco de forma segura
               const item = {
-                ...base,
+                ...(existing || {}),
                 id: row.id,
                 createdAt: row.created_at,
                 status: statusMapped,
+                operador_id: row.operador_id || existing?.operador_id || null,
+                operador_nome: row.operador_nome || existing?.operador_nome || null,
                 lead: {
-                  ...(base.lead || {}),
-                  nome: base.lead?.nome || row.nome,
-                  cpf: base.lead?.cpf || row.cpf
+                  ...(existing?.lead || {}),
+                  ...(row.lead || {}),
+                  nome: row.nome || row.lead?.nome || '',
+                  cpf: row.cpf || row.lead?.cpf || ''
                 },
                 dados_funcionais: {
-                  ...(base.dados_funcionais || {}),
-                  convenio: row.convenio || base.dados_funcionais?.convenio || ''
+                  ...(existing?.dados_funcionais || {}),
+                  ...(row.dados_funcionais || {}),
+                  convenio: row.convenio || row.dados_funcionais?.convenio || '',
+                  matricula: row.dados_funcionais?.matricula || existing?.dados_funcionais?.matricula || ''
+                },
+                dados_bancarios: {
+                  ...(existing?.dados_bancarios || {}),
+                  ...(row.dados_bancarios || {})
                 },
                 proposta: {
-                  ...(base.proposta || {}),
-                  valor_solicitado: (row.valor_solicitado != null ? row.valor_solicitado : base.proposta?.valor_solicitado) || 0
-                }
+                  ...(existing?.proposta || {}),
+                  ...(row.proposta || {}),
+                  valor_solicitado: row.valor_solicitado || row.proposta?.valor_solicitado || 0,
+                  valor_parcela: row.proposta?.valor_parcela ? parseFloat(row.proposta.valor_parcela) : (existing?.proposta?.valor_parcela || 0),
+                  prazo_meses: row.proposta?.prazo_meses ? parseInt(row.proposta.prazo_meses) : (existing?.proposta?.prazo_meses || 36),
+                  assinatura_sms_validada: row.proposta?.assinatura_sms_validada === 'true' || row.proposta?.assinatura_sms_validada === true || existing?.proposta?.assinatura_sms_validada || false,
+                  assinatura_manual_solicitada: row.proposta?.assinatura_manual_solicitada === 'true' || row.proposta?.assinatura_manual_solicitada === true || existing?.proposta?.assinatura_manual_solicitada || false
+                },
+                marketing: {
+                  ...(existing?.marketing || {}),
+                  ...(row.marketing || {})
+                },
+                historico_contatos: row.historico_contatos || existing?.historico_contatos || []
               };
 
               return item;
@@ -5093,7 +5256,7 @@
       // 5. MESA DE ANÁLISE (PÁGINA 1)
       // ==========================================
       const updateMesaMetrics = (leads) => {
-        const filteredLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
+        const filteredLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
         document.getElementById("metric-total-leads").textContent = filteredLeads.length;
 
         const volume = filteredLeads.filter(l => l.status !== "Recusada").reduce((sum, l) => sum + (l.proposta?.valor_solicitado || 0), 0);
@@ -5114,7 +5277,7 @@
 
         // Nav count Base Geral
         const allLeadsForBase = getLeads();
-        const baseGeralCount = allLeadsForBase.filter(l => l.status === "Consulta de Margem").length;
+        const baseGeralCount = allLeadsForBase.filter(l => l.status === "Consulta de Margem" || l.status === "Importado").length;
         const navCountBase = document.getElementById("nav-count-base");
         if (navCountBase) navCountBase.textContent = baseGeralCount;
       };
@@ -5122,7 +5285,7 @@
       let selectedMesaStatus = 'all';
 
       const renderMesaTable = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") {
           leads = leads.filter(l => l.operador_id === profile);
@@ -5302,11 +5465,23 @@
                     <div class="wpp-dropdown-item" onclick="sendWppTable('${lead.id}', 'recusada')">✕ Avisar Recusa</div>
                   </div>
                 </div>
+                ${activeProfile === "admin" ? `
+                  <button class="btn-action-sm btn-delete-lead" title="Excluir Lead" data-delete-id="${lead.id}" style="background: rgba(192, 57, 43, 0.1); color: var(--red-error); border: 1px solid rgba(192, 57, 43, 0.3); width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; padding: 0; font-size: 0.85rem; cursor: pointer;">🗑️</button>
+                ` : ""}
                 <button class="btn-action" data-id="${lead.id}">Analisar</button>
               </div>
             </td>
           `;
           tr.querySelector(".btn-action").addEventListener("click", () => openLeadDetails(lead.id));
+          if (activeProfile === "admin") {
+            const delBtn = tr.querySelector(".btn-delete-lead");
+            if (delBtn) {
+              delBtn.addEventListener("click", (e) => {
+                console.log("[Walker Bank] Clique na lixeira da tabela para o ID:", lead.id);
+                deleteLead(lead.id);
+              });
+            }
+          }
           fragment.appendChild(tr);
         });
         tbody.innerHTML = "";
@@ -5683,15 +5858,16 @@
           
           if (sessionStorage.getItem("walker_demo_mode") !== "true") {
             try {
+              const sanitizedLead = await sanitizeLeadPayload(lead);
               await supabaseClient.from("leads").upsert({
-                id: lead.id,
-                created_at: lead.createdAt,
-                nome: lead.lead?.nome,
-                cpf: lead.lead?.cpf,
+                id: sanitizedLead.id,
+                created_at: sanitizedLead.createdAt,
+                nome: sanitizedLead.lead?.nome,
+                cpf: sanitizedLead.lead?.cpf,
                 status: "Aguardando Assinatura",
-                convenio: lead.dados_funcionais?.convenio,
-                valor_solicitado: lead.proposta?.valor_solicitado,
-                payload: lead
+                convenio: sanitizedLead.dados_funcionais?.convenio,
+                valor_solicitado: sanitizedLead.proposta?.valor_solicitado,
+                payload: sanitizedLead
               });
             } catch(e) {}
           }
@@ -5885,8 +6061,8 @@
         }
 
         // Otimização de Egress (Lazy Loading):
-        // Se for um lead real do Supabase (não mock) e não tiver os dados do payload detalhado (como dados bancários/anexos), busca do banco.
-        if (id && !id.startsWith("proposta-mock") && (!lead.dados_bancarios || Object.keys(lead.dados_bancarios).length === 0)) {
+        // Se for um lead real do Supabase e não tiver o campo 'arquivos' (excluído da query leve), busca o payload completo do banco.
+        if (id && !id.startsWith("proposta-mock") && !lead.arquivos) {
           try {
             const btn = document.querySelector(`.btn-action[data-id="${id}"]`);
             const originalText = btn ? btn.textContent : "Analisar";
@@ -5936,6 +6112,11 @@
         document.getElementById("m-btn-editar").style.display = "inline-flex";
         document.getElementById("m-btn-salvar").style.display = "none";
         document.getElementById("m-btn-cancelar").style.display = "none";
+        if (profile === "admin") {
+          document.getElementById("m-btn-excluir").style.display = "inline-flex";
+        } else {
+          document.getElementById("m-btn-excluir").style.display = "none";
+        }
         document.querySelectorAll(".view-mode").forEach(el => el.style.display = "");
         document.querySelectorAll(".edit-mode").forEach(el => el.style.display = "none");
 
@@ -6203,8 +6384,102 @@
         activeLeadId = null;
       };
 
+      const deleteLead = async (id) => {
+        console.log("[Walker Bank] deleteLead acionado para o ID:", id);
+        
+        const confirmed = await openConfirmModal(
+          "Tem certeza que deseja excluir permanentemente este lead e toda a sua proposta? Esta ação não pode ser desfeita.",
+          "Excluir Proposta permanentemente",
+          "🗑️",
+          "var(--red-error)",
+          "Excluir Permanentemente"
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        const isDemo = sessionStorage.getItem("walker_demo_mode") === "true";
+        if (isDemo) {
+          let leads = getLeads();
+          leads = leads.filter(l => l.id !== id);
+          currentLeads = leads;
+          safeSaveLeads(leads);
+          showToast("Lead excluído com sucesso (Modo Demo).", "var(--green-success)");
+          if (typeof activeLeadId !== 'undefined' && activeLeadId === id) {
+            closeLeadDetails();
+          }
+          const activePage = sessionStorage.getItem("walker_active_page") || "inicio";
+          if (activePage === 'mesa-analise') renderMesaTable();
+          else if (activePage === 'inicio') renderInicioHome();
+          return;
+        }
+
+        try {
+          const userObj = getActiveUserObj();
+          const lead = getLeads().find(l => l.id === id);
+          const leadInfo = lead ? `${lead.lead?.nome || ''} (${lead.lead?.cpf || ''})` : id;
+
+          const { error } = await supabaseClient
+            .from('leads')
+            .delete()
+            .eq('id', id);
+
+          if (error) throw error;
+
+          try {
+            const sessionData = await supabaseClient.auth.getSession();
+            const realUserId = sessionData.data.session?.user?.id || 'sistema';
+            await supabaseClient
+              .from('audit_log')
+              .insert({
+                tipo: 'EXCLUSAO_LEAD',
+                operador_id: realUserId,
+                proposta_id: id,
+                detalhes: {
+                  usuario: userObj.nome,
+                  mensagem: `Lead ${leadInfo} excluído permanentemente por ${userObj.nome}.`
+                }
+              });
+          } catch (eAudit) {
+            console.warn("Falha ao registrar log de auditoria de exclusão:", eAudit);
+          }
+
+          currentLeads = currentLeads.filter(l => l.id !== id);
+          safeSaveLeads(currentLeads);
+          showToast("Lead excluído permanentemente com sucesso.", "var(--green-success)");
+
+          if (typeof activeLeadId !== 'undefined' && activeLeadId === id) {
+            closeLeadDetails();
+          }
+
+          const activePage = sessionStorage.getItem("walker_active_page") || "inicio";
+          if (activePage === 'mesa-analise') renderMesaTable();
+          else if (activePage === 'inicio') renderInicioHome();
+          else navigateTo(activePage);
+
+        } catch (err) {
+          console.error("Erro ao excluir lead do Supabase:", err);
+          alert("Não foi possível excluir o lead. Detalhes: " + err.message);
+        }
+      };
+      window.deleteLead = deleteLead;
+
       document.getElementById("close-modal").addEventListener("click", closeLeadDetails);
       modal.addEventListener("click", (e) => { if (e.target === modal) closeLeadDetails(); });
+      const btnExcluir = document.getElementById("m-btn-excluir");
+      if (btnExcluir) {
+        btnExcluir.addEventListener("click", () => {
+          console.log("[Walker Bank] Clique no botao Excluir do modal. activeLeadId:", activeLeadId);
+          if (activeLeadId) {
+            deleteLead(activeLeadId);
+          } else {
+            console.warn("[Walker Bank] activeLeadId esta nulo.");
+          }
+        });
+      } else {
+        console.error("[Walker Bank] Elemento 'm-btn-excluir' nao encontrado no DOM!");
+      }
 
       // Fechar modais com Escape
       document.addEventListener("keydown", (e) => {
@@ -6219,6 +6494,7 @@
       // Editar/Salvar/Cancelar
       document.getElementById("m-btn-editar").addEventListener("click", () => {
         document.getElementById("m-btn-editar").style.display = "none";
+        document.getElementById("m-btn-excluir").style.display = "none";
         document.getElementById("m-btn-salvar").style.display = "inline-flex";
         document.getElementById("m-btn-cancelar").style.display = "inline-flex";
         document.querySelectorAll(".view-mode").forEach(el => el.style.display = "none");
@@ -6227,6 +6503,9 @@
 
       document.getElementById("m-btn-cancelar").addEventListener("click", () => {
         document.getElementById("m-btn-editar").style.display = "inline-flex";
+        if (getActiveProfile() === "admin") {
+          document.getElementById("m-btn-excluir").style.display = "inline-flex";
+        }
         document.getElementById("m-btn-salvar").style.display = "none";
         document.getElementById("m-btn-cancelar").style.display = "none";
         document.querySelectorAll(".view-mode").forEach(el => el.style.display = "");
@@ -6384,12 +6663,19 @@
         rgInput.value = "";
         contraInput.value = "";
 
-        currentLeads = updated;
-        safeSaveLeads(updated);
-
-        // Salva no Supabase
-        if (targetLead) {
+        if (targetLead && sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
+            // Desabilita botões durante o processo de higienização e upload
+            const originalText = document.getElementById("m-btn-salvar").innerHTML;
+            document.getElementById("m-btn-salvar").innerHTML = "⏳ Enviando Docs...";
+            document.getElementById("m-btn-salvar").disabled = true;
+
+            // Higieniza o payload removendo base64 e fazendo upload para o Storage
+            targetLead = await sanitizeLeadPayload(targetLead);
+
+            // Re-atualiza a lista local com o targetLead migrado
+            currentLeads = currentLeads.map(l => l.id === activeLeadId ? targetLead : l);
+
             const { error: dbError } = await supabaseClient
               .from('leads')
               .upsert({
@@ -6403,13 +6689,23 @@
                 payload: targetLead
               });
 
+            document.getElementById("m-btn-salvar").innerHTML = originalText;
+            document.getElementById("m-btn-salvar").disabled = false;
+
             if (dbError) throw dbError;
             console.log("[Walker Bank] Lead atualizado no Supabase com sucesso.");
           } catch(dbErr) {
             console.error("[Walker Bank] Erro ao salvar edição no Supabase:", dbErr);
             showToast("Erro ao salvar no banco de dados. As alterações foram salvas localmente.", "var(--red-error)");
+            
+            // Restaura o botão em caso de erro
+            document.getElementById("m-btn-salvar").innerHTML = "Salvar Alterações";
+            document.getElementById("m-btn-salvar").disabled = false;
           }
         }
+
+        currentLeads = currentLeads.map(l => l.id === activeLeadId && targetLead ? targetLead : l);
+        safeSaveLeads(currentLeads);
 
         if (targetLead) {
           recordLog('lead_edit', `Dados da proposta editados`, targetLead);
@@ -6478,12 +6774,14 @@
           return l;
         });
 
-        currentLeads = updated;
-        safeSaveLeads(updated);
-
-        // Envia para o Supabase
-        if (targetLead) {
+        if (targetLead && sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
+            // Sanitiza o payload removendo base64 (migra para storage se necessário)
+            targetLead = await sanitizeLeadPayload(targetLead);
+
+            // Re-atualiza a lista local com a versão higienizada
+            currentLeads = currentLeads.map(l => l.id === activeLeadId ? targetLead : l);
+
             const { error: dbError } = await supabaseClient
               .from('leads')
               .upsert({
@@ -6504,6 +6802,9 @@
             showToast("Erro ao sincronizar status com o banco de dados. Status salvo localmente.", "var(--red-error)");
           }
         }
+
+        currentLeads = currentLeads.map(l => l.id === activeLeadId && targetLead ? targetLead : l);
+        safeSaveLeads(currentLeads);
 
         if (targetLead) {
           const prevStatus = leads.find(l => l.id === activeLeadId)?.status || '?';
@@ -6533,8 +6834,9 @@
       };
 
       // Confirmação antes de mudar status
-      const confirmAction = (message, color, onConfirm) => {
-        if (window.confirm(message)) onConfirm();
+      const confirmAction = async (message, color, onConfirm) => {
+        const confirmed = await openConfirmModal(message, "Confirmar Ação", "⚠️", color, "Confirmar");
+        if (confirmed) onConfirm();
       };
 
       document.getElementById("m-btn-iniciar").addEventListener("click", () => {
@@ -6597,11 +6899,10 @@
           return l;
         });
 
-        currentLeads = updated;
-        safeSaveLeads(updated);
-
-        if (targetLead) {
+        if (targetLead && sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
+            targetLead = await sanitizeLeadPayload(targetLead);
+            currentLeads = currentLeads.map(l => l.id === activeLeadId ? targetLead : l);
             await supabaseClient
               .from('leads')
               .upsert({
@@ -6619,6 +6920,9 @@
           }
         }
 
+        currentLeads = currentLeads.map(l => l.id === activeLeadId && targetLead ? targetLead : l);
+        safeSaveLeads(currentLeads);
+
         const wppUrl = `https://wa.me/55${celular}?text=${encodeURIComponent(text)}`;
         window.open(wppUrl, "_blank");
 
@@ -6627,12 +6931,28 @@
           const statusAtualizado = getLeads().map(l =>
             l.id === activeLeadId ? { ...l, status: "Aguardando Assinatura" } : l
           );
-          currentLeads = statusAtualizado;
-          safeSaveLeads(statusAtualizado);
-          try {
-            const updLead = statusAtualizado.find(l => l.id === activeLeadId);
-            if (updLead) await supabaseClient.from('leads').upsert({ id: updLead.id, created_at: updLead.createdAt, nome: updLead.lead?.nome, cpf: updLead.lead?.cpf, status: "Aguardando Assinatura", convenio: updLead.dados_funcionais?.convenio, valor_solicitado: updLead.proposta?.valor_solicitado, payload: updLead });
-          } catch(e) {}
+          let updLead = statusAtualizado.find(l => l.id === activeLeadId);
+          if (updLead && sessionStorage.getItem("walker_demo_mode") !== "true") {
+            try {
+              updLead = await sanitizeLeadPayload(updLead);
+              // Atualiza local com a versão higienizada
+              currentLeads = statusAtualizado.map(l => l.id === activeLeadId ? updLead : l);
+              await supabaseClient.from('leads').upsert({
+                id: updLead.id,
+                created_at: updLead.createdAt,
+                nome: updLead.lead?.nome,
+                cpf: updLead.lead?.cpf,
+                status: "Aguardando Assinatura",
+                convenio: updLead.dados_funcionais?.convenio,
+                valor_solicitado: updLead.proposta?.valor_solicitado,
+                payload: updLead
+              });
+            } catch(e) {
+              console.error("[Walker Bank] Erro ao atualizar status de assinatura no Supabase:", e);
+            }
+          }
+          currentLeads = currentLeads.map(l => l.id === activeLeadId && updLead ? updLead : l);
+          safeSaveLeads(currentLeads);
           renderMesaTable();
           if (modal.classList.contains("active")) setTimeout(() => openLeadDetails(activeLeadId), 200);
           showToast("Link de assinatura enviado! Status → Aguardando Assinatura", "#9b59b6");
@@ -6648,7 +6968,7 @@
       // 7. DASHBOARD GERAL (PÁGINA 2)
       // ==========================================
       const renderDashboard = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("dash-data-inicio").value;
@@ -6669,7 +6989,7 @@
 
         const pagas = filteredLeads.filter(l => l.status === "Paga");
 
-        const volumeTotal = pagas.reduce((s, l) => s + (l.proposta?.total_financiado || 0), 0);
+        const volumeTotal = pagas.reduce((s, l) => s + (l.proposta?.total_financiado || l.proposta?.valor_solicitado || 0), 0);
         const ticketPago = pagas.length > 0 ? pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0) / pagas.length : 0;
         const conversao = filteredLeads.length > 0 ? (pagas.length / filteredLeads.length * 100) : 0;
         const txEmpresa = (getConfigs().comissao_empresa !== undefined ? parseFloat(getConfigs().comissao_empresa) : 6.0) / 100;
@@ -6785,7 +7105,7 @@
         
         // Se a diferença for muito grande, limita a 15 pontos para não poluir
         const timeDiff = Math.abs(endDate.getTime() - startDate.getTime());
-        const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const diffDays = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
         const finalSteps = diffDays > 15 ? 15 : diffDays;
         
         for (let i = finalSteps - 1; i >= 0; i--) {
@@ -6902,7 +7222,7 @@
       // 8. RELATÓRIO FINANCEIRO (PÁGINA 3)
       // ==========================================
       const renderFinanceiro = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("fin-data-inicio").value;
@@ -6956,7 +7276,7 @@
             <td><div class="lead-name-cell"><span>${escapeHtml(l.lead?.nome || '-')}</span></div></td>
             <td>${getConvenioLabel(l.dados_funcionais?.convenio)}</td>
             <td style="font-weight:700;">${formatBRL(l.proposta?.valor_solicitado || 0)}</td>
-            <td>${formatBRL(l.proposta?.total_financiado || 0)}</td>
+            <td>${formatBRL(l.proposta?.total_financiado || l.proposta?.valor_solicitado || 0)}</td>
             <td>${l.proposta?.prazo_meses || 0}x</td>
             <td>${formatBRL(l.proposta?.valor_parcela || 0)}</td>
             <td style="color:var(--green-success);font-weight:700;">${formatBRL(comissao)}</td>
@@ -7003,7 +7323,7 @@
       // 9. RELATÓRIO DE LEADS (PÁGINA 4)
       // ==========================================
       const renderLeadsReport = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("leads-data-inicio").value;
@@ -7146,7 +7466,7 @@
         // Agrupar por CPF (Filtrando para ignorar os leads que possuem apenas o status "Consulta de Margem")
         const cpfMap = {};
         leads.forEach(l => {
-          if (l.status === "Consulta de Margem" || l.status === "Descartado") return;
+          if (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Descartado") return;
           
           let cpf = l.lead?.cpf?.replace(/\D/g, "") || l.cpf?.replace(/\D/g, "") || '';
           if (!cpf) return;
@@ -7228,7 +7548,19 @@
         const frag = document.createDocumentFragment();
         clients.forEach(c => {
           const maxMargem = c.proposals.reduce((max, p) => {
-            const m = parseFloat(p.dados_funcionais?.margem_pre_aprovada) || 0;
+            let m = 0;
+            if (p.dados_funcionais?.margem_pre_aprovada !== undefined && p.dados_funcionais?.margem_pre_aprovada !== null) {
+              m = parseFloat(p.dados_funcionais.margem_pre_aprovada) || 0;
+            } else if (p.proposta?.valor_parcela) {
+              m = parseFloat(p.proposta.valor_parcela) || 0;
+            } else {
+              const salario = parseFloat(p.dados_funcionais?.salario_liquido || 0);
+              const convenioKey = p.dados_funcionais?.convenio || 'inss';
+              const configs = getConfigs();
+              const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { margem: 30 };
+              const margemPorcentagem = parseFloat(convCfg.margem) || 30;
+              m = salario * (margemPorcentagem / 100);
+            }
             return Math.max(max, m);
           }, 0);
           const margemFormatada = formatBRL(maxMargem);
@@ -7280,10 +7612,10 @@
         const filterScore = document.getElementById("base-score").value;
         const filterMargem = document.getElementById("base-margem").value;
 
-        // Agrupar por CPF (Filtrando para mostrar apenas os leads cujo status é "Consulta de Margem")
+        // Agrupar por CPF (Filtrando para mostrar apenas os leads cujo status é "Consulta de Margem" ou "Importado")
         const cpfMap = {};
         leads.forEach(l => {
-          if (l.status !== "Consulta de Margem") return;
+          if (l.status !== "Consulta de Margem" && l.status !== "Importado") return;
           
           let cpf = l.lead?.cpf?.replace(/\D/g, "") || l.cpf?.replace(/\D/g, "") || '';
           if (!cpf) return;
@@ -7550,7 +7882,7 @@
         }
 
         // Exibe ou oculta o botão de atendimento se o lead ainda for apenas Consulta de Margem
-        const hasConsultaMargem = clientLeads.some(l => l.status === "Consulta de Margem");
+        const hasConsultaMargem = clientLeads.some(l => l.status === "Consulta de Margem" || l.status === "Importado");
         const cmFooter = document.getElementById("cm-footer-atendimento");
         if (cmFooter) {
           if (hasConsultaMargem) {
@@ -7580,9 +7912,21 @@
         const funcionaisEl = document.getElementById("cm-funcionais");
         if (funcionaisEl) {
           const convLabel = getConvenioLabel(first.dados_funcionais?.convenio);
-          const margemPreRaw = parseFloat(first.dados_funcionais?.margem_pre_aprovada) || 0;
+          let margemPreRaw = 0;
+          if (first.dados_funcionais?.margem_pre_aprovada !== undefined && first.dados_funcionais.margem_pre_aprovada !== null) {
+            margemPreRaw = parseFloat(first.dados_funcionais.margem_pre_aprovada) || 0;
+          } else if (first.proposta?.valor_parcela) {
+            margemPreRaw = parseFloat(first.proposta.valor_parcela) || 0;
+          } else {
+            const salario = parseFloat(first.dados_funcionais?.salario_liquido || 0);
+            const convenioKey = first.dados_funcionais?.convenio || 'inss';
+            const configs = getConfigs();
+            const convCfg = configs.convenios?.[convenioKey] || defaultConvenios[convenioKey] || { margem: 30 };
+            const margemPorcentagem = parseFloat(convCfg.margem) || 30;
+            margemPreRaw = salario * (margemPorcentagem / 100);
+          }
           const margemPreNegativa = margemPreRaw < 0;
-          const margemPre = first.dados_funcionais?.margem_pre_aprovada !== undefined && first.dados_funcionais.margem_pre_aprovada !== null ? formatBRL(Math.max(0, margemPreRaw)) : '-';
+          const margemPre = formatBRL(Math.max(0, margemPreRaw));
           const margemCartao = first.dados_funcionais?.mg_margem_cartao !== undefined && first.dados_funcionais.mg_margem_cartao !== null ? formatBRL(first.dados_funcionais.mg_margem_cartao) : '-';
           const margemCartaoBeneficio = first.dados_funcionais?.mg_margem_cartao_beneficio !== undefined && first.dados_funcionais.mg_margem_cartao_beneficio !== null ? formatBRL(first.dados_funcionais.mg_margem_cartao_beneficio) : '-';
           const salarioLiq = first.dados_funcionais?.salario_liquido !== undefined && first.dados_funcionais.salario_liquido !== null ? formatBRL(first.dados_funcionais.salario_liquido) : '-';
@@ -7776,7 +8120,7 @@
         btn.textContent = "Iniciando...";
 
         const leads = getLeads();
-        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && l.status === "Consulta de Margem");
+        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado"));
 
         if (clientLeads.length > 0) {
           const user = getActiveUserObj();
@@ -7815,7 +8159,7 @@
           }
 
           const updatedLeads = leads.map(l => {
-            if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && l.status === "Consulta de Margem") {
+            if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado")) {
               l.status = "Recebida";
               if (profile !== "admin") {
                 l.operador_id = user.id;
@@ -7845,8 +8189,11 @@
           if (sessionStorage.getItem("walker_demo_mode") !== "true") {
             try {
               for (const clientLead of clientLeads) {
-                const updatedLead = currentLeads.find(l => l.id === clientLead.id);
+                let updatedLead = currentLeads.find(l => l.id === clientLead.id);
                 if (updatedLead) {
+                  updatedLead = await sanitizeLeadPayload(updatedLead);
+                  // Atualiza local com a versão higienizada
+                  currentLeads = currentLeads.map(l => l.id === updatedLead.id ? updatedLead : l);
                   await supabaseClient.from('leads').upsert({
                     id: updatedLead.id,
                     created_at: updatedLead.createdAt,
@@ -7893,8 +8240,7 @@
         }
 
         let leads = getLeads();
-        // Filtrar todos os leads locais com esse CPF e status "Consulta de Margem"
-        const leadsParaAtualizar = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === cpfClean && l.status === "Consulta de Margem");
+        const leadsParaAtualizar = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === cpfClean && (l.status === "Consulta de Margem" || l.status === "Importado"));
 
         if (leadsParaAtualizar.length === 0) {
           alert("Nenhum lead elegível para descarte encontrado.");
@@ -7902,7 +8248,7 @@
         }
 
         const updatedLeads = leads.map(l => {
-          if ((l.lead?.cpf?.replace(/\D/g, "") || '') === cpfClean && l.status === "Consulta de Margem") {
+          if ((l.lead?.cpf?.replace(/\D/g, "") || '') === cpfClean && (l.status === "Consulta de Margem" || l.status === "Importado")) {
             l.status = "Descartado";
           }
           return l;
@@ -7915,8 +8261,11 @@
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
             for (const lead of leadsParaAtualizar) {
-              const updatedLead = currentLeads.find(l => l.id === lead.id);
+              let updatedLead = currentLeads.find(l => l.id === lead.id);
               if (updatedLead) {
+                updatedLead = await sanitizeLeadPayload(updatedLead);
+                // Atualiza local com a versão higienizada
+                currentLeads = currentLeads.map(l => l.id === updatedLead.id ? updatedLead : l);
                 await supabaseClient.from('leads').upsert({
                   id: updatedLead.id,
                   created_at: updatedLead.createdAt,
@@ -8820,20 +9169,27 @@
               let cpfKey = Object.keys(row).find(k => k.toUpperCase() === 'CPF');
               let nomeKey = Object.keys(row).find(k => k.toUpperCase() === 'NOME');
               if (!cpfKey) return;
-              
+
               let cpfRaw = String(row[cpfKey]).replace(/\D/g, '');
               if (!cpfRaw || cpfRaw === 'nan' || cpfRaw === 'undefined') return;
               let cpfNorm = cpfRaw.padStart(11, '0');
-              
+
               let nome = nomeKey ? row[nomeKey] : '';
-              
+
               let mgMargem = cleanVal(row['mg_margem']);
               let mgMargemCartao = cleanVal(row['mg_margem_cartao']);
               let mgMargemCartaoBeneficio = cleanVal(row['mg_margem_cartao_beneficio']);
               let mgMargemBruta = cleanVal(row['mg_margem_bruta']);
               let mgMargemCartaoBruta = cleanVal(row['mg_margem_cartao_bruta']);
               let mgMargemCartaoBeneficioBruta = cleanVal(row['mg_margem_cartao_beneficio_bruta']);
-              
+
+              const strVal = (v) => (v === null || v === undefined || String(v).trim().toLowerCase() === 'nan') ? '' : String(v).trim();
+              let celular = '';
+              const ddd = strVal(row['DDDCEL1']);
+              const cel = strVal(row['CEL1']);
+              if (ddd && cel) celular = ddd + cel;
+              else if (cel) celular = cel;
+
               excelParsedLeads[cpfNorm] = {
                 nome: nome,
                 mg_margem: mgMargem,
@@ -8842,7 +9198,15 @@
                 mg_margem_bruta: mgMargemBruta,
                 mg_margem_cartao_bruta: mgMargemCartaoBruta,
                 mg_margem_cartao_beneficio_bruta: mgMargemCartaoBeneficioBruta,
-                salario_liquido: mgMargemBruta
+                salario_liquido: mgMargemBruta,
+                nome_mae: strVal(row['NOME_MAE']),
+                data_nascimento: strVal(row['NASC']),
+                celular: celular.replace(/\D/g, ''),
+                email: strVal(row['EMAIL1']),
+                profissao: strVal(row['POSSIVEL_PROFISSAO']),
+                matricula: strVal(row['mg_matricula']),
+                mg_orgao: strVal(row['mg_orgao']),
+                mg_tipo_servidor: strVal(row['mg_tipo_servidor'])
               };
               count++;
             });
@@ -8952,20 +9316,23 @@
                 leads = [];
               }
               
+              const matchedCpfsLocal = new Set();
+
               for (let i = 0; i < leads.length; i++) {
                 if (importCancelled) {
                   logProgress('Importação cancelada pelo usuário.', 'orange');
                   break;
                 }
-                
+
                 let lead = leads[i];
                 let cpfRaw = lead.lead?.cpf || '';
                 let cpfNorm = cpfRaw.replace(/\D/g, "").padStart(11, '0');
-                
+
                 if (excelParsedLeads[cpfNorm]) {
+                  matchedCpfsLocal.add(cpfNorm);
                   const ex = excelParsedLeads[cpfNorm];
                   if (!lead.dados_funcionais) lead.dados_funcionais = {};
-                  
+
                   lead.dados_funcionais.margem_pre_aprovada = ex.mg_margem;
                   lead.dados_funcionais.mg_margem = ex.mg_margem;
                   lead.dados_funcionais.mg_margem_cartao = ex.mg_margem_cartao;
@@ -8974,25 +9341,83 @@
                   lead.dados_funcionais.mg_margem_cartao_bruta = ex.mg_margem_cartao_bruta;
                   lead.dados_funcionais.mg_margem_cartao_beneficio_bruta = ex.mg_margem_cartao_beneficio_bruta;
                   lead.dados_funcionais.salario_liquido = ex.salario_liquido;
-                  
+
                   if (!lead.lead) lead.lead = {};
                   if (!lead.lead.nome) lead.lead.nome = ex.nome;
-                  
+                  if (!lead.lead.nome_mae && ex.nome_mae) lead.lead.nome_mae = ex.nome_mae;
+                  if (!lead.lead.data_nascimento && ex.data_nascimento) lead.lead.data_nascimento = ex.data_nascimento;
+                  if (!lead.lead.celular && ex.celular) lead.lead.celular = ex.celular;
+                  if (!lead.lead.email && ex.email) lead.lead.email = ex.email;
+                  if (!lead.dados_funcionais.matricula && ex.matricula) lead.dados_funcionais.matricula = ex.matricula;
+                  if (!lead.dados_funcionais.profissao && ex.profissao) lead.dados_funcionais.profissao = ex.profissao;
+
                   successCount++;
                   logProgress(`[LOCAL] Lead CPF ${cpfNorm} (${ex.nome}) atualizado.`, 'var(--green-success)');
                 }
-                
+
                 const percent = Math.round(((i + 1) / leads.length) * 100);
                 if (progressBar) progressBar.style.width = `${percent}%`;
                 if (progressPercent) progressPercent.textContent = `${percent}%`;
                 if (progressStatus) progressStatus.textContent = `Processando local: ${i + 1}/${leads.length}`;
               }
-              
+
+              // Cria leads novos para CPFs da planilha que não existiam no banco
+              let newCount = 0;
+              if (!importCancelled) {
+                const unmatchedCpfs = cpfsToImport.filter(cpf => !matchedCpfsLocal.has(cpf));
+                logProgress(`${unmatchedCpfs.length} CPFs novos encontrados na planilha. Criando leads...`, 'var(--navy)');
+
+                for (let i = 0; i < unmatchedCpfs.length; i++) {
+                  if (importCancelled) {
+                    logProgress('Importação cancelada pelo usuário.', 'orange');
+                    break;
+                  }
+                  const cpfNorm = unmatchedCpfs[i];
+                  const ex = excelParsedLeads[cpfNorm];
+                  const newLead = {
+                    id: crypto.randomUUID(),
+                    createdAt: new Date().toISOString(),
+                    status: 'Importado',
+                    lead: {
+                      nome: ex.nome || '',
+                      cpf: cpfNorm,
+                      celular: ex.celular || '',
+                      email: ex.email || '',
+                      data_nascimento: ex.data_nascimento || '',
+                      nome_mae: ex.nome_mae || ''
+                    },
+                    dados_funcionais: {
+                      margem_pre_aprovada: ex.mg_margem,
+                      mg_margem: ex.mg_margem,
+                      mg_margem_cartao: ex.mg_margem_cartao,
+                      mg_margem_cartao_beneficio: ex.mg_margem_cartao_beneficio,
+                      mg_margem_bruta: ex.mg_margem_bruta,
+                      mg_margem_cartao_bruta: ex.mg_margem_cartao_bruta,
+                      mg_margem_cartao_beneficio_bruta: ex.mg_margem_cartao_beneficio_bruta,
+                      salario_liquido: ex.salario_liquido,
+                      matricula: ex.matricula || '',
+                      profissao: ex.profissao || ''
+                    },
+                    dados_bancarios: {},
+                    proposta: {}
+                  };
+                  leads.push(newLead);
+                  newCount++;
+                  successCount++;
+                  logProgress(`[LOCAL] Novo lead criado: CPF ${cpfNorm} (${ex.nome})`, 'var(--green-success)');
+
+                  const percent = Math.round(((i + 1) / unmatchedCpfs.length) * 100);
+                  if (progressBar) progressBar.style.width = `${percent}%`;
+                  if (progressPercent) progressPercent.textContent = `${percent}%`;
+                  if (progressStatus) progressStatus.textContent = `Criando novos: ${i + 1}/${unmatchedCpfs.length}`;
+                }
+              }
+
               if (!importCancelled) {
                 localStorage.setItem("walker_leads", JSON.stringify(leads));
                 currentLeads = leads;
-                logProgress(`Concluído! ${successCount} leads atualizados localmente.`, 'var(--navy)');
-                showToast(`Sincronizados ${successCount} leads offline!`, 'var(--green-success)');
+                logProgress(`Concluído! ${successCount - newCount} atualizados, ${newCount} novos leads criados.`, 'var(--navy)');
+                showToast(`Importação concluída! ${successCount - newCount} atualizados, ${newCount} novos.`, 'var(--green-success)');
                 renderActivePage();
               }
             } else {
@@ -9006,39 +9431,42 @@
                 if (getErr) throw getErr;
                 
                 logProgress(`Encontrados ${supabaseRows.length} registros no Supabase. Iniciando cruzamento...`, 'var(--navy)');
-                
+
+                const matchedCpfs = new Set();
+
                 for (let i = 0; i < supabaseRows.length; i++) {
                   if (importCancelled) {
                     logProgress('Importação cancelada pelo usuário.', 'orange');
                     break;
                   }
-                  
+
                   const row = supabaseRows[i];
                   const leadId = row.id;
                   const cpfRaw = String(row.cpf || '').replace(/\D/g, "");
                   const cpfNorm = cpfRaw.padStart(11, '0');
-                  
+
                   if (excelParsedLeads[cpfNorm]) {
+                    matchedCpfs.add(cpfNorm);
                     const ex = excelParsedLeads[cpfNorm];
                     logProgress(`Atualizando lead CPF ${cpfNorm} (${ex.nome})...`, 'var(--gray-light-text)');
-                    
+
                     try {
                       const { data: singleData, error: singleErr } = await supabaseClient
                         .from('leads')
                         .select('payload')
                         .eq('id', leadId)
                         .single();
-                        
+
                       if (singleErr) throw singleErr;
-                      
+
                       let payload = singleData?.payload || {};
                       if (typeof payload === 'string') {
                         try { payload = JSON.parse(payload); } catch(e) { payload = {}; }
                       }
-                      
+
                       if (!payload.dados_funcionais) payload.dados_funcionais = {};
                       const df_func = payload.dados_funcionais;
-                      
+
                       df_func.margem_pre_aprovada = ex.mg_margem;
                       df_func.mg_margem = ex.mg_margem;
                       df_func.mg_margem_cartao = ex.mg_margem_cartao;
@@ -9047,17 +9475,26 @@
                       df_func.mg_margem_cartao_bruta = ex.mg_margem_cartao_bruta;
                       df_func.mg_margem_cartao_beneficio_bruta = ex.mg_margem_cartao_beneficio_bruta;
                       df_func.salario_liquido = ex.salario_liquido;
-                      
+
                       if (!payload.lead) payload.lead = {};
                       if (!payload.lead.nome) payload.lead.nome = ex.nome;
-                      
+                      if (!payload.lead.nome_mae && ex.nome_mae) payload.lead.nome_mae = ex.nome_mae;
+                      if (!payload.lead.data_nascimento && ex.data_nascimento) payload.lead.data_nascimento = ex.data_nascimento;
+                      if (!payload.lead.celular && ex.celular) payload.lead.celular = ex.celular;
+                      if (!payload.lead.email && ex.email) payload.lead.email = ex.email;
+                      if (!payload.dados_funcionais.matricula && ex.matricula) payload.dados_funcionais.matricula = ex.matricula;
+                      if (!payload.dados_funcionais.profissao && ex.profissao) payload.dados_funcionais.profissao = ex.profissao;
+
+                      if (!payload.id) payload.id = leadId;
+                      payload = await sanitizeLeadPayload(payload);
+
                       const { error: updErr } = await supabaseClient
                         .from('leads')
                         .update({ payload: payload })
                         .eq('id', leadId);
-                        
+
                       if (updErr) throw updErr;
-                      
+
                       successCount++;
                       logProgress(`Lead CPF ${cpfNorm} atualizado no Supabase com sucesso.`, 'var(--green-success)');
                     } catch(err) {
@@ -9066,17 +9503,96 @@
                       console.error(`Erro ao atualizar CPF ${cpfNorm}:`, err);
                     }
                   }
-                  
+
                   const percent = Math.round(((i + 1) / supabaseRows.length) * 100);
                   if (progressBar) progressBar.style.width = `${percent}%`;
                   if (progressPercent) progressPercent.textContent = `${percent}%`;
-                  if (progressStatus) progressStatus.textContent = `Processando: ${i + 1}/${supabaseRows.length}`;
+                  if (progressStatus) progressStatus.textContent = `Atualizando existentes: ${i + 1}/${supabaseRows.length}`;
                 }
-                
+
+                // Cria novos leads no Supabase para CPFs da planilha que não existiam no banco
+                let newCountSupa = 0;
                 if (!importCancelled) {
-                  logProgress(`Sincronização concluída! Sucesso: ${successCount}, Falhas: ${failCount}.`, 'var(--navy)');
-                  showToast(`Importação concluída! ${successCount} atualizados.`, 'var(--green-success)');
-                  
+                  const unmatchedCpfs = cpfsToImport.filter(cpf => !matchedCpfs.has(cpf));
+                  if (unmatchedCpfs.length > 0) {
+                    logProgress(`${unmatchedCpfs.length} CPFs novos na planilha. Criando leads no Supabase...`, 'var(--navy)');
+
+                    for (let i = 0; i < unmatchedCpfs.length; i++) {
+                      if (importCancelled) {
+                        logProgress('Importação cancelada pelo usuário.', 'orange');
+                        break;
+                      }
+                      const cpfNorm = unmatchedCpfs[i];
+                      const ex = excelParsedLeads[cpfNorm];
+
+                      try {
+                        const newId = crypto.randomUUID();
+                        let payload = {
+                          id: newId,
+                          createdAt: new Date().toISOString(),
+                          status: 'Importado',
+                          lead: {
+                            nome: ex.nome || '',
+                            cpf: cpfNorm,
+                            celular: ex.celular || '',
+                            email: ex.email || '',
+                            data_nascimento: ex.data_nascimento || '',
+                            nome_mae: ex.nome_mae || ''
+                          },
+                          dados_funcionais: {
+                            margem_pre_aprovada: ex.mg_margem,
+                            mg_margem: ex.mg_margem,
+                            mg_margem_cartao: ex.mg_margem_cartao,
+                            mg_margem_cartao_beneficio: ex.mg_margem_cartao_beneficio,
+                            mg_margem_bruta: ex.mg_margem_bruta,
+                            mg_margem_cartao_bruta: ex.mg_margem_cartao_bruta,
+                            mg_margem_cartao_beneficio_bruta: ex.mg_margem_cartao_beneficio_bruta,
+                            salario_liquido: ex.salario_liquido,
+                            matricula: ex.matricula || '',
+                            profissao: ex.profissao || ''
+                          },
+                          dados_bancarios: {},
+                          proposta: {}
+                        };
+
+                        payload = await sanitizeLeadPayload(payload);
+
+                        const { error: insertErr } = await supabaseClient
+                          .from('leads')
+                          .insert({
+                            id: newId,
+                            created_at: new Date().toISOString(),
+                            nome: ex.nome || '',
+                            cpf: cpfNorm,
+                            status: 'Importado',
+                            convenio: null,
+                            valor_solicitado: 0,
+                            payload: payload
+                          });
+
+                        if (insertErr) throw insertErr;
+
+                        newCountSupa++;
+                        successCount++;
+                        logProgress(`Novo lead criado: CPF ${cpfNorm} (${ex.nome})`, 'var(--green-success)');
+                      } catch(err) {
+                        failCount++;
+                        logProgress(`Erro ao criar CPF ${cpfNorm}: ${err.message || err}`, 'red');
+                        console.error(`Erro ao criar CPF ${cpfNorm}:`, err);
+                      }
+
+                      const percent = Math.round(((i + 1) / unmatchedCpfs.length) * 100);
+                      if (progressBar) progressBar.style.width = `${percent}%`;
+                      if (progressPercent) progressPercent.textContent = `${percent}%`;
+                      if (progressStatus) progressStatus.textContent = `Criando novos: ${i + 1}/${unmatchedCpfs.length}`;
+                    }
+                  }
+                }
+
+                if (!importCancelled) {
+                  logProgress(`Concluído! ${successCount - newCountSupa} atualizados, ${newCountSupa} novos criados. Falhas: ${failCount}.`, 'var(--navy)');
+                  showToast(`Importação concluída! ${successCount - newCountSupa} atualizados, ${newCountSupa} novos.`, 'var(--green-success)');
+
                   logProgress('Atualizando painel com os novos dados...', 'var(--navy)');
                   await fetchLeadsFromSupabase();
                   renderActivePage();
@@ -9336,15 +9852,17 @@
 
             if (sessionStorage.getItem("walker_demo_mode") !== "true") {
               try {
+                const sanitizedLead = await sanitizeLeadPayload(foundLead);
+                currentLeads = currentLeads.map(l => l.id === sanitizedLead.id ? sanitizedLead : l);
                 await supabaseClient.from("leads").upsert({
-                  id: foundLead.id,
-                  created_at: foundLead.createdAt,
-                  nome: foundLead.lead?.nome,
-                  cpf: foundLead.lead?.cpf,
-                  status: foundLead.status,
-                  convenio: foundLead.dados_funcionais?.convenio,
-                  valor_solicitado: foundLead.proposta?.valor_solicitado || 0,
-                  payload: foundLead
+                  id: sanitizedLead.id,
+                  created_at: sanitizedLead.createdAt,
+                  nome: sanitizedLead.lead?.nome,
+                  cpf: sanitizedLead.lead?.cpf,
+                  status: sanitizedLead.status,
+                  convenio: sanitizedLead.dados_funcionais?.convenio,
+                  valor_solicitado: sanitizedLead.proposta?.valor_solicitado || 0,
+                  payload: sanitizedLead
                 });
               } catch (err) {
                 console.error("[Walker Bank] Erro ao salvar conversão no Supabase:", err);
@@ -9404,7 +9922,7 @@
 
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
           const leads = getLeads();
-          foundLead = leads.find(l => l.lead?.cpf?.replace(/\D/g, "") === cpfVal && l.status === "Consulta de Margem");
+          foundLead = leads.find(l => l.lead?.cpf?.replace(/\D/g, "") === cpfVal && (l.status === "Consulta de Margem" || l.status === "Importado"));
           await new Promise(r => setTimeout(r, 400));
         } else {
           try {
@@ -9412,7 +9930,7 @@
               .from('leads')
               .select('*')
               .eq('cpf', cpfVal)
-              .eq('status', 'Consulta de Margem')
+              .in('status', ['Consulta de Margem', 'Importado'])
               .order('created_at', { ascending: false })
               .limit(1);
 
@@ -9455,7 +9973,7 @@
           prospActiveLead = null;
           if (cardLead) cardLead.style.display = "none";
           if (emptyState) emptyState.style.display = "block";
-          alert("Nenhum lead com status 'Consulta de Margem' encontrado para este CPF.");
+          alert("Nenhum lead disponível para prospecção encontrado para este CPF.");
         }
       };
 
@@ -9476,7 +9994,7 @@
         let foundLead = null;
 
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
-          const leads = getLeads().filter(l => l.status === "Consulta de Margem");
+          const leads = getLeads().filter(l => l.status === "Consulta de Margem" || l.status === "Importado");
           if (leads.length > 0) {
             const idx = Math.floor(Math.random() * leads.length);
             foundLead = leads[idx];
@@ -9487,7 +10005,7 @@
             const { data, error } = await supabaseClient
               .from('leads')
               .select('id')
-              .eq('status', 'Consulta de Margem');
+              .in('status', ['Consulta de Margem', 'Importado']);
 
             if (error) throw error;
             if (data && data.length > 0) {
@@ -9538,7 +10056,7 @@
           prospActiveLead = null;
           if (cardLead) cardLead.style.display = "none";
           if (emptyState) emptyState.style.display = "block";
-          alert("Não há leads disponíveis com status 'Consulta de Margem' para prospecção.");
+          alert("Não há leads disponíveis na base de prospecção.");
         }
       };
 
@@ -9702,15 +10220,16 @@
 
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
+            const sanitizedProsp = await sanitizeLeadPayload(prospActiveLead);
             await supabaseClient.from("leads").upsert({
-              id: prospActiveLead.id,
-              created_at: prospActiveLead.createdAt,
-              nome: prospActiveLead.lead?.nome,
-              cpf: prospActiveLead.lead?.cpf,
-              status: "Consulta de Margem",
-              convenio: prospActiveLead.dados_funcionais?.convenio,
-              valor_solicitado: prospActiveLead.proposta?.valor_solicitado || 0,
-              payload: prospActiveLead
+              id: sanitizedProsp.id,
+              created_at: sanitizedProsp.createdAt,
+              nome: sanitizedProsp.lead?.nome,
+              cpf: sanitizedProsp.lead?.cpf,
+              status: sanitizedProsp.status,
+              convenio: sanitizedProsp.dados_funcionais?.convenio,
+              valor_solicitado: sanitizedProsp.proposta?.valor_solicitado || 0,
+              payload: sanitizedProsp
             });
           } catch (err) {
             console.error("[Walker Bank] Erro ao salvar tentativa no Supabase:", err);
@@ -9759,15 +10278,16 @@
 
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
+            const sanitizedLead = await sanitizeLeadPayload(lead);
             await supabaseClient.from("leads").upsert({
-              id: lead.id,
-              created_at: lead.createdAt,
-              nome: lead.lead?.nome,
-              cpf: lead.lead?.cpf,
-              status: "Consulta de Margem",
-              convenio: lead.dados_funcionais?.convenio,
-              valor_solicitado: lead.proposta?.valor_solicitado || 0,
-              payload: lead
+              id: sanitizedLead.id,
+              created_at: sanitizedLead.createdAt,
+              nome: sanitizedLead.lead?.nome,
+              cpf: sanitizedLead.lead?.cpf,
+              status: sanitizedLead.status,
+              convenio: sanitizedLead.dados_funcionais?.convenio,
+              valor_solicitado: sanitizedLead.proposta?.valor_solicitado || 0,
+              payload: sanitizedLead
             });
           } catch (err) {
             console.error("[Walker Bank] Erro ao registrar Prospectado:", err);
@@ -10000,7 +10520,7 @@
         const user = getActiveUserObj();
         
         // Filtragem por Operador (excluindo leads frios da base geral que não foram atendidos)
-        let userLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Descartado");
+        let userLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
         if (profile !== "admin") {
           userLeads = userLeads.filter(l => l.operador_id === profile);
         }
@@ -10058,8 +10578,7 @@
             ticketEl.textContent = formatBRL(ticketMedio);
           }
 
-          // Meta Comercial: R$ 1.5M
-          const metaVolume = 1500000;
+          const metaVolume = OPERADORES.reduce((sum, op) => sum + (op.meta || 0), 0) || 1500000;
           const pctMeta = Math.min((volumeMes / metaVolume) * 100, 100);
           
           const pctMetaEl = document.getElementById("meta-progresso-percent");
@@ -10102,8 +10621,8 @@
           }
 
           // Meta Pessoal do Operador: R$ 100k
-          const metaPessoal = user.meta; // R$ 100.000
-          const pctMeta = Math.min((volumeMes / metaPessoal) * 100, 100);
+          const metaPessoal = user.meta || 100000;
+          const pctMeta = metaPessoal > 0 ? Math.min((volumeMes / metaPessoal) * 100, 100) : 0;
           
           const pctMetaEl = document.getElementById("meta-progresso-percent");
           if (pctMetaEl) pctMetaEl.textContent = `${pctMeta.toFixed(1)}%`;
@@ -10158,9 +10677,10 @@
           }
         }
 
-        // Nav count
+        // Nav count (apenas leads ativos na mesa, sem base geral)
+        const mesaLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
         const navCountMesa = document.getElementById("nav-count-mesa");
-        if (navCountMesa) navCountMesa.textContent = leads.length;
+        if (navCountMesa) navCountMesa.textContent = mesaLeads.length;
       };
 
       // ==========================================
