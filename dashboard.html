@@ -3103,8 +3103,19 @@
                     </strong>
                     <ul style="margin-left: 20px; list-style-type: disc; display: flex; flex-direction: column; gap: 6px; font-family: Arial;">
                       <li><strong>Administrador:</strong> Possui controle total da plataforma. Consegue editar todas as configurações gerais do sistema (taxas, comissões, chaves de API, convênios), visualizar dados unificados da equipe de vendas e realizar o cadastro ou exclusão de novos perfis.</li>
-                      <li><strong>Operador:</strong> Possui acesso limitado ao sistema. Consegue apenas visualizar a Mesa de Análise para simular propostas de crédito, consultar andamento de propostas criadas por ele mesmo e acompanhar sua meta individual. A aba de configurações gerais e os dados consolidados dos outros operadores ficam totalmente ocultos para ele.</li>
                     </ul>
+                  </div>
+
+                  <!-- Caixa de Dica sobre Limitação do Supabase Auth -->
+                  <div style="margin-top: 16px; background: rgba(52, 152, 219, 0.08); border-left: 4px solid #3498db; border-radius: 8px; padding: 16px; font-size: 0.78rem; color: var(--navy); line-height: 1.45;">
+                    <strong style="display: flex; align-items: center; gap: 8px; color: var(--navy); margin-bottom: 6px; font-family: Arial; font-size: 0.85rem;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></svg>
+                      💡 Dica para contornar limitações do Supabase
+                    </strong>
+                    <p style="font-family: Arial; margin: 0;">
+                      Por padrão, o Supabase limita o cadastro direto pelo front-end para evitar abusos (como limite de taxa de e-mails de confirmação e políticas de signup público).
+                      Caso receba algum erro ao cadastrar o operador aqui, você pode criá-lo em segundos diretamente pelo <strong>Painel do Supabase</strong> (<em>Authentication &rarr; Users &rarr; Add User &rarr; Create User</em>) marcando a opção <strong>"Auto Confirm"</strong>. Depois, basta clicar em <strong>"Atualizar Lista"</strong> aqui no dashboard para configurar o nome, meta e função dele.
+                    </p>
                   </div>
                   
                   <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
@@ -8841,7 +8852,11 @@
           }
 
           if (error) {
-            showToast(`Erro ao criar conta: ${error.message}`, "var(--red-error)");
+            let msg = `Erro ao criar conta: ${error.message}`;
+            if (error.message.toLowerCase().includes("rate limit") || error.message.toLowerCase().includes("disabled") || error.status === 429) {
+              msg += " (Dica: Cadastre diretamente no console do Supabase com 'Auto Confirm' para contornar o limite)";
+            }
+            showToast(msg, "var(--red-error)");
             btn.innerHTML = originalText;
             btn.disabled = false;
             return;
