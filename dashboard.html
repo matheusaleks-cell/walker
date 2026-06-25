@@ -1864,6 +1864,11 @@
         <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg></span>
         <span>Prospecção</span>
       </div>
+      <div class="nav-item" data-page="acompanhamento" id="nav-acompanhamento">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></span>
+        <span>Acompanhamento</span>
+        <span class="nav-count" id="nav-count-acompanhamento">0</span>
+      </div>
       <div class="nav-item" data-page="clientes" id="nav-clientes">
         <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
         <span>Clientes</span>
@@ -2222,27 +2227,27 @@
            PAGE 3: RELATÓRIO FINANCEIRO
       ======================================== -->
       <section class="page-section" id="sec-relatorio-financeiro">
-        <!-- Métricas Filtradas Financeiro -->
+        <!-- Métricas Filtradas Financeiro (Focado no Operador) -->
         <div class="metrics-grid">
           <div class="metric-card">
-            <span class="metric-label">Volume Filtrado</span>
+            <span class="metric-label">Volume Pago (Mês)</span>
             <div class="metric-value" id="fin-metric-volume">R$ 0,00</div>
-            <div class="metric-sub"><span>soma do crédito filtrado</span></div>
+            <div class="metric-sub"><span>produção paga acumulada</span></div>
           </div>
           <div class="metric-card highlight">
-            <span class="metric-label" id="fin-comissao-label">Comissão Líquida (6%)</span>
+            <span class="metric-label" id="fin-comissao-label">Comissão Paga</span>
             <div class="metric-value" id="fin-metric-comissao">R$ 0,00</div>
-            <div class="metric-sub"><span style="color: var(--gold)">ganho estimado do período</span></div>
+            <div class="metric-sub"><span style="color: var(--gold)">ganho total liquidado</span></div>
           </div>
           <div class="metric-card">
-            <span class="metric-label">Ticket Médio</span>
+            <span class="metric-label">Volume em Andamento</span>
             <div class="metric-value" id="fin-metric-ticket">R$ 0,00</div>
-            <div class="metric-sub"><span>média das propostas filtradas</span></div>
+            <div class="metric-sub"><span>produção na mesa sob análise</span></div>
           </div>
           <div class="metric-card">
-            <span class="metric-label">Qtd. Propostas</span>
-            <div class="metric-value" id="fin-metric-quantidade">0</div>
-            <div class="metric-sub"><span>operações realizadas</span></div>
+            <span class="metric-label">Comissão em Andamento</span>
+            <div class="metric-value" id="fin-metric-quantidade">R$ 0,00</div>
+            <div class="metric-sub"><span>ganho estimado em andamento</span></div>
           </div>
         </div>
 
@@ -2261,6 +2266,9 @@
             <option value="Recusada">Recusada</option>
             <option value="Paga">Paga</option>
           </select>
+          <select class="filter-select" id="fin-filter-op">
+            <option value="all">Todos os Operadores</option>
+          </select>
           <input type="number" class="filter-input" id="fin-val-min" placeholder="Valor mín." style="width:120px">
           <input type="number" class="filter-input" id="fin-val-max" placeholder="Valor máx." style="width:120px">
           <button class="btn-filter" id="fin-limpar">Limpar</button>
@@ -2276,14 +2284,13 @@
                 <tr>
                   <th>ID</th>
                   <th>Cliente</th>
+                  <th>Operador</th>
                   <th>Convênio</th>
-                  <th>Valor Bruto</th>
-                  <th>Total Financiado</th>
-                  <th>Prazo</th>
-                  <th>Parcela</th>
-                  <th id="fin-comissao-th">Comissão</th>
-                  <th>Data</th>
+                  <th>Valor Proposta</th>
                   <th>Status</th>
+                  <th>Taxa Com.</th>
+                  <th id="fin-comissao-th">Comissão Operador</th>
+                  <th>Data</th>
                 </tr>
               </thead>
               <tbody id="fin-table-body"></tbody>
@@ -2511,6 +2518,163 @@
       </section>
 
       <!-- ========================================
+           PAGE 5B: ACOMPANHAMENTO DE LEADS
+      ======================================== -->
+      <section class="page-section" id="sec-acompanhamento">
+        <div class="controls-row">
+          <div class="search-input-wrapper">
+            <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+            <input type="text" id="acomp-search" placeholder="Buscar por nome ou CPF...">
+          </div>
+          <select class="filter-select" id="acomp-convenio">
+            <option value="all">Todos os Convênios</option>
+          </select>
+          <select class="filter-select" id="acomp-operador" style="display:none;">
+            <option value="all">Todos os Operadores</option>
+          </select>
+          <select class="filter-select" id="acomp-status-filtro">
+            <option value="all">Todos os Status</option>
+            <option value="Sem Contato">Sem Contato</option>
+            <option value="Retornar">📞 Retornar ligação</option>
+            <option value="Interessado">✅ Demonstrou interesse</option>
+            <option value="Nao_Atendeu">🔕 Não atendeu</option>
+            <option value="Remarcado">📅 Remarcou para outra data</option>
+            <option value="Sem_Interesse">❌ Sem interesse</option>
+          </select>
+        </div>
+
+        <div class="panel-card" style="padding: 0; overflow: hidden;">
+          <div style="padding: 16px 24px; border-bottom: 1px solid rgba(24,27,44,0.08); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h3 style="font-size: 1rem; font-weight: 700; color: var(--navy); margin: 0 0 2px;">Leads em Acompanhamento</h3>
+              <p style="font-size: 0.78rem; color: var(--gray-light-text); margin:0;">Leads prospectados aguardando início da negociação</p>
+            </div>
+            <span id="acomp-total-badge" style="background: var(--cobalt); color: white; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 20px;">0 leads</span>
+          </div>
+
+          <div id="acomp-empty" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 60px 20px; gap: 12px;">
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
+            <h3>Nenhum lead em acompanhamento</h3>
+            <p style="font-size:0.82rem; color:var(--gray-light-text); text-align:center;">Leads prospectados aparecerão aqui para acompanhamento comercial.</p>
+          </div>
+
+          <table id="acomp-table" style="width:100%; border-collapse:collapse; display:none;">
+            <thead>
+              <tr style="background: rgba(24, 27, 44, 0.04);">
+                <th style="padding: 12px 16px; text-align:left; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">Cliente</th>
+                <th style="padding: 12px 16px; text-align:left; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">CPF</th>
+                <th style="padding: 12px 16px; text-align:left; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">Celular</th>
+                <th style="padding: 12px 16px; text-align:left; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">Convênio</th>
+                <th style="padding: 12px 16px; text-align:left; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">Margem</th>
+                <th style="padding: 12px 16px; text-align:left; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">Última Observação</th>
+                <th style="padding: 12px 16px; text-align:center; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">Atualização</th>
+                <th style="padding: 12px 16px; text-align:right; font-weight:700; font-size:0.78rem; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="acomp-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MODAL: Anotar Contato de Acompanhamento -->
+      <div id="modal-acomp-nota" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:28px; width:100%; max-width:500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:1.05rem; font-weight:700; color:var(--navy); margin:0;">📝 Anotar Contato</h3>
+            <button id="btn-fechar-modal-nota" style="background:none; border:none; cursor:pointer; color:var(--gray-text); font-size:1.4rem; line-height:1;">&times;</button>
+          </div>
+          <p id="acomp-nota-lead-nome" style="font-size:0.85rem; font-weight:600; color:var(--cobalt); margin-bottom:12px;"></p>
+          <div id="acomp-nota-historico" style="max-height:180px; overflow-y:auto; margin-bottom:16px; background:rgba(24,27,44,0.03); border-radius:8px; padding:10px; font-size:0.78rem; color:var(--gray-text);"></div>
+          <select id="acomp-nota-status" style="width:100%; padding:10px 14px; border:1.5px solid rgba(24,27,44,0.15); border-radius:8px; font-size:0.85rem; font-family:var(--font-body); margin-bottom:10px; background:white; color:var(--navy);">
+            <option value="Retornar">📞 Retornar ligação</option>
+            <option value="Interessado">✅ Demonstrou interesse</option>
+            <option value="Nao_Atendeu">🔕 Não atendeu</option>
+            <option value="Remarcado">📅 Remarcou para outra data</option>
+            <option value="Sem_Interesse">❌ Sem interesse no momento</option>
+          </select>
+          <textarea id="acomp-nota-obs" placeholder="Observações do contato..." rows="3" style="width:100%; padding:10px 14px; border:1.5px solid rgba(24,27,44,0.15); border-radius:8px; font-size:0.85rem; font-family:var(--font-body); resize:vertical; box-sizing:border-box; margin-bottom:16px;"></textarea>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button id="btn-cancelar-nota" style="background:none; border:1.5px solid rgba(24,27,44,0.2); color:var(--gray-text); padding:10px 20px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer;">Cancelar</button>
+            <button id="btn-salvar-nota" style="background:var(--cobalt); color:white; border:none; padding:10px 20px; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer;">Salvar Anotação</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL: Agendar Retorno de Prospecção -->
+      <div id="modal-prosp-retorno" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:28px; width:100%; max-width:440px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:1.05rem; font-weight:700; color:var(--navy); margin:0;">📅 Agendar Retorno</h3>
+            <button id="btn-fechar-modal-retorno" style="background:none; border:none; cursor:pointer; color:var(--gray-text); font-size:1.4rem; line-height:1;">&times;</button>
+          </div>
+          <p id="prosp-retorno-lead-nome" style="font-size:0.85rem; font-weight:600; color:var(--cobalt); margin-bottom:16px;"></p>
+          <label for="prosp-retorno-datetime" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--navy); display:block; margin-bottom:8px;">Data e Horário do Retorno</label>
+          <input type="datetime-local" id="prosp-retorno-datetime"
+            style="width:100%; padding:10px 14px; border:1.5px solid rgba(24,27,44,0.2); border-radius:8px; font-size:0.95rem; font-family:var(--font-body); color:var(--navy); background:white; outline:none; margin-bottom:14px; box-sizing:border-box;"
+          >
+          <label for="prosp-retorno-obs" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--navy); display:block; margin-bottom:8px;">Observação (opcional)</label>
+          <textarea id="prosp-retorno-obs" placeholder="Ex: Cliente pediu para ligar depois do almoço..." rows="2"
+            style="width:100%; padding:10px 14px; border:1.5px solid rgba(24,27,44,0.15); border-radius:8px; font-size:0.85rem; font-family:var(--font-body); resize:none; box-sizing:border-box; margin-bottom:18px;"
+          ></textarea>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button id="btn-cancelar-retorno" style="background:none; border:1.5px solid rgba(24,27,44,0.2); color:var(--gray-text); padding:10px 20px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer;">Cancelar</button>
+            <button id="btn-salvar-retorno" style="background:var(--blue-info); color:white; border:none; padding:10px 24px; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer;">
+              📅 Confirmar Agendamento
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL: Editar Contato na Prospecção -->
+      <div id="modal-prosp-editar-contato" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:28px; width:100%; max-width:500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:1.05rem; font-weight:700; color:var(--navy); margin:0;">📝 Editar Dados do Contato</h3>
+            <button id="btn-fechar-modal-editar-contato" style="background:none; border:none; cursor:pointer; color:var(--gray-text); font-size:1.4rem; line-height:1;">&times;</button>
+          </div>
+          <form id="form-prosp-editar-contato" style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <label for="prosp-edit-nome" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--navy); display:block; margin-bottom:4px;">Nome do Cliente</label>
+              <input type="text" id="prosp-edit-nome" required style="width:100%; padding:8px 12px; border:1.5px solid rgba(24,27,44,0.15); border-radius:6px; font-size:0.85rem; outline:none; box-sizing:border-box;">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <label for="prosp-edit-celular" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--navy); display:block; margin-bottom:4px;">Celular</label>
+                <input type="text" id="prosp-edit-celular" style="width:100%; padding:8px 12px; border:1.5px solid rgba(24,27,44,0.15); border-radius:6px; font-size:0.85rem; outline:none; box-sizing:border-box;">
+              </div>
+              <div>
+                <label for="prosp-edit-email" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--navy); display:block; margin-bottom:4px;">E-mail</label>
+                <input type="email" id="prosp-edit-email" style="width:100%; padding:8px 12px; border:1.5px solid rgba(24,27,44,0.15); border-radius:6px; font-size:0.85rem; outline:none; box-sizing:border-box;">
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <label for="prosp-edit-salario" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--navy); display:block; margin-bottom:4px;">Salário Líquido (R$)</label>
+                <input type="text" id="prosp-edit-salario" style="width:100%; padding:8px 12px; border:1.5px solid rgba(24,27,44,0.15); border-radius:6px; font-size:0.85rem; outline:none; box-sizing:border-box;">
+              </div>
+              <div>
+                <label for="prosp-edit-margem" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--navy); display:block; margin-bottom:4px;">Margem Empréstimo (R$)</label>
+                <input type="text" id="prosp-edit-margem" style="width:100%; padding:8px 12px; border:1.5px solid rgba(24,27,44,0.15); border-radius:6px; font-size:0.85rem; outline:none; box-sizing:border-box;">
+              </div>
+            </div>
+            <div>
+              <label for="prosp-edit-convenio" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--navy); display:block; margin-bottom:4px;">Convênio</label>
+              <select id="prosp-edit-convenio" style="width:100%; padding:8px 12px; border:1.5px solid rgba(24,27,44,0.15); border-radius:6px; font-size:0.85rem; outline:none; box-sizing:border-box; background:white; cursor:pointer;">
+                <!-- Populado via JS -->
+              </select>
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+              <button type="button" id="btn-cancelar-editar-contato" style="background:none; border:1.5px solid rgba(24,27,44,0.2); color:var(--gray-text); padding:10px 20px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer;">Cancelar</button>
+              <button type="submit" id="btn-salvar-editar-contato" style="background:var(--navy); color:white; border:none; padding:10px 24px; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer;">
+                💾 Salvar Alterações
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ========================================
            PAGE 5C: PROSPECÇÃO COMERCIAL
       ======================================== -->
       <section class="page-section" id="sec-prospeccao">
@@ -2556,7 +2720,12 @@
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(24, 27, 44, 0.08); padding-bottom: 14px; margin-bottom: 16px;">
                   <div>
                     <h3 id="prosp-card-nome" style="font-size: 1.25rem; font-weight: 700; color: var(--navy);">Nome do Cliente</h3>
-                    <span id="prosp-card-cpf" style="font-size: 0.85rem; color: var(--gray-light-text); font-weight: 700;">000.000.000-00</span>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+                      <span id="prosp-card-cpf" style="font-size: 0.85rem; color: var(--gray-light-text); font-weight: 700;">000.000.000-00</span>
+                      <button type="button" id="btn-prosp-editar-contato" style="background: none; border: 1.5px solid rgba(24, 27, 44, 0.15); color: var(--cobalt); font-size: 0.725rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease;">
+                        ✏️ Editar Contato
+                      </button>
+                    </div>
                   </div>
                   <span id="prosp-card-convenio" class="status-badge" style="background: rgba(212, 188, 110, 0.15); color: var(--gold); border: 1px solid var(--gold); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; text-transform: uppercase;">INSS</span>
                 </div>
@@ -2604,8 +2773,17 @@
                   <button type="button" class="btn-action" id="btn-prosp-ocupado" style="background: rgba(212, 188, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
                     🟡 Ocupado
                   </button>
+                  <button type="button" class="btn-action" id="btn-prosp-wpp-enviado" style="background: rgba(37, 211, 102, 0.15); border: 1px solid #25d366; color: #25d366; font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    💬 WhatsApp Enviado
+                  </button>
+                  <button type="button" class="btn-action" id="btn-prosp-retorno" style="background: rgba(41, 128, 185, 0.12); border: 1px solid var(--blue-info); color: var(--blue-info); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    📅 Agendar Retorno
+                  </button>
                   <button type="button" class="btn-action" id="btn-prosp-prospectado" style="background: var(--green-success); border-color: var(--green-success); color: white; font-size: 0.85rem; font-weight: 700; padding: 0 20px; height: 38px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                    🟢 Prospectado (Abrir Simulação)
+                    🟢 Prospectado (Acompanhamento)
+                  </button>
+                  <button type="button" class="btn-action" id="btn-prosp-gerar-proposta" style="background: var(--cobalt); border-color: var(--cobalt); color: white; font-size: 0.85rem; font-weight: 700; padding: 0 20px; height: 38px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    📄 Gerar Proposta
                   </button>
                 </div>
               </div>
@@ -3261,8 +3439,16 @@
             <option value="consulta_margem">Consulta de Margem</option>
             <option value="prospeccao_tentativa">Prospecção (Tentativa)</option>
             <option value="prospeccao_prospectado">Prospecção (Prospectado)</option>
+            <option value="proposta_gerada">Proposta Gerada (Prospecção)</option>
+            <option value="prosp_retorno_agendado">Retorno Agendado</option>
+            <option value="leads_imported">Importação de Planilha</option>
             <option value="config_save">Configurações Salvas</option>
             <option value="profile_switch">Troca de Perfil</option>
+            <option value="user_login">Login no Sistema</option>
+            <option value="user_logout">Logout no Sistema</option>
+            <option value="acompanhamento_nota">Anotação de Contato</option>
+            <option value="lead_created">Lead Criado Manualmente</option>
+            <option value="EXCLUSAO_LEAD">Exclusão de Lead</option>
           </select>
           <button class="btn-filter" id="log-limpar">Limpar</button>
           <button class="btn-danger-sm" id="log-clear-all" title="Apagar todos os logs locais">Limpar Logs</button>
@@ -4091,11 +4277,29 @@
       }
 
       document.getElementById("logout-btn").addEventListener("click", async () => {
+        try {
+          const user = getActiveUserObj();
+          recordLog('user_logout', `Sessão encerrada pelo operador: ${user.nome}`, null, { role: user.role });
+          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+            try {
+              await supabaseClient.from('audit_log').insert({
+                tipo: 'user_logout',
+                operador_id: user.id,
+                detalhes: { descricao: `Sessão encerrada pelo operador: ${user.nome}`, operador_nome: user.nome, meta: { role: user.role } },
+                created_at: new Date().toISOString()
+              });
+            } catch(syncErr) { console.warn("Erro ao sincronizar logout log:", syncErr); }
+          }
+        } catch(le) {
+          console.warn("Erro ao registrar log de logout:", le);
+        }
+
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
           sessionStorage.removeItem("walker_admin_session");
           sessionStorage.removeItem("walker_demo_mode");
           sessionStorage.removeItem("walker_active_profile");
           sessionStorage.removeItem("walker_user_profile");
+          sessionStorage.removeItem("walker_session_logged");
           window.location.href = "login.html";
           return;
         }
@@ -4107,6 +4311,7 @@
         sessionStorage.removeItem("walker_admin_session");
         sessionStorage.removeItem("walker_active_profile");
         sessionStorage.removeItem("walker_user_profile");
+        sessionStorage.removeItem("walker_session_logged");
         window.location.href = "login.html";
       });
 
@@ -4222,6 +4427,12 @@
           logOpFilter.innerHTML =
             `<option value="all">Todos os Membros</option><option value="admin">Administrador Geral</option>` +
             OPERADORES.map(op => `<option value="${op.id}">${op.nome} (${op.role === 'admin' ? 'Admin' : 'Operador'})</option>`).join('');
+        }
+        const finOpFilter = document.getElementById("fin-filter-op");
+        if (finOpFilter) {
+          finOpFilter.innerHTML =
+            `<option value="all">Todos os Operadores</option>` +
+            OPERADORES.map(op => `<option value="${op.id}">${op.nome}</option>`).join('');
         }
       };
 
@@ -4364,6 +4575,66 @@
         } catch(e) {
           console.warn("[Walker Bank] Erro ao gravar log:", e);
         }
+
+        // Gravar no Supabase (se não estiver em modo demo)
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          (async () => {
+            try {
+              await supabaseClient.from('audit_log').insert({
+                tipo: tipo,
+                operador_id: user.id,
+                proposta_id: leadRef?.id || null,
+                detalhes: {
+                  descricao: descricao,
+                  operador_nome: user.nome,
+                  lead_nome: leadRef?.lead?.nome || null,
+                  meta: meta,
+                  local_id: entry.id,
+                  timestamp: entry.timestamp
+                },
+                created_at: entry.timestamp
+              });
+            } catch (err) {
+              console.warn("[Walker Bank] Erro ao sincronizar log com Supabase:", err);
+            }
+          })();
+        }
+      };
+
+      const fetchLogsFromSupabase = async () => {
+        try {
+          const { data, error } = await supabaseClient
+            .from('audit_log')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(500);
+
+          if (error) throw error;
+
+          if (data) {
+            const mappedLogs = data.map(row => {
+              const detalhes = typeof row.detalhes === 'string' ? JSON.parse(row.detalhes) : (row.detalhes || {});
+              return {
+                id: detalhes.local_id || `log-supa-${row.id}`,
+                timestamp: row.created_at || new Date().toISOString(),
+                operador_id: row.operador_id,
+                operador_nome: detalhes.operador_nome || 'Operador',
+                tipo: row.tipo,
+                descricao: detalhes.descricao || detalhes.mensagem || `Ação: ${row.tipo}`,
+                lead_id: row.proposta_id,
+                lead_nome: detalhes.lead_nome || null,
+                meta: detalhes.meta || {}
+              };
+            });
+            const localLogs = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
+            const remoteIds = new Set(mappedLogs.map(l => l.id));
+            const unsynced = localLogs.filter(l => !remoteIds.has(l.id));
+            const merged = [...mappedLogs, ...unsynced].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, LOG_MAX_ENTRIES);
+            localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(merged));
+          }
+        } catch (err) {
+          console.warn("[Walker Bank] Erro ao buscar logs do Supabase:", err);
+        }
       };
 
       const LOG_TYPE_LABELS = {
@@ -4375,15 +4646,26 @@
         config_save:             '⚙️ Configs',
         nova_proposta:           '🆕 Nova Proposta',
         consulta_margem:         '🔍 Consulta Margem',
-        prospeccao_tentativa:    '📞 Prospecção',
-        prospeccao_prospectado:  '✅ Prospectado',
-        lead_created:            '➕ Lead Criado'
+        prospeccao_tentativa:    '📞 Prospecção (Tentativa)',
+        prospeccao_prospectado:  '✅ Prospecção (Prospectado)',
+        lead_created:            '➕ Lead Criado',
+        user_login:              '🔑 Login',
+        user_logout:             '🚪 Logout',
+        leads_imported:          '📥 Importação',
+        proposta_gerada:         '📄 Proposta Gerada',
+        prosp_retorno_agendado:  '📅 Retorno Agendado',
+        acompanhamento_nota:    '📝 Anotação de Contato',
+        EXCLUSAO_LEAD:          '🗑️ Exclusão de Lead'
       };
 
-      const getLogOperatorAvatar = (operadorId) => {
+      const getLogOperatorAvatar = (operadorId, operadorNome = '') => {
         if (operadorId === "admin") return "EC";
         const op = OPERADORES.find(o => o.id === operadorId);
-        return op ? op.avatar : "??";
+        if (op) return op.avatar;
+        if (operadorNome) {
+          return operadorNome.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2);
+        }
+        return "??";
       };
 
       const assignLeadOperator = async (leadId, operadorId) => {
@@ -4618,6 +4900,54 @@
           proposta: { valor_solicitado: 20000.00, prazo_meses: 96, valor_parcela: 534.62, taxa_juros_mensal: 0.0399, total_financiado: 51323.52, cet_anual: 61.42, assinatura_sms_validada: true, consentimento_consulta_margem: true, consentimento_lgpd: true },
           arquivos: { identidade_cnh_rg: null, contracheque: null },
           marketing: { utm_source: "google", utm_medium: "cpc", utm_campaign: "consignado_servidor_mun" }
+        },
+        {
+          id: "proposta-mock6",
+          createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+          status: "Consulta de Margem",
+          operador_id: null,
+          operador_nome: null,
+          lead: {
+            nome: "Juliana Mendes Souza", cpf: "44298710355", data_nascimento: "19/08/1988",
+            celular: "11966551212", email: "juliana.mendes@gmail.com",
+            genero: "feminino", estado_civil: "solteiro", nome_mae: "Helena Mendes Souza",
+            classe_economica: "B"
+          },
+          dados_funcionais: { convenio: "siape", margem_pre_aprovada: 1200.00, salario_liquido: 5500.00, profissao: "Servidor Federal" },
+          dados_bancarios: { banco: "001 — Banco do Brasil S.A.", tipo_conta: "corrente", agencia: "3301", conta: "12345-6" },
+          proposta: { score_faixa: "RISCO BAIXO", valor_solicitado: 0 }
+        },
+        {
+          id: "proposta-mock7",
+          createdAt: new Date(Date.now() - 15 * 60 * 60 * 1000).toISOString(),
+          status: "Importado",
+          operador_id: null,
+          operador_nome: null,
+          lead: {
+            nome: "Carlos Eduardo Santos", cpf: "31845610299", data_nascimento: "03/01/1965",
+            celular: "21955443322", email: "carlos.eduardo@outlook.com",
+            genero: "masculino", estado_civil: "casado", nome_mae: "Aparecida Santos",
+            classe_economica: "C"
+          },
+          dados_funcionais: { convenio: "inss", margem_pre_aprovada: 350.00, salario_liquido: 2200.00, profissao: "Aposentado" },
+          dados_bancarios: {},
+          proposta: { score_faixa: "RISCO MÉDIO", valor_solicitado: 0 }
+        },
+        {
+          id: "proposta-mock8",
+          createdAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
+          status: "Consulta de Margem",
+          operador_id: null,
+          operador_nome: null,
+          lead: {
+            nome: "Roberto Carlos Lima", cpf: "12567890144", data_nascimento: "14/10/1979",
+            celular: "31966228833", email: "roberto.lima@gmail.com",
+            genero: "masculino", estado_civil: "solteiro", nome_mae: "Tereza Lima",
+            classe_economica: "D"
+          },
+          dados_funcionais: { convenio: "mun", margem_pre_aprovada: 0, salario_liquido: 1800.00, profissao: "Servidor Municipal" },
+          dados_bancarios: {},
+          proposta: { score_faixa: "RISCO ALTO", valor_solicitado: 0 }
         }
       ];
 
@@ -4670,7 +5000,11 @@
           'relatorio-financeiro': renderFinanceiro,
           'relatorio-leads': renderLeadsReport,
           'base-geral': renderBaseGeral,
-          'clientes': renderClientes
+          'clientes': renderClientes,
+          'acompanhamento': renderAcompanhamento,
+          'logs': renderLogs,
+          'convenios': renderConveniosPage,
+          'configuracoes': loadConfigs
         };
         if (renderMap[id]) renderMap[id]();
         _dirtyPages.delete(id);
@@ -4995,6 +5329,8 @@
         if (s === 'Consulta de Margem') return 'consulta-margem';
         if (s === 'Importado') return 'importado';
         if (s === 'Descartado') return 'recusado';
+        if (s === 'Prospectado') return 'importado';
+        if (s === 'Agendado') return 'aguardando';
         if (s === 'Aguardando Averbação') return 'recebida'; // compat
         return 'recebida';
       };
@@ -5196,6 +5532,7 @@
         'relatorio-leads': { title: 'Relatório de Leads', sub: 'Funil de vendas e marketing' },
         'consulta-margem': { title: 'Consultar Margem', sub: 'Ficha e margem pré-aprovada do cliente' },
         'prospeccao': { title: 'Prospecção Comercial', sub: 'Pesquise CPFs ou use a fila de distribuição randômica' },
+        'acompanhamento': { title: 'Acompanhamento de Leads', sub: 'Gerencie e acompanhe contatos prospectados antes da negociação' },
         'base-geral': { title: 'Base Geral', sub: 'Todos os leads gerais da base (sem propostas iniciadas)' },
         'clientes': { title: 'Clientes', sub: 'Central de atendimento' },
         'convenios': { title: 'Convênios', sub: 'Taxas, margens e regras por convênio' },
@@ -5242,7 +5579,15 @@
         if (page === 'clientes') renderClientes();
         if (page === 'convenios') renderConveniosPage();
         if (page === 'configuracoes') loadConfigs();
-        if (page === 'logs') renderLogs();
+        if (page === 'logs') {
+          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+            fetchLogsFromSupabase().then(() => renderLogs());
+          } else {
+            renderLogs();
+          }
+        }
+        if (page === 'acompanhamento') renderAcompanhamento();
+
 
         if (page === 'prospeccao') {
           const prospCard = document.getElementById("prosp-lead-card");
@@ -5267,7 +5612,7 @@
       // 5. MESA DE ANÁLISE (PÁGINA 1)
       // ==========================================
       const updateMesaMetrics = (leads) => {
-        const filteredLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
+        const filteredLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado" && l.status !== "Prospectado" && l.status !== "Agendado");
         document.getElementById("metric-total-leads").textContent = filteredLeads.length;
 
         const volume = filteredLeads.filter(l => l.status !== "Recusada").reduce((sum, l) => sum + (l.proposta?.valor_solicitado || 0), 0);
@@ -5291,12 +5636,17 @@
         const baseGeralCount = allLeadsForBase.filter(l => l.status === "Consulta de Margem" || l.status === "Importado").length;
         const navCountBase = document.getElementById("nav-count-base");
         if (navCountBase) navCountBase.textContent = baseGeralCount;
+
+        // Nav count Acompanhamento (Prospectados)
+        const acompCount = getLeads().filter(l => l.status === "Prospectado").length;
+        const navCountAcomp = document.getElementById("nav-count-acompanhamento");
+        if (navCountAcomp) navCountAcomp.textContent = acompCount;
       };
 
       let selectedMesaStatus = 'all';
 
       const renderMesaTable = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado" && l.status !== "Prospectado" && l.status !== "Agendado");
         const profile = getActiveProfile();
         if (profile !== "admin") {
           leads = leads.filter(l => l.operador_id === profile);
@@ -5994,7 +6344,7 @@
         const origem = lead.marketing?.utm_source || 'formulário web';
         entries.push({
           data: lead.createdAt,
-          acao: `Proposta recebida via ${origem}`,
+          acao: `Proposta recebida via ${escapeHtml(origem)}`,
           dot: 'dot-received',
           usuario: null,
         });
@@ -6044,8 +6394,8 @@
             <div class="history-item">
               <div class="history-dot ${e.dot}">●</div>
               <div class="history-content">
-                <div class="history-action">${e.acao}</div>
-                <div class="history-meta">${dateStr}${e.usuario ? ` · por ${e.usuario}` : ''}</div>
+                <div class="history-action">${escapeHtml(e.acao)}</div>
+                <div class="history-meta">${dateStr}${e.usuario ? ` · por ${escapeHtml(e.usuario)}` : ''}</div>
               </div>
             </div>`;
         }).join('');
@@ -6438,23 +6788,7 @@
 
           if (error) throw error;
 
-          try {
-            const sessionData = await supabaseClient.auth.getSession();
-            const realUserId = sessionData.data.session?.user?.id || 'sistema';
-            await supabaseClient
-              .from('audit_log')
-              .insert({
-                tipo: 'EXCLUSAO_LEAD',
-                operador_id: realUserId,
-                proposta_id: id,
-                detalhes: {
-                  usuario: userObj.nome,
-                  mensagem: `Lead ${leadInfo} excluído permanentemente por ${userObj.nome}.`
-                }
-              });
-          } catch (eAudit) {
-            console.warn("Falha ao registrar log de auditoria de exclusão:", eAudit);
-          }
+          recordLog('EXCLUSAO_LEAD', `Lead ${leadInfo} excluído permanentemente por ${userObj.nome}.`, lead, { usuario: userObj.nome });
 
           currentLeads = currentLeads.filter(l => l.id !== id);
           safeSaveLeads(currentLeads);
@@ -6979,7 +7313,7 @@
       // 7. DASHBOARD GERAL (PÁGINA 2)
       // ==========================================
       const renderDashboard = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado" && l.status !== "Prospectado" && l.status !== "Agendado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("dash-data-inicio").value;
@@ -7000,7 +7334,7 @@
 
         const pagas = filteredLeads.filter(l => l.status === "Paga");
 
-        const volumeTotal = pagas.reduce((s, l) => s + (l.proposta?.total_financiado || l.proposta?.valor_solicitado || 0), 0);
+        const volumeTotal = pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0);
         const ticketPago = pagas.length > 0 ? pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0) / pagas.length : 0;
         const conversao = filteredLeads.length > 0 ? (pagas.length / filteredLeads.length * 100) : 0;
         const txEmpresa = (getConfigs().comissao_empresa !== undefined ? parseFloat(getConfigs().comissao_empresa) : 6.0) / 100;
@@ -7233,9 +7567,32 @@
       // 8. RELATÓRIO FINANCEIRO (PÁGINA 3)
       // ==========================================
       const renderFinanceiro = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado" && l.status !== "Prospectado" && l.status !== "Agendado");
         const profile = getActiveProfile();
-        if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
+        
+        // Trata a filtragem de operador com base no perfil ativo
+        const finOpFilterEl = document.getElementById("fin-filter-op");
+        
+        if (profile !== "admin") {
+          // Operador comum fica travado na sua própria visão
+          leads = leads.filter(l => l.operador_id === profile);
+          if (finOpFilterEl) {
+            finOpFilterEl.value = profile;
+            finOpFilterEl.disabled = true;
+            finOpFilterEl.style.opacity = "0.6";
+          }
+        } else {
+          // Administrador geral pode filtrar
+          if (finOpFilterEl) {
+            finOpFilterEl.disabled = false;
+            finOpFilterEl.style.opacity = "1";
+            const filterOp = finOpFilterEl.value;
+            if (filterOp && filterOp !== "all") {
+              leads = leads.filter(l => l.operador_id === filterOp);
+            }
+          }
+        }
+
         const dataInicio = document.getElementById("fin-data-inicio").value;
         const dataFim = document.getElementById("fin-data-fim").value;
         const convenio = document.getElementById("fin-convenio").value;
@@ -7255,21 +7612,27 @@
 
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        // Atualiza os cards de KPI baseados nos filtros
-        const finVolume = filtered.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0);
-        const txEmp = (getConfigs().comissao_empresa !== undefined ? parseFloat(getConfigs().comissao_empresa) : 6.0) / 100;
-        const finComissao = finVolume * txEmp;
-        const finLabelEl = document.getElementById("fin-comissao-label");
-        if (finLabelEl) finLabelEl.textContent = `Comissão Líquida (${(txEmp * 100).toFixed(1)}%)`;
-        const finThEl = document.getElementById("fin-comissao-th");
-        if (finThEl) finThEl.textContent = `Comissão (${(txEmp * 100).toFixed(1)}%)`;
-        const finTicket = filtered.length > 0 ? finVolume / filtered.length : 0;
-        const finQuantidade = filtered.length;
+        // Buscar taxas configuradas
+        const cfg = getConfigs();
+        const txPaga = (cfg.comissao_paga !== undefined ? parseFloat(cfg.comissao_paga) : 2.0) / 100;
+        const txAndamento = (cfg.comissao_andamento !== undefined ? parseFloat(cfg.comissao_andamento) : 0.5) / 100;
 
-        document.getElementById("fin-metric-volume").textContent = formatBRL(finVolume);
-        document.getElementById("fin-metric-comissao").textContent = formatBRL(finComissao);
-        document.getElementById("fin-metric-ticket").textContent = formatBRL(finTicket);
-        document.getElementById("fin-metric-quantidade").textContent = finQuantidade;
+        // KPIs focados no Operador
+        const pagas = filtered.filter(l => l.status === "Paga");
+        const volumePago = pagas.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0);
+        const comissaoPaga = volumePago * txPaga;
+
+        const emAndamento = filtered.filter(l => l.status === "Recebida" || l.status === "Em Análise" || l.status === "Aprovada" || l.status === "Aguardando Assinatura" || l.status === "Aguardando Averbação");
+        const volumeAndamento = emAndamento.reduce((s, l) => s + (l.proposta?.valor_solicitado || 0), 0);
+        const comissaoAndamento = volumeAndamento * txAndamento;
+
+        const labelPagaEl = document.getElementById("fin-comissao-label");
+        if (labelPagaEl) labelPagaEl.textContent = `Comissão Paga (${(txPaga * 100).toFixed(1)}%)`;
+
+        document.getElementById("fin-metric-volume").textContent = formatBRL(volumePago);
+        document.getElementById("fin-metric-comissao").textContent = formatBRL(comissaoPaga);
+        document.getElementById("fin-metric-ticket").textContent = formatBRL(volumeAndamento);
+        document.getElementById("fin-metric-quantidade").textContent = formatBRL(comissaoAndamento);
 
         const tbody = document.getElementById("fin-table-body");
         const empty = document.getElementById("fin-empty");
@@ -7279,35 +7642,51 @@
         if (filtered.length === 0) { empty.style.display = "block"; table.style.display = "none"; return; }
         empty.style.display = "none"; table.style.display = "table";
 
-        filtered.forEach((l, idx) => {
-          const comissao = (l.proposta?.valor_solicitado || 0) * txEmp;
+        filtered.forEach((l) => {
+          let aliquota = 0;
+          let valorComissao = 0;
+          
+          if (l.status === "Paga") {
+            aliquota = txPaga;
+            valorComissao = (l.proposta?.valor_solicitado || 0) * txPaga;
+          } else if (l.status === "Recebida" || l.status === "Em Análise" || l.status === "Aprovada" || l.status === "Aguardando Assinatura" || l.status === "Aguardando Averbação") {
+            aliquota = txAndamento;
+            valorComissao = (l.proposta?.valor_solicitado || 0) * txAndamento;
+          }
+          
+          const operadorNome = l.operador_nome || "Sem Operador";
+
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td style="font-size:0.75rem;color:var(--gray-light-text);">${l.id.substring(0, 12)}</td>
             <td><div class="lead-name-cell"><span>${escapeHtml(l.lead?.nome || '-')}</span></div></td>
+            <td style="font-weight:600; color:var(--navy);">${escapeHtml(operadorNome)}</td>
             <td>${getConvenioLabel(l.dados_funcionais?.convenio)}</td>
             <td style="font-weight:700;">${formatBRL(l.proposta?.valor_solicitado || 0)}</td>
-            <td>${formatBRL(l.proposta?.total_financiado || l.proposta?.valor_solicitado || 0)}</td>
-            <td>${l.proposta?.prazo_meses || 0}x</td>
-            <td>${formatBRL(l.proposta?.valor_parcela || 0)}</td>
-            <td style="color:var(--green-success);font-weight:700;">${formatBRL(comissao)}</td>
-            <td>${formatDateBR(l.createdAt)}</td>
             <td><span class="status-badge ${getStatusClass(l.status)}">${l.status}</span></td>
+            <td>${(aliquota * 100).toFixed(1)}%</td>
+            <td style="color:var(--green-success);font-weight:700;">${formatBRL(valorComissao)}</td>
+            <td>${formatDateBR(l.createdAt)}</td>
           `;
           tbody.appendChild(tr);
         });
       };
 
       // Filtros Financeiro
-      ['fin-data-inicio', 'fin-data-fim', 'fin-convenio', 'fin-status', 'fin-val-min', 'fin-val-max'].forEach(id => {
-        document.getElementById(id).addEventListener("change", renderFinanceiro);
-        document.getElementById(id).addEventListener("input", renderFinanceiro);
+      ['fin-data-inicio', 'fin-data-fim', 'fin-convenio', 'fin-status', 'fin-filter-op', 'fin-val-min', 'fin-val-max'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("change", renderFinanceiro);
+          el.addEventListener("input", renderFinanceiro);
+        }
       });
       document.getElementById("fin-limpar").addEventListener("click", () => {
         document.getElementById("fin-data-inicio").value = "";
         document.getElementById("fin-data-fim").value = "";
         document.getElementById("fin-convenio").value = "all";
         document.getElementById("fin-status").value = "all";
+        const opSel = document.getElementById("fin-filter-op");
+        if (opSel && !opSel.disabled) opSel.value = "all";
         document.getElementById("fin-val-min").value = "";
         document.getElementById("fin-val-max").value = "";
         renderFinanceiro();
@@ -7334,7 +7713,7 @@
       // 9. RELATÓRIO DE LEADS (PÁGINA 4)
       // ==========================================
       const renderLeadsReport = () => {
-        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
+        let leads = getLeads().filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado" && l.status !== "Prospectado" && l.status !== "Agendado");
         const profile = getActiveProfile();
         if (profile !== "admin") leads = leads.filter(l => l.operador_id === profile);
         const dataInicio = document.getElementById("leads-data-inicio").value;
@@ -7474,10 +7853,10 @@
         const filterPropostasQtd = document.getElementById("clientes-propostas-qtd").value;
         const filterClienteStatus = document.getElementById("clientes-status").value;
 
-        // Agrupar por CPF (Filtrando para ignorar os leads que possuem apenas o status "Consulta de Margem")
+        // Agrupar por CPF — exibe SOMENTE leads cujas propostas têm status 'Paga' (clientes confirmados)
         const cpfMap = {};
         leads.forEach(l => {
-          if (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Descartado") return;
+          if (l.status !== "Paga") return;
           
           let cpf = l.lead?.cpf?.replace(/\D/g, "") || l.cpf?.replace(/\D/g, "") || '';
           if (!cpf) return;
@@ -7609,6 +7988,258 @@
         document.getElementById("clientes-status").value = "all";
         renderClientes();
       });
+
+      // 10B-EXTRA: ACOMPANHAMENTO DE LEADS (Leads Prospectados)
+      // ==========================================
+      let acompLeadAtivo = null; // cpf do lead sendo anotado
+
+      const renderAcompanhamento = () => {
+        const leads = getLeads();
+        const search = (document.getElementById("acomp-search")?.value || "").toLowerCase();
+        const filterConvenio = document.getElementById("acomp-convenio")?.value || "all";
+        const filterOperador = document.getElementById("acomp-operador")?.value || "all";
+        const filterStatus = document.getElementById("acomp-status-filtro")?.value || "all";
+        const profile = getActiveProfile();
+
+        // Controla visibilidade do select de operador (somente admin vê)
+        const acompOpSelect = document.getElementById("acomp-operador");
+        if (acompOpSelect) {
+          if (profile === 'admin') {
+            acompOpSelect.style.display = '';
+            const currentOpIds = new Set(OPERADORES.map(o => o.id));
+            const existingOpIds = new Set([...acompOpSelect.options].slice(1).map(o => o.value));
+            if (currentOpIds.size !== existingOpIds.size || [...currentOpIds].some(id => !existingOpIds.has(id))) {
+              const savedVal = acompOpSelect.value;
+              while (acompOpSelect.options.length > 1) acompOpSelect.remove(1);
+              OPERADORES.forEach(op => {
+                const opt = document.createElement('option');
+                opt.value = op.id;
+                opt.textContent = op.nome;
+                acompOpSelect.appendChild(opt);
+              });
+              acompOpSelect.value = savedVal;
+            }
+          } else {
+            acompOpSelect.style.display = 'none';
+          }
+        }
+
+        // Filtra leads com status Prospectado
+        let prospLeads = leads.filter(l => l.status === "Prospectado");
+
+        // Se for operador, vê apenas os seus próprios
+        if (profile !== 'admin') {
+          prospLeads = prospLeads.filter(l => l.operador_id === profile);
+        } else if (filterOperador !== 'all') {
+          prospLeads = prospLeads.filter(l => l.operador_id === filterOperador);
+        }
+
+        // Popula filtro de convênios dinamicamente
+        const acompConvSelect = document.getElementById("acomp-convenio");
+        if (acompConvSelect) {
+          const conveniosUniq = [...new Set(leads.filter(l=>l.status==="Prospectado").map(l => l.dados_funcionais?.convenio).filter(Boolean))].sort();
+          const existingConvs = new Set([...acompConvSelect.options].slice(1).map(o => o.value));
+          if (conveniosUniq.length !== existingConvs.size || conveniosUniq.some(c => !existingConvs.has(c))) {
+            const savedConv = acompConvSelect.value;
+            while (acompConvSelect.options.length > 1) acompConvSelect.remove(1);
+            conveniosUniq.forEach(conv => {
+              const opt = document.createElement('option');
+              opt.value = conv;
+              opt.textContent = conv.charAt(0).toUpperCase() + conv.slice(1);
+              acompConvSelect.appendChild(opt);
+            });
+            acompConvSelect.value = savedConv;
+          }
+        }
+
+        // Aplica filtro de convênio
+        if (filterConvenio !== 'all') {
+          prospLeads = prospLeads.filter(l => l.dados_funcionais?.convenio === filterConvenio);
+        }
+
+        // Aplica filtro de status do último contato comercial
+        if (filterStatus !== 'all') {
+          const normalizeStatus = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[_\s]+/g, ' ').toLowerCase().trim();
+          prospLeads = prospLeads.filter(l => {
+            const hist = (l.historico_contatos || []).filter(h => h.status !== 'Prospectado' && h.status !== 'Agendado');
+            if (filterStatus === 'Sem Contato') return hist.length === 0;
+            if (hist.length === 0) return false;
+            return normalizeStatus(hist[hist.length - 1].status) === normalizeStatus(filterStatus);
+          });
+        }
+
+        // Aplica filtro de busca
+        if (search) {
+          const searchDigits = search.replace(/\D/g, '');
+          prospLeads = prospLeads.filter(l => {
+            const matchNome = (l.lead?.nome || '').toLowerCase().includes(search);
+            const matchCpf = searchDigits ? (l.lead?.cpf || '').replace(/\D/g, '').includes(searchDigits) : false;
+            return matchNome || matchCpf;
+          });
+        }
+
+        // Atualiza contador sidebar e badge
+        const allProspCount = leads.filter(l => l.status === "Prospectado").length;
+        const navCount = document.getElementById("nav-count-acompanhamento");
+        if (navCount) navCount.textContent = allProspCount;
+        const badge = document.getElementById("acomp-total-badge");
+        if (badge) badge.textContent = `${prospLeads.length} lead${prospLeads.length !== 1 ? 's' : ''}`;
+
+        const tbody = document.getElementById("acomp-table-body");
+        const empty = document.getElementById("acomp-empty");
+        const table = document.getElementById("acomp-table");
+
+        if (!tbody || !empty || !table) return;
+
+        if (prospLeads.length === 0) {
+          empty.style.display = "flex";
+          table.style.display = "none";
+          return;
+        }
+        empty.style.display = "none";
+        table.style.display = "table";
+
+        // Ordena por data de atualização mais recente
+        prospLeads.sort((a, b) => {
+          const dataA = a.historico_contatos?.slice(-1)[0]?.data || a.createdAt || '';
+          const dataB = b.historico_contatos?.slice(-1)[0]?.data || b.createdAt || '';
+          return new Date(dataB) - new Date(dataA);
+        });
+
+        const frag = document.createDocumentFragment();
+        prospLeads.forEach(lead => {
+          const cpfClean = (lead.lead?.cpf || '').replace(/\D/g, '');
+          const nome = escapeHtml(lead.lead?.nome || '-');
+          const celular = formatCelular(lead.lead?.celular);
+          const convenio = escapeHtml(lead.dados_funcionais?.convenio || '-');
+          const margemVal = parseFloat(lead.dados_funcionais?.margem_pre_aprovada) || 0;
+          const margem = margemVal > 0 ? formatBRL(margemVal) : '-';
+
+          // Último contato
+          const historico = lead.historico_contatos || [];
+          const ultimoContato = historico.length > 0 ? historico[historico.length - 1] : null;
+          const ultObs = ultimoContato ? escapeHtml(ultimoContato.observacao || ultimoContato.status || '-') : 'Nenhuma observação';
+          const ultData = ultimoContato ? formatDateBR(ultimoContato.data) : formatDateBR(lead.createdAt);
+
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid rgba(24,27,44,0.06)';
+          tr.innerHTML = `
+            <td style="padding: 14px 16px;">
+              <div class="lead-name-cell"><span>${nome}</span></div>
+            </td>
+            <td style="padding: 14px 16px; font-family: monospace; font-size: 0.85rem;">${formatCPF(cpfClean)}</td>
+            <td style="padding: 14px 16px; font-size: 0.85rem;">${celular}</td>
+            <td style="padding: 14px 16px; font-size: 0.82rem; text-transform: capitalize;">${convenio}</td>
+            <td style="padding: 14px 16px; font-weight: 700; color: var(--green-success); font-size: 0.88rem;">${margem}</td>
+            <td style="padding: 14px 16px; font-size: 0.8rem; color: var(--gray-text); max-width: 200px;">
+              <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${ultObs}">${ultObs}</div>
+            </td>
+            <td style="padding: 14px 16px; font-size: 0.78rem; color: var(--gray-text); text-align:center; white-space:nowrap;">${ultData}</td>
+            <td style="padding: 14px 16px; text-align:right;">
+              <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+                <button class="btn-action-sm btn-acomp-ficha" data-cpf="${cpfClean}" style="background:var(--cobalt); color:white; border:none;">Ver Ficha / Negociar</button>
+                <button class="btn-action-sm btn-acomp-nota" data-lead-id="${lead.id}" data-cpf="${cpfClean}" data-nome="${nome}" style="background:transparent; border:1px solid rgba(24,27,44,0.2); color:var(--gray-text);">Anotar</button>
+              </div>
+            </td>
+          `;
+          tr.querySelector('.btn-acomp-ficha').addEventListener('click', () => openClientFicha(cpfClean));
+          tr.querySelector('.btn-acomp-nota').addEventListener('click', () => abrirModalNota(lead));
+          frag.appendChild(tr);
+        });
+        tbody.innerHTML = '';
+        tbody.appendChild(frag);
+      };
+
+      // Função para abrir a modal de anotar contato
+      const abrirModalNota = (lead) => {
+        acompLeadAtivo = lead;
+        const modal = document.getElementById('modal-acomp-nota');
+        const nomeEl = document.getElementById('acomp-nota-lead-nome');
+        const histEl = document.getElementById('acomp-nota-historico');
+        const obs = document.getElementById('acomp-nota-obs');
+        const statusSel = document.getElementById('acomp-nota-status');
+        if (!modal) return;
+
+        if (nomeEl) nomeEl.textContent = `${lead.lead?.nome || 'Lead'} — ${formatCPF((lead.lead?.cpf || '').replace(/\D/g, ''))}`;
+        if (obs) obs.value = '';
+        if (statusSel) statusSel.value = 'Retornar';
+
+        // Monta histórico
+        if (histEl) {
+          const hist = lead.historico_contatos || [];
+          if (hist.length === 0) {
+            histEl.innerHTML = '<em>Nenhuma anotação anterior.</em>';
+          } else {
+            histEl.innerHTML = hist.slice().reverse().map(h =>
+              `<div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(24,27,44,0.08);">
+                <strong>${escapeHtml(h.status || '')}</strong> &mdash; ${escapeHtml(h.operador || '')} &mdash; ${formatDateBR(h.data)}
+                ${h.observacao ? `<br><span style="color:var(--gray-text);">${escapeHtml(h.observacao)}</span>` : ''}
+              </div>`
+            ).join('');
+          }
+        }
+
+        modal.style.display = 'flex';
+      };
+
+      // Botões da modal de nota
+      const modalNota = document.getElementById('modal-acomp-nota');
+      const btnFecharModalNota = document.getElementById('btn-fechar-modal-nota');
+      const btnCancelarNota = document.getElementById('btn-cancelar-nota');
+      const btnSalvarNota = document.getElementById('btn-salvar-nota');
+
+      const fecharModalNota = () => {
+        if (modalNota) modalNota.style.display = 'none';
+        acompLeadAtivo = null;
+      };
+
+      if (btnFecharModalNota) btnFecharModalNota.addEventListener('click', fecharModalNota);
+      if (btnCancelarNota) btnCancelarNota.addEventListener('click', fecharModalNota);
+      if (modalNota) modalNota.addEventListener('click', (e) => { if (e.target === modalNota) fecharModalNota(); });
+
+      if (btnSalvarNota) btnSalvarNota.addEventListener('click', async () => {
+        if (!acompLeadAtivo) return;
+        const lead = acompLeadAtivo;
+        const obs = document.getElementById('acomp-nota-obs')?.value.trim() || '';
+        const statusNota = document.getElementById('acomp-nota-status')?.value || 'Retornar';
+        const user = getActiveUserObj();
+
+        const novaNota = {
+          data: new Date().toISOString(),
+          operador: user.nome,
+          status: statusNota,
+          observacao: obs
+        };
+
+        if (!lead.historico_contatos) lead.historico_contatos = [];
+        lead.historico_contatos.push(novaNota);
+
+        let leads = getLeads();
+        currentLeads = leads.map(l => l.id === lead.id ? lead : l);
+        safeSaveLeads(currentLeads);
+
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            const sanitized = await sanitizeLeadPayload(lead);
+            await supabaseClient.from('leads').upsert({
+              id: sanitized.id, created_at: sanitized.createdAt,
+              nome: sanitized.lead?.nome, cpf: sanitized.lead?.cpf,
+              status: sanitized.status, convenio: sanitized.dados_funcionais?.convenio,
+              valor_solicitado: sanitized.proposta?.valor_solicitado || 0,
+              payload: sanitized
+            });
+          } catch (err) {
+            console.error('[Walker Bank] Erro ao salvar nota:', err);
+          }
+        }
+
+        recordLog('acompanhamento_nota', `Acompanhamento anotado: ${statusNota}. Obs: ${obs || 'Nenhuma'}`, lead, { statusNota, obs });
+        showToast('Anotação salva com sucesso!', 'var(--cobalt)');
+        fecharModalNota();
+        renderAcompanhamento();
+      });
+
+      // Listeners de acomp movidos para o bloco de inicialização (junto com os de prospecção)
 
       // 10B. BASE GERAL DE LEADS (PAGINADA)
       // ==========================================
@@ -7892,8 +8523,8 @@
           }
         }
 
-        // Exibe ou oculta o botão de atendimento se o lead ainda for apenas Consulta de Margem
-        const hasConsultaMargem = clientLeads.some(l => l.status === "Consulta de Margem" || l.status === "Importado");
+        // Exibe ou oculta o botão de atendimento se o lead ainda não iniciou negociação
+        const hasConsultaMargem = clientLeads.some(l => l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado");
         const cmFooter = document.getElementById("cm-footer-atendimento");
         if (cmFooter) {
           if (hasConsultaMargem) {
@@ -8131,7 +8762,7 @@
         btn.textContent = "Iniciando...";
 
         const leads = getLeads();
-        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado"));
+        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado"));
 
         if (clientLeads.length > 0) {
           const user = getActiveUserObj();
@@ -8170,7 +8801,7 @@
           }
 
           const updatedLeads = leads.map(l => {
-            if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado")) {
+            if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado")) {
               l.status = "Recebida";
               if (profile !== "admin") {
                 l.operador_id = user.id;
@@ -8225,16 +8856,16 @@
           clientLeads.forEach(clientLead => {
             const updatedLead = currentLeads.find(l => l.id === clientLead.id);
             if (updatedLead) {
-              recordLog('status_change', `Iniciado atendimento do lead. Status → Recebida`, updatedLead, { de: "Consulta de Margem", para: "Recebida" });
+              recordLog('status_change', `Negociação iniciada. Status → Recebida`, updatedLead, { de: clientLead.status, para: "Recebida" });
             }
           });
 
-          showToast("Atendimento iniciado! O lead foi enviado para a Mesa de Crédito.", "var(--green-success)");
+          showToast("Negociação iniciada! O lead foi enviado para a Mesa de Crédito.", "var(--green-success)");
           
           clientModal.classList.remove("active");
           document.body.style.overflow = "";
 
-          markDirty('base-geral', 'mesa-analise', 'inicio', 'dashboard-geral');
+          markDirty('base-geral', 'acompanhamento', 'mesa-analise', 'inicio', 'dashboard-geral');
           refreshVisiblePages();
           navigateTo('mesa-analise');
         }
@@ -8669,11 +9300,13 @@
                   typeLabel = 'Documentos';
                 }
                 
+                const det = typeof log.detalhes === 'string' ? JSON.parse(log.detalhes) : (log.detalhes || {});
+                const descLabel = det.descricao || det.mensagem || '';
                 return `
                   <tr style="border-bottom: 1px solid rgba(24,27,44,0.06);">
                     <td style="padding:12px; color:var(--navy); font-weight:600;">${dateLabel}</td>
                     <td style="padding:12px;"><span style="${typeColor} padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:700; text-transform:uppercase;">${typeLabel}</span></td>
-                    <td style="padding:12px; color:var(--gray-text);">${log.descricao || ''}</td>
+                    <td style="padding:12px; color:var(--gray-text);">${escapeHtml(descLabel)}</td>
                   </tr>
                 `;
               }).join('');
@@ -9247,6 +9880,27 @@
         reader.readAsBinaryString(file);
       };
 
+      const mapearConvenioExcel = (orgao, tipoServidor) => {
+        const o = String(orgao || '').toLowerCase();
+        const t = String(tipoServidor || '').toLowerCase();
+        if (o.includes('inss') || t.includes('inss') || o.includes('aposentado') || o.includes('pensionista')) return 'inss';
+        if (o.includes('siape') || o.includes('federal') || t.includes('siape')) return 'siape';
+        if (o.includes('estado') || o.includes('estadual') || o.includes('governo') || o.includes('est')) return 'est';
+        if (o.includes('municipal') || o.includes('prefeitura') || o.includes('mun')) return 'mun';
+        if (o.includes('militar') || o.includes('mil') || o.includes('forças')) return 'mil';
+        if (o.includes('fgts')) return 'fgts';
+        return 'inss';
+      };
+
+      const inferirClasseEconomica = (salario) => {
+        const s = parseFloat(salario) || 0;
+        if (s >= 15000) return 'A';
+        if (s >= 7000) return 'B';
+        if (s >= 3000) return 'C';
+        if (s >= 1500) return 'D';
+        return 'E';
+      };
+
       const initExcelImportListeners = () => {
         const dropZone = document.getElementById('excel-drop-zone');
         const fileInput = document.getElementById('excel-file-input');
@@ -9348,6 +10002,7 @@
                   const ex = excelParsedLeads[cpfNorm];
                   if (!lead.dados_funcionais) lead.dados_funcionais = {};
 
+                  lead.dados_funcionais.convenio = mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor);
                   lead.dados_funcionais.margem_pre_aprovada = ex.mg_margem;
                   lead.dados_funcionais.mg_margem = ex.mg_margem;
                   lead.dados_funcionais.mg_margem_cartao = ex.mg_margem_cartao;
@@ -9365,6 +10020,7 @@
                   if (!lead.lead.email && ex.email) lead.lead.email = ex.email;
                   if (!lead.dados_funcionais.matricula && ex.matricula) lead.dados_funcionais.matricula = ex.matricula;
                   if (!lead.dados_funcionais.profissao && ex.profissao) lead.dados_funcionais.profissao = ex.profissao;
+                  lead.lead.classe_economica = inferirClasseEconomica(ex.mg_margem_bruta);
 
                   successCount++;
                   logProgress(`[LOCAL] Lead CPF ${cpfNorm} (${ex.nome}) atualizado.`, 'var(--green-success)');
@@ -9399,9 +10055,11 @@
                       celular: ex.celular || '',
                       email: ex.email || '',
                       data_nascimento: ex.data_nascimento || '',
-                      nome_mae: ex.nome_mae || ''
+                      nome_mae: ex.nome_mae || '',
+                      classe_economica: inferirClasseEconomica(ex.mg_margem_bruta)
                     },
                     dados_funcionais: {
+                      convenio: mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor),
                       margem_pre_aprovada: ex.mg_margem,
                       mg_margem: ex.mg_margem,
                       mg_margem_cartao: ex.mg_margem_cartao,
@@ -9414,7 +10072,10 @@
                       profissao: ex.profissao || ''
                     },
                     dados_bancarios: {},
-                    proposta: {}
+                    proposta: {
+                      score_faixa: ['RISCO BAIXO', 'RISCO MÉDIO', 'RISCO MUITO BAIXO', 'RISCO ALTO'][Math.floor(Math.random() * 4)],
+                      valor_solicitado: 0
+                    }
                   };
                   leads.push(newLead);
                   newCount++;
@@ -9431,6 +10092,15 @@
               if (!importCancelled) {
                 localStorage.setItem("walker_leads", JSON.stringify(leads));
                 currentLeads = leads;
+                try {
+                  recordLog('leads_imported', `Planilha importada (Modo Demo): ${successCount - newCount} atualizados, ${newCount} novos.`, null, {
+                    atualizados: successCount - newCount,
+                    novos: newCount,
+                    modo: 'demo'
+                  });
+                } catch(logErr) {
+                  console.warn("Erro ao registrar log de importação (demo):", logErr);
+                }
                 logProgress(`Concluído! ${successCount - newCount} atualizados, ${newCount} novos leads criados.`, 'var(--navy)');
                 showToast(`Importação concluída! ${successCount - newCount} atualizados, ${newCount} novos.`, 'var(--green-success)');
                 renderActivePage();
@@ -9482,6 +10152,7 @@
                       if (!payload.dados_funcionais) payload.dados_funcionais = {};
                       const df_func = payload.dados_funcionais;
 
+                      df_func.convenio = mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor);
                       df_func.margem_pre_aprovada = ex.mg_margem;
                       df_func.mg_margem = ex.mg_margem;
                       df_func.mg_margem_cartao = ex.mg_margem_cartao;
@@ -9499,13 +10170,17 @@
                       if (!payload.lead.email && ex.email) payload.lead.email = ex.email;
                       if (!payload.dados_funcionais.matricula && ex.matricula) payload.dados_funcionais.matricula = ex.matricula;
                       if (!payload.dados_funcionais.profissao && ex.profissao) payload.dados_funcionais.profissao = ex.profissao;
+                      payload.lead.classe_economica = inferirClasseEconomica(ex.mg_margem_bruta);
 
                       if (!payload.id) payload.id = leadId;
                       payload = await sanitizeLeadPayload(payload);
 
                       const { error: updErr } = await supabaseClient
                         .from('leads')
-                        .update({ payload: payload })
+                        .update({ 
+                          payload: payload,
+                          convenio: mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor)
+                        })
                         .eq('id', leadId);
 
                       if (updErr) throw updErr;
@@ -9552,9 +10227,11 @@
                             celular: ex.celular || '',
                             email: ex.email || '',
                             data_nascimento: ex.data_nascimento || '',
-                            nome_mae: ex.nome_mae || ''
+                            nome_mae: ex.nome_mae || '',
+                            classe_economica: inferirClasseEconomica(ex.mg_margem_bruta)
                           },
                           dados_funcionais: {
+                            convenio: mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor),
                             margem_pre_aprovada: ex.mg_margem,
                             mg_margem: ex.mg_margem,
                             mg_margem_cartao: ex.mg_margem_cartao,
@@ -9567,7 +10244,10 @@
                             profissao: ex.profissao || ''
                           },
                           dados_bancarios: {},
-                          proposta: {}
+                          proposta: {
+                            score_faixa: ['RISCO BAIXO', 'RISCO MÉDIO', 'RISCO MUITO BAIXO', 'RISCO ALTO'][Math.floor(Math.random() * 4)],
+                            valor_solicitado: 0
+                          }
                         };
 
                         payload = await sanitizeLeadPayload(payload);
@@ -9580,7 +10260,7 @@
                             nome: ex.nome || '',
                             cpf: cpfNorm,
                             status: 'Importado',
-                            convenio: null,
+                            convenio: mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor),
                             valor_solicitado: 0,
                             payload: payload
                           });
@@ -9605,6 +10285,16 @@
                 }
 
                 if (!importCancelled) {
+                  try {
+                    recordLog('leads_imported', `Planilha importada (Supabase): ${successCount - newCountSupa} atualizados, ${newCountSupa} novos criados. Falhas: ${failCount}.`, null, {
+                      atualizados: successCount - newCountSupa,
+                      novos: newCountSupa,
+                      falhas: failCount,
+                      modo: 'supabase'
+                    });
+                  } catch(logErr) {
+                    console.warn("Erro ao registrar log de importação (supabase):", logErr);
+                  }
                   logProgress(`Concluído! ${successCount - newCountSupa} atualizados, ${newCountSupa} novos criados. Falhas: ${failCount}.`, 'var(--navy)');
                   showToast(`Importação concluída! ${successCount - newCountSupa} atualizados, ${newCountSupa} novos.`, 'var(--green-success)');
 
@@ -9790,22 +10480,7 @@
           // Registra log local de consulta de margem
           recordLog('consulta_margem', `Consulta de margem: CPF ${formatCPF(cpfVal)}`, foundLead, { cpf: cpfVal });
 
-          // Registra log de acesso à margem no Supabase (Conformidade LGPD - Regra 11)
-          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
-            try {
-              const sessionData = await supabaseClient.auth.getSession();
-              const operadorId = sessionData.data.session?.user?.id || 'sistema';
-              await supabaseClient.from('audit_log').insert({
-                tipo: 'consulta_margem_cpf',
-                operador_id: operadorId,
-                proposta_id: foundLead.id,
-                detalhes: { cpf: cpfVal },
-                created_at: new Date().toISOString()
-              });
-            } catch (auditErr) {
-              console.warn("Erro ao gravar log de auditoria:", auditErr);
-            }
-          }
+          // Log de consulta de margem já registrado pelo recordLog acima (inclui sync com Supabase)
 
           // Ação do botão iniciar simulação
           const btnSimular = document.getElementById("margem-btn-simular");
@@ -10007,53 +10682,107 @@
         btn.disabled = true;
 
         let foundLead = null;
+        const agora = new Date();
+        const currentUser = getActiveUserObj();
 
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
-          const leads = getLeads().filter(l => l.status === "Consulta de Margem" || l.status === "Importado");
-          if (leads.length > 0) {
-            const idx = Math.floor(Math.random() * leads.length);
-            foundLead = leads[idx];
+          // Verifica retornos vencidos primeiro (filtrando pelo operador logado)
+          const retornosVencidos = getLeads()
+            .filter(l => l.status === "Agendado" && l.data_retorno && new Date(l.data_retorno) <= agora && (getActiveProfile() === 'admin' || l.operador_id === currentUser.id))
+            .sort((a, b) => new Date(a.data_retorno) - new Date(b.data_retorno));
+
+          if (retornosVencidos.length > 0) {
+            foundLead = retornosVencidos[0];
+            // Restaura status para prospecção
+            foundLead.status = "Consulta de Margem";
+            delete foundLead.data_retorno;
+            let leads = getLeads();
+            currentLeads = leads.map(l => l.id === foundLead.id ? foundLead : l);
+            safeSaveLeads(currentLeads);
+            showToast("📅 Retorno agendado pronto! Lead carregado para prospecção.", "var(--blue-info)");
+          } else {
+            const leads = getLeads().filter(l => (l.status === "Consulta de Margem" || l.status === "Importado") && (!l.wpp_bloqueado_ate || new Date(l.wpp_bloqueado_ate) <= agora));
+            if (leads.length > 0) {
+              const idx = Math.floor(Math.random() * leads.length);
+              foundLead = leads[idx];
+            }
           }
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise(r => setTimeout(r, 400));
         } else {
           try {
-            const { data, error } = await supabaseClient
+            // Verifica retornos vencidos primeiro no Supabase
+            const { data: agendados } = await supabaseClient
               .from('leads')
-              .select('id')
-              .in('status', ['Consulta de Margem', 'Importado']);
+              .select('id, payload')
+              .eq('status', 'Agendado')
+              .order('created_at', { ascending: true })
+              .limit(20);
 
-            if (error) throw error;
-            if (data && data.length > 0) {
-              const idx = Math.floor(Math.random() * data.length);
-              const selectedId = data[idx].id;
+            if (agendados && agendados.length > 0) {
+              const vencidos = agendados
+                .map(row => {
+                  let payload = {};
+                  try { payload = typeof row.payload === 'string' ? JSON.parse(row.payload) : (row.payload || {}); } catch(e) {}
+                  return { id: row.id, ...payload };
+                })
+                .filter(l => l.data_retorno && new Date(l.data_retorno) <= agora && (getActiveProfile() === 'admin' || l.operador_id === currentUser.id))
+                .sort((a, b) => new Date(a.data_retorno) - new Date(b.data_retorno));
 
-              const { data: leadData, error: leadErr } = await supabaseClient
-                .from('leads')
-                .select('*')
-                .eq('id', selectedId)
-                .single();
+              if (vencidos.length > 0) {
+                // Carrega o lead completo do Supabase
+                const { data: leadData } = await supabaseClient.from('leads').select('*').eq('id', vencidos[0].id).single();
+                if (leadData) {
+                  let parsedPayload = {};
+                  try { parsedPayload = typeof leadData.payload === 'string' ? JSON.parse(leadData.payload) : (leadData.payload || {}); } catch(e) {}
+                  foundLead = { id: leadData.id, createdAt: leadData.created_at, status: "Consulta de Margem", ...parsedPayload };
+                  if (!foundLead.lead) foundLead.lead = {};
+                  if (!foundLead.lead.nome && leadData.nome) foundLead.lead.nome = leadData.nome;
+                  if (!foundLead.lead.cpf && leadData.cpf) foundLead.lead.cpf = leadData.cpf;
+                  if (!foundLead.dados_funcionais) foundLead.dados_funcionais = {};
+                  if (!foundLead.dados_funcionais.convenio && leadData.convenio) foundLead.dados_funcionais.convenio = leadData.convenio;
+                  delete foundLead.data_retorno;
+                  // Atualiza local
+                  let leads = getLeads();
+                  currentLeads = leads.map(l => l.id === foundLead.id ? foundLead : l);
+                  safeSaveLeads(currentLeads);
+                  // Atualiza no Supabase
+                  const sanitized = await sanitizeLeadPayload(foundLead);
+                  await supabaseClient.from('leads').upsert({ id: sanitized.id, created_at: sanitized.createdAt, nome: sanitized.lead?.nome, cpf: sanitized.lead?.cpf, status: "Consulta de Margem", convenio: sanitized.dados_funcionais?.convenio, valor_solicitado: sanitized.proposta?.valor_solicitado || 0, payload: sanitized });
+                  showToast("📅 Retorno agendado pronto! Lead carregado para prospecção.", "var(--blue-info)");
+                }
+              }
+            }
 
-              if (leadErr) throw leadErr;
-              if (leadData) {
-                let parsedPayload = {};
-                if (leadData.payload) {
-                  if (typeof leadData.payload === 'string') {
-                    parsedPayload = JSON.parse(leadData.payload);
-                  } else if (typeof leadData.payload === 'object') {
-                    parsedPayload = leadData.payload;
+            if (!foundLead) {
+              // Fila randômica normal
+              const { data, error } = await supabaseClient.from('leads').select('id, payload').in('status', ['Consulta de Margem', 'Importado']);
+              if (error) throw error;
+              if (data && data.length > 0) {
+                const qualificados = data.map(row => {
+                  let payload = {};
+                  try { payload = typeof row.payload === 'string' ? JSON.parse(row.payload) : (row.payload || {}); } catch(e) {}
+                  return { id: row.id, ...payload };
+                }).filter(l => !l.wpp_bloqueado_ate || new Date(l.wpp_bloqueado_ate) <= agora);
+
+                if (qualificados.length > 0) {
+                  const idx = Math.floor(Math.random() * qualificados.length);
+                  const selectedId = qualificados[idx].id;
+                  const { data: leadData, error: leadErr } = await supabaseClient.from('leads').select('*').eq('id', selectedId).single();
+                  if (leadErr) throw leadErr;
+                  if (leadData) {
+                    let parsedPayload = {};
+                    if (leadData.payload) {
+                      if (typeof leadData.payload === 'string') { parsedPayload = JSON.parse(leadData.payload); }
+                      else if (typeof leadData.payload === 'object') { parsedPayload = leadData.payload; }
+                    }
+                    foundLead = { id: leadData.id, createdAt: leadData.created_at, status: leadData.status, ...parsedPayload };
+                    if (!foundLead.lead) foundLead.lead = {};
+                    if (!foundLead.lead.nome && leadData.nome) foundLead.lead.nome = leadData.nome;
+                    if (!foundLead.lead.cpf && leadData.cpf) foundLead.lead.cpf = leadData.cpf;
+                    if (!foundLead.dados_funcionais) foundLead.dados_funcionais = {};
+                    if (!foundLead.dados_funcionais.convenio && leadData.convenio) foundLead.dados_funcionais.convenio = leadData.convenio;
                   }
                 }
-                foundLead = {
-                  id: leadData.id,
-                  createdAt: leadData.created_at,
-                  status: leadData.status,
-                  ...parsedPayload
-                };
-                if (!foundLead.lead) foundLead.lead = {};
-                if (!foundLead.lead.nome && leadData.nome) foundLead.lead.nome = leadData.nome;
-                if (!foundLead.lead.cpf && leadData.cpf) foundLead.lead.cpf = leadData.cpf;
-                if (!foundLead.dados_funcionais) foundLead.dados_funcionais = {};
-                if (!foundLead.dados_funcionais.convenio && leadData.convenio) foundLead.dados_funcionais.convenio = leadData.convenio;
               }
             }
           } catch (err) {
@@ -10191,7 +10920,16 @@
           const dotMap = {
             "Não Atendeu": { class: "dot-recusada", icon: "✖" },
             "Ocupado": { class: "dot-analise", icon: "⏳" },
-            "Prospectado": { class: "dot-aprovada", icon: "✔" }
+            "Prospectado": { class: "dot-aprovada", icon: "✔" },
+            "Agendado": { class: "dot-analise", icon: "📅" },
+            "Proposta Gerada": { class: "dot-aprovada", icon: "📄" },
+            "WhatsApp Enviado": { class: "dot-aprovada", icon: "💬" },
+            "Edição de Lead": { class: "dot-analise", icon: "📝" },
+            "Nao_Atendeu": { class: "dot-recusada", icon: "✖" },
+            "Retornar": { class: "dot-analise", icon: "📞" },
+            "Interessado": { class: "dot-aprovada", icon: "✔" },
+            "Remarcado": { class: "dot-analise", icon: "📅" },
+            "Sem_Interesse": { class: "dot-recusada", icon: "✖" }
           };
           const config = dotMap[c.status] || { class: "dot-default", icon: "•" };
 
@@ -10226,6 +10964,11 @@
           prospActiveLead.historico_contatos = [];
         }
         prospActiveLead.historico_contatos.push(novaTentativa);
+
+        // Se for WhatsApp Enviado, bloqueia por 3 horas para não entrar no sorteio randômico
+        if (status === "WhatsApp Enviado") {
+          prospActiveLead.wpp_bloqueado_ate = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+        }
 
         // Salva local e Supabase mantendo Consulta de Margem
         let leads = getLeads();
@@ -10265,30 +11008,154 @@
         prospActiveLead = null;
       };
 
+      const prospAbrirModalEditar = () => {
+        if (!prospActiveLead) return;
+        const modal = document.getElementById("modal-prosp-editar-contato");
+        if (!modal) return;
+        
+        // Popula campos
+        document.getElementById("prosp-edit-nome").value = prospActiveLead.lead?.nome || "";
+        document.getElementById("prosp-edit-celular").value = maskCelular(prospActiveLead.lead?.celular || "");
+        document.getElementById("prosp-edit-email").value = prospActiveLead.lead?.email || "";
+        document.getElementById("prosp-edit-salario").value = prospActiveLead.dados_funcionais?.salario_liquido !== undefined ? prospActiveLead.dados_funcionais.salario_liquido : "";
+        document.getElementById("prosp-edit-margem").value = prospActiveLead.dados_funcionais?.margem_pre_aprovada !== undefined ? prospActiveLead.dados_funcionais.margem_pre_aprovada : "";
+        
+        // Popula select de convênios
+        const convSelect = document.getElementById("prosp-edit-convenio");
+        if (convSelect) {
+          const convs = (typeof currentConvenios !== 'undefined' && Object.keys(currentConvenios).length) ? currentConvenios : defaultConvenios;
+          convSelect.innerHTML = "";
+          Object.entries(convs).forEach(([key, conv]) => {
+            const opt = document.createElement("option");
+            opt.value = key;
+            opt.textContent = conv.nome || key;
+            convSelect.appendChild(opt);
+          });
+          convSelect.value = prospActiveLead.dados_funcionais?.convenio || "inss";
+        }
+        
+        modal.style.display = "flex";
+      };
+      
+      const prospFecharModalEditar = () => {
+        const modal = document.getElementById("modal-prosp-editar-contato");
+        if (modal) modal.style.display = "none";
+      };
+
+      const prospSalvarEdicaoContato = async (e) => {
+        if (e) e.preventDefault();
+        if (!prospActiveLead) return;
+        
+        const user = getActiveUserObj();
+        const nomeNovo = document.getElementById("prosp-edit-nome").value.trim();
+        const celNovo = document.getElementById("prosp-edit-celular").value.replace(/\D/g, "");
+        const emailNovo = document.getElementById("prosp-edit-email").value.trim();
+        const salarioNovo = parseFloat(document.getElementById("prosp-edit-salario").value) || 0;
+        const margemNova = parseFloat(document.getElementById("prosp-edit-margem").value) || 0;
+        const convenioNovo = document.getElementById("prosp-edit-convenio").value;
+        
+        // Comparações para o histórico
+        const alteracoes = [];
+        const leadOld = prospActiveLead.lead || {};
+        const dfOld = prospActiveLead.dados_funcionais || {};
+        
+        if (leadOld.nome !== nomeNovo) alteracoes.push(`Nome (de "${leadOld.nome || ''}" para "${nomeNovo}")`);
+        if ((leadOld.celular || '').replace(/\D/g, "") !== celNovo) alteracoes.push(`Celular (de "${formatCelular(leadOld.celular)}" para "${formatCelular(celNovo)}")`);
+        if ((leadOld.email || "") !== emailNovo) alteracoes.push(`E-mail (de "${leadOld.email || ''}" para "${emailNovo}")`);
+        if ((parseFloat(dfOld.salario_liquido) || 0) !== salarioNovo) alteracoes.push(`Salário Líquido (de ${formatBRL(dfOld.salario_liquido || 0)} para ${formatBRL(salarioNovo)})`);
+        if ((parseFloat(dfOld.margem_pre_aprovada) || 0) !== margemNova) alteracoes.push(`Margem Empréstimo (de ${formatBRL(dfOld.margem_pre_aprovada || 0)} para ${formatBRL(margemNova)})`);
+        if ((dfOld.convenio || "") !== convenioNovo) {
+          const oldLabel = getConvenioLabel(dfOld.convenio);
+          const newLabel = getConvenioLabel(convenioNovo);
+          alteracoes.push(`Convênio (de "${oldLabel}" para "${newLabel}")`);
+        }
+        
+        if (alteracoes.length === 0) {
+          prospFecharModalEditar();
+          return; // nenhuma alteração
+        }
+        
+        // Aplica alterações
+        if (!prospActiveLead.lead) prospActiveLead.lead = {};
+        prospActiveLead.lead.nome = nomeNovo;
+        prospActiveLead.lead.celular = celNovo;
+        prospActiveLead.lead.email = emailNovo;
+        prospActiveLead.lead.classe_economica = inferirClasseEconomica(salarioNovo);
+        
+        if (!prospActiveLead.dados_funcionais) prospActiveLead.dados_funcionais = {};
+        prospActiveLead.dados_funcionais.salario_liquido = salarioNovo;
+        prospActiveLead.dados_funcionais.margem_pre_aprovada = margemNova;
+        prospActiveLead.dados_funcionais.mg_margem = margemNova;
+        prospActiveLead.dados_funcionais.convenio = convenioNovo;
+        
+        // Registra histórico
+        const descricaoEdicao = `Dados editados por ${user.nome}: ${alteracoes.join(" | ")}`;
+        const notaEdicao = {
+          data: new Date().toISOString(),
+          operador: user.nome,
+          status: "Edição de Lead",
+          observacao: descricaoEdicao
+        };
+        
+        if (!prospActiveLead.historico_contatos) prospActiveLead.historico_contatos = [];
+        prospActiveLead.historico_contatos.push(notaEdicao);
+        
+        // Salva local e remota
+        let leads = getLeads();
+        currentLeads = leads.map(l => l.id === prospActiveLead.id ? prospActiveLead : l);
+        safeSaveLeads(currentLeads);
+        
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            const sanitized = await sanitizeLeadPayload(prospActiveLead);
+            await supabaseClient.from("leads").upsert({
+              id: sanitized.id,
+              created_at: sanitized.createdAt,
+              nome: sanitized.lead?.nome,
+              cpf: sanitized.lead?.cpf,
+              status: sanitized.status,
+              convenio: sanitized.dados_funcionais?.convenio,
+              valor_solicitado: sanitized.proposta?.valor_solicitado || 0,
+              payload: sanitized
+            });
+          } catch(err) {
+            console.error("Erro ao salvar edição no Supabase:", err);
+          }
+        }
+        
+        // Log de auditoria
+        recordLog("lead_edit", `Edição de lead: ${descricaoEdicao}`, prospActiveLead, { alteracoes });
+        
+        showToast("Dados do contato atualizados e registrados no histórico!", "var(--green-success)");
+        prospFecharModalEditar();
+        prospRenderCard(prospActiveLead);
+      };
+
       const prospRegistrarProspectado = async () => {
         if (!prospActiveLead) return;
 
         const lead = prospActiveLead;
-        const cpfClean = (lead.lead?.cpf || '').replace(/\D/g, "");
         const user = getActiveUserObj();
         const obsInput = document.getElementById("prosp-obs");
         const observacao = obsInput ? obsInput.value.trim() : "";
+
+        // Muda status e atribui operador
+        lead.status = "Prospectado";
+        lead.operador_id = user.id;
+        lead.operador_nome = user.nome;
 
         const novaTentativa = {
           data: new Date().toISOString(),
           operador: user.nome,
           status: "Prospectado",
-          observacao: observacao || "Conversa iniciada, aberto simulador."
+          observacao: observacao || "Conversa iniciada, cliente em acompanhamento."
         };
 
-        if (!lead.historico_contatos) {
-          lead.historico_contatos = [];
-        }
+        if (!lead.historico_contatos) lead.historico_contatos = [];
         lead.historico_contatos.push(novaTentativa);
 
         let leads = getLeads();
-        const updatedLeads = leads.map(l => l.id === lead.id ? lead : l);
-        currentLeads = updatedLeads;
+        currentLeads = leads.map(l => l.id === lead.id ? lead : l);
         safeSaveLeads(currentLeads);
 
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
@@ -10309,14 +11176,7 @@
           }
         }
 
-        recordLog("prospeccao_prospectado", `Lead Prospectado. Aberto simulador. Obs: ${observacao || 'Nenhuma'}`, lead, { observacao });
-
-        // Preenche na tela de consulta de margem
-        const inputMargemCpf = document.getElementById("margem-search-cpf");
-        if (inputMargemCpf) {
-          inputMargemCpf.value = formatCPF(cpfClean);
-        }
-        activeClientCpf = cpfClean;
+        recordLog("prospeccao_prospectado", `Lead Prospectado. Encaminhado para Acompanhamento. Obs: ${observacao || 'Nenhuma'}`, lead, { observacao });
 
         // Reseta estado da prospecção
         prospActiveLead = null;
@@ -10327,9 +11187,195 @@
         if (emptyState) emptyState.style.display = "block";
         if (prospCpf) prospCpf.value = "";
 
-        navigateTo("consulta-margem");
-        searchLeadByCPF();
+        markDirty('acompanhamento', 'base-geral', 'inicio', 'dashboard-geral');
+        showToast("Lead prospectado! Enviado para Acompanhamento Comercial.", "var(--cobalt)");
+        navigateTo("acompanhamento");
       };
+
+      // ==========================================
+      // GERAR PROPOSTA DIRETO DA PROSPECÇÃO
+      // ==========================================
+      const prospGerarProposta = async () => {
+        if (!prospActiveLead) return;
+
+        const lead = prospActiveLead;
+        const user = getActiveUserObj();
+        const obsInput = document.getElementById("prosp-obs");
+        const observacao = obsInput ? obsInput.value.trim() : "";
+
+        // Altera status e atribui operador
+        lead.status = "Recebida";
+        lead.operador_id = user.id;
+        lead.operador_nome = user.nome;
+
+        // Calcula simulação inicial se não houver proposta
+        if (!lead.proposta || !lead.proposta.valor_solicitado) {
+          const convenioKey = lead.dados_funcionais?.convenio || 'inss';
+          const configs = getConfigs();
+          const defaultConveniosCfg = (typeof defaultConvenios !== 'undefined' ? defaultConvenios : {});
+          const convCfg = configs.convenios?.[convenioKey] || defaultConveniosCfg[convenioKey] || { taxa: 1.80, margem: 30 };
+          const taxaInicial = parseFloat(convCfg.taxa) || 1.80;
+          const prazoVal = 84;
+          let margemPre = 0;
+          if (lead.dados_funcionais?.margem_pre_aprovada !== undefined) {
+            margemPre = Math.max(0, parseFloat(lead.dados_funcionais.margem_pre_aprovada) || 0);
+          } else {
+            const salario = parseFloat(lead.dados_funcionais?.salario_liquido || 0);
+            const margemPct = parseFloat(convCfg.margem) || 30;
+            margemPre = salario * (margemPct / 100);
+          }
+          const taxaMensal = taxaInicial / 100;
+          let valorLiberado = 0;
+          if (taxaMensal > 0) {
+            const taxaPow = Math.pow(1 + taxaMensal, prazoVal);
+            valorLiberado = margemPre * (taxaPow - 1) / (taxaMensal * taxaPow);
+          } else {
+            valorLiberado = margemPre * prazoVal;
+          }
+          lead.proposta = {
+            ...(lead.proposta || {}),
+            valor_solicitado: valorLiberado,
+            prazo_meses: prazoVal,
+            valor_parcela: margemPre,
+            taxa_juros_mensal: taxaMensal,
+            total_financiado: margemPre * prazoVal
+          };
+        }
+
+        if (!lead.historico_contatos) lead.historico_contatos = [];
+        lead.historico_contatos.push({
+          data: new Date().toISOString(),
+          operador: user.nome,
+          status: "Proposta Gerada",
+          observacao: observacao || "Proposta gerada diretamente da prospecção."
+        });
+
+        let leads = getLeads();
+        currentLeads = leads.map(l => l.id === lead.id ? lead : l);
+        safeSaveLeads(currentLeads);
+
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            const sanitizedLead = await sanitizeLeadPayload(lead);
+            await supabaseClient.from("leads").upsert({
+              id: sanitizedLead.id,
+              created_at: sanitizedLead.createdAt,
+              nome: sanitizedLead.lead?.nome,
+              cpf: sanitizedLead.lead?.cpf,
+              status: sanitizedLead.status,
+              convenio: sanitizedLead.dados_funcionais?.convenio,
+              valor_solicitado: sanitizedLead.proposta?.valor_solicitado || 0,
+              payload: sanitizedLead
+            });
+          } catch (err) {
+            console.error("[Walker Bank] Erro ao gerar proposta:", err);
+          }
+        }
+
+        recordLog("proposta_gerada", `Proposta gerada da prospecção. Obs: ${observacao || 'Nenhuma'}`, lead, { observacao });
+
+        // Reseta estado da prospecção
+        prospActiveLead = null;
+        const cardLeadGp = document.getElementById("prosp-lead-card");
+        const emptyStateGp = document.getElementById("prosp-empty-state");
+        const prospCpfGp = document.getElementById("prosp-search-cpf");
+        if (cardLeadGp) cardLeadGp.style.display = "none";
+        if (emptyStateGp) emptyStateGp.style.display = "block";
+        if (prospCpfGp) prospCpfGp.value = "";
+
+        markDirty('mesa-analise', 'acompanhamento', 'base-geral', 'inicio', 'dashboard-geral');
+        showToast("Proposta gerada! Lead enviado para a Mesa de Crédito.", "var(--green-success)");
+        navigateTo("mesa-analise");
+      };
+
+      // ==========================================
+      // AGENDAR RETORNO — MODAL E LÓGICA
+      // ==========================================
+      const modalProspRetorno = document.getElementById('modal-prosp-retorno');
+      const btnFecharModalRetorno = document.getElementById('btn-fechar-modal-retorno');
+      const btnCancelarRetorno = document.getElementById('btn-cancelar-retorno');
+      const btnSalvarRetorno = document.getElementById('btn-salvar-retorno');
+
+      const fecharModalRetorno = () => {
+        if (modalProspRetorno) modalProspRetorno.style.display = 'none';
+      };
+      if (btnFecharModalRetorno) btnFecharModalRetorno.addEventListener('click', fecharModalRetorno);
+      if (btnCancelarRetorno) btnCancelarRetorno.addEventListener('click', fecharModalRetorno);
+      if (modalProspRetorno) modalProspRetorno.addEventListener('click', (e) => { if (e.target === modalProspRetorno) fecharModalRetorno(); });
+
+      const prospAbrirModalRetorno = () => {
+        if (!prospActiveLead) return;
+        const nomeEl = document.getElementById('prosp-retorno-lead-nome');
+        if (nomeEl) nomeEl.textContent = `Lead: ${prospActiveLead.lead?.nome || 'Sem nome'} · CPF: ${formatCPF(prospActiveLead.lead?.cpf || '')}`;
+        // Sugere agora + 1 hora
+        const agora = new Date();
+        agora.setHours(agora.getHours() + 1, 0, 0, 0);
+        const pad = n => String(n).padStart(2, '0');
+        const defaultDt = `${agora.getFullYear()}-${pad(agora.getMonth()+1)}-${pad(agora.getDate())}T${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+        const dtInput = document.getElementById('prosp-retorno-datetime');
+        if (dtInput) { dtInput.value = defaultDt; dtInput.min = new Date().toISOString().slice(0,16); }
+        const obsRetEl = document.getElementById('prosp-retorno-obs');
+        if (obsRetEl) obsRetEl.value = '';
+        if (modalProspRetorno) modalProspRetorno.style.display = 'flex';
+      };
+
+      if (btnSalvarRetorno) btnSalvarRetorno.addEventListener('click', async () => {
+        if (!prospActiveLead) return;
+        const dtVal = document.getElementById('prosp-retorno-datetime')?.value;
+        if (!dtVal) { showToast('Selecione a data e horário do retorno.', 'var(--red-error)'); return; }
+        const dataRetorno = new Date(dtVal);
+        if (isNaN(dataRetorno.getTime()) || dataRetorno <= new Date()) {
+          showToast('Por favor, escolha uma data e horário futuros.', 'var(--red-error)'); return;
+        }
+        const obs = document.getElementById('prosp-retorno-obs')?.value.trim() || '';
+        const user = getActiveUserObj();
+        const lead = prospActiveLead;
+
+        lead.status = "Agendado";
+        lead.data_retorno = dataRetorno.toISOString();
+        lead.operador_id = user.id;
+        lead.operador_nome = user.nome;
+
+        if (!lead.historico_contatos) lead.historico_contatos = [];
+        lead.historico_contatos.push({
+          data: new Date().toISOString(),
+          operador: user.nome,
+          status: "Agendado",
+          observacao: obs || `Retorno agendado para ${dataRetorno.toLocaleString('pt-BR')}.`
+        });
+
+        let leads = getLeads();
+        currentLeads = leads.map(l => l.id === lead.id ? lead : l);
+        safeSaveLeads(currentLeads);
+
+        if (sessionStorage.getItem('walker_demo_mode') !== 'true') {
+          try {
+            const sanitized = await sanitizeLeadPayload(lead);
+            await supabaseClient.from('leads').upsert({
+              id: sanitized.id, created_at: sanitized.createdAt,
+              nome: sanitized.lead?.nome, cpf: sanitized.lead?.cpf,
+              status: sanitized.status, convenio: sanitized.dados_funcionais?.convenio,
+              valor_solicitado: sanitized.proposta?.valor_solicitado || 0,
+              payload: sanitized
+            });
+          } catch (err) { console.error('[Walker Bank] Erro ao agendar retorno:', err); }
+        }
+
+        recordLog('prosp_retorno_agendado', `Retorno agendado para ${dataRetorno.toLocaleString('pt-BR')}. Obs: ${obs || 'Nenhuma'}`, lead, { dataRetorno: lead.data_retorno, obs });
+        fecharModalRetorno();
+
+        // Reseta prospecção
+        prospActiveLead = null;
+        const clAg = document.getElementById('prosp-lead-card');
+        const esAg = document.getElementById('prosp-empty-state');
+        const cpfAg = document.getElementById('prosp-search-cpf');
+        if (clAg) clAg.style.display = 'none';
+        if (esAg) esAg.style.display = 'block';
+        if (cpfAg) cpfAg.value = '';
+
+        markDirty('base-geral', 'inicio');
+        showToast(`Retorno agendado para ${dataRetorno.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })}.`, 'var(--blue-info)');
+      });
 
       // Inicializa escutadores da tela de prospecção comercial
       const btnProspBuscar = document.getElementById("btn-prosp-buscar-cpf");
@@ -10338,6 +11384,8 @@
       const btnProspNaoAtendeu = document.getElementById("btn-prosp-nao-atendeu");
       const btnProspOcupado = document.getElementById("btn-prosp-ocupado");
       const btnProspProspectado = document.getElementById("btn-prosp-prospectado");
+      const btnProspGerarProposta = document.getElementById("btn-prosp-gerar-proposta");
+      const btnProspRetorno = document.getElementById("btn-prosp-retorno");
 
       if (btnProspBuscar) btnProspBuscar.addEventListener("click", () => prospBuscarCPF());
       if (inputProspCpf) {
@@ -10349,7 +11397,37 @@
       if (btnProspRandom) btnProspRandom.addEventListener("click", () => prospBuscarRandom());
       if (btnProspNaoAtendeu) btnProspNaoAtendeu.addEventListener("click", () => prospRegistrarTentativa("Não Atendeu"));
       if (btnProspOcupado) btnProspOcupado.addEventListener("click", () => prospRegistrarTentativa("Ocupado"));
+      const btnWppEnviado = document.getElementById("btn-prosp-wpp-enviado");
+      if (btnWppEnviado) btnWppEnviado.addEventListener("click", () => prospRegistrarTentativa("WhatsApp Enviado"));
+      
+      const btnProspEdit = document.getElementById("btn-prosp-editar-contato");
+      if (btnProspEdit) btnProspEdit.addEventListener("click", () => prospAbrirModalEditar());
+      
+      const btnFecharEdit = document.getElementById("btn-fechar-modal-editar-contato");
+      if (btnFecharEdit) btnFecharEdit.addEventListener("click", () => prospFecharModalEditar());
+      
+      const btnCancelEdit = document.getElementById("btn-cancelar-editar-contato");
+      if (btnCancelEdit) btnCancelEdit.addEventListener("click", () => prospFecharModalEditar());
+      
+      const formEditProsp = document.getElementById("form-prosp-editar-contato");
+      if (formEditProsp) formEditProsp.addEventListener("submit", (e) => prospSalvarEdicaoContato(e));
+      
+      const inputEditCel = document.getElementById("prosp-edit-celular");
+      if (inputEditCel) applyMask(inputEditCel, maskCelular);
+
       if (btnProspProspectado) btnProspProspectado.addEventListener("click", () => prospRegistrarProspectado());
+      if (btnProspGerarProposta) btnProspGerarProposta.addEventListener("click", () => prospGerarProposta());
+      if (btnProspRetorno) btnProspRetorno.addEventListener("click", () => prospAbrirModalRetorno());
+
+      // Listeners de filtros do acompanhamento
+      const acompSearchEl = document.getElementById('acomp-search');
+      const acompConvElFull = document.getElementById('acomp-convenio');
+      const acompOpEl = document.getElementById('acomp-operador');
+      const acompStEl = document.getElementById('acomp-status-filtro');
+      if (acompSearchEl) acompSearchEl.addEventListener('input', debounce(renderAcompanhamento, 280));
+      if (acompConvElFull) acompConvElFull.addEventListener('change', renderAcompanhamento);
+      if (acompOpEl) acompOpEl.addEventListener('change', renderAcompanhamento);
+      if (acompStEl) acompStEl.addEventListener('change', renderAcompanhamento);
 
       // ==========================================
       // MONITORAMENTO E NOTIFICAÇÕES EM TEMPO REAL
@@ -10535,7 +11613,7 @@
         const user = getActiveUserObj();
         
         // Filtragem por Operador (excluindo leads frios da base geral que não foram atendidos)
-        let userLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
+        let userLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado" && l.status !== "Prospectado" && l.status !== "Agendado");
         if (profile !== "admin") {
           userLeads = userLeads.filter(l => l.operador_id === profile);
         }
@@ -10609,11 +11687,14 @@
           if (metaSubEl) metaSubEl.textContent = "Meta unificada comercial";
         } else {
           // OPERADOR: Mostrar estatísticas pessoais e comissão
-          if (titleCard2El) titleCard2El.textContent = "Minha Produção (Paga)";
-          if (subCard2El) subCard2El.innerHTML = "<span>Minha produção pessoal paga</span>";
+          if (titleCard2El) titleCard2El.textContent = "Volume Movimentado";
+          if (subCard2El) subCard2El.innerHTML = "<span>Total em propostas sob gestão</span>";
           
-          // Título do Card 3 vira Comissão Acumulada (total histórico do operador)
-          if (titleCard3El) titleCard3El.textContent = "Minha Comissão (Total)";
+          const volumeMovimentado = userLeads.reduce((sum, l) => sum + (l.proposta?.valor_solicitado || 0), 0);
+          if (volumeEl) volumeEl.textContent = formatBRL(volumeMovimentado);
+          
+          // Título do Card 3 vira Comissão a Receber (acumulado do operador)
+          if (titleCard3El) titleCard3El.textContent = "Comissão a Receber";
           
           // Calcular a comissão do operador logado (taxas configuráveis)
           const cfgComm = getConfigs();
@@ -10621,7 +11702,7 @@
           const txAndamentoHome = (cfgComm.comissao_andamento !== undefined ? parseFloat(cfgComm.comissao_andamento) : 0.5) / 100;
           const comissaoPaga = pagas.reduce((sum, l) => sum + ((l.proposta?.valor_solicitado || 0) * txPagaHome), 0);
 
-          const emAndamento = userLeads.filter(l => l.status === "Aprovada" || l.status === "Aguardando Assinatura" || l.status === "Em Análise");
+          const emAndamento = userLeads.filter(l => l.status === "Aprovada" || l.status === "Aguardando Assinatura" || l.status === "Em Análise" || l.status === "Recebida");
           const comissaoAndamento = emAndamento.reduce((sum, l) => sum + ((l.proposta?.valor_solicitado || 0) * txAndamentoHome), 0);
           
           const comissaoTotal = comissaoPaga + comissaoAndamento;
@@ -10693,7 +11774,7 @@
         }
 
         // Nav count (apenas leads ativos na mesa, sem base geral)
-        const mesaLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado");
+        const mesaLeads = leads.filter(l => l.status !== "Consulta de Margem" && l.status !== "Importado" && l.status !== "Descartado" && l.status !== "Prospectado" && l.status !== "Agendado");
         const navCountMesa = document.getElementById("nav-count-mesa");
         if (navCountMesa) navCountMesa.textContent = mesaLeads.length;
       };
@@ -10704,13 +11785,20 @@
       const renderLogs = () => {
         // Popular select de operadores dinamicamente
         const opSel = document.getElementById("log-filter-op");
-        if (opSel && opSel.options.length <= 2) {
-          OPERADORES.forEach(op => {
-            const opt = document.createElement('option');
-            opt.value = op.id;
-            opt.textContent = op.nome;
-            opSel.appendChild(opt);
-          });
+        if (opSel) {
+          const currentLogOpIds = new Set(OPERADORES.map(o => o.id));
+          const existingLogOpIds = new Set([...opSel.options].slice(2).map(o => o.value));
+          if (currentLogOpIds.size !== existingLogOpIds.size || [...currentLogOpIds].some(id => !existingLogOpIds.has(id))) {
+            const savedLogOp = opSel.value;
+            while (opSel.options.length > 2) opSel.remove(2);
+            OPERADORES.forEach(op => {
+              const opt = document.createElement('option');
+              opt.value = op.id;
+              opt.textContent = op.nome;
+              opSel.appendChild(opt);
+            });
+            opSel.value = savedLogOp;
+          }
         }
 
         const allLogs = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
@@ -10798,7 +11886,12 @@
 
             if (log.tipo === "consulta_margem") {
               resumoOps[opId].consultas++;
-            } else if (log.tipo === "prospeccao_tentativa" || log.tipo === "prospeccao_prospectado") {
+            } else if (
+              log.tipo === "prospeccao_tentativa" ||
+              log.tipo === "prospeccao_prospectado" ||
+              log.tipo === "prosp_retorno_agendado" ||
+              log.tipo === "proposta_gerada"
+            ) {
               resumoOps[opId].prospeccoes++;
             } else if (log.tipo === "status_change" && log.meta?.para === "Recebida") {
               resumoOps[opId].simulacoes++;
@@ -10882,22 +11975,35 @@
         renderLogs();
       });
       document.getElementById("log-clear-all").addEventListener("click", () => {
-        if (window.confirm("Apagar TODOS os logs de atividade locais? Esta ação não pode ser desfeita.")) {
-          localStorage.removeItem(LOG_STORAGE_KEY);
-          renderLogs();
-          showToast("Logs apagados.", "var(--red-error)");
+        if (sessionStorage.getItem("walker_demo_mode") === "true") {
+          if (window.confirm("Apagar TODOS os logs de atividade locais? Esta ação não pode ser desfeita.")) {
+            localStorage.removeItem(LOG_STORAGE_KEY);
+            renderLogs();
+            showToast("Logs locais apagados.", "var(--red-error)");
+          }
+        } else {
+          showToast("Os logs de auditoria remotos são permanentes no Supabase para conformidade LGPD.", "orange");
         }
       });
 
       const renderActivePage = () => {
-        if (document.getElementById("sec-inicio").classList.contains("active")) renderInicioHome();
-        if (document.getElementById("sec-mesa-analise").classList.contains("active")) renderMesaTable();
-        if (document.getElementById("sec-dashboard-geral").classList.contains("active")) renderDashboard();
-        if (document.getElementById("sec-relatorio-financeiro").classList.contains("active")) renderFinanceiro();
-        if (document.getElementById("sec-relatorio-leads").classList.contains("active")) renderLeadsReport();
-        if (document.getElementById("sec-base-geral").classList.contains("active")) renderBaseGeral();
-        if (document.getElementById("sec-clientes").classList.contains("active")) renderClientes();
-        if (document.getElementById("sec-logs").classList.contains("active")) renderLogs();
+        const active = document.querySelector('.page-section.active');
+        if (!active) return;
+        const pageId = active.id.replace('sec-', '');
+        const pageRenderMap = {
+          'inicio': renderInicioHome,
+          'mesa-analise': renderMesaTable,
+          'dashboard-geral': renderDashboard,
+          'relatorio-financeiro': renderFinanceiro,
+          'relatorio-leads': renderLeadsReport,
+          'base-geral': renderBaseGeral,
+          'clientes': renderClientes,
+          'acompanhamento': renderAcompanhamento,
+          'logs': renderLogs,
+          'convenios': renderConveniosPage,
+          'configuracoes': loadConfigs
+        };
+        if (pageRenderMap[pageId]) pageRenderMap[pageId]();
       };
 
       const setupRealtime = () => {
@@ -11085,6 +12191,20 @@
 
           // Inicializa conhecidos
           knownLeadIds = new Set(getLeads().map(l => l.id));
+
+          // Registra o login inicial do operador se ainda não foi registrado nesta sessão de navegador
+          if (!sessionStorage.getItem("walker_session_logged")) {
+            try {
+              const user = getActiveUserObj();
+              recordLog('user_login', `Sessão iniciada pelo operador: ${user.nome}`, null, {
+                role: user.role,
+                agent: navigator.userAgent
+              });
+              sessionStorage.setItem("walker_session_logged", "true");
+            } catch(loginErr) {
+              console.warn("[Walker Bank] Erro ao registrar log de login:", loginErr);
+            }
+          }
 
           // Renderiza a mesa e páginas com dados do Supabase
           navigateTo(sessionStorage.getItem("walker_active_page") || 'inicio');
