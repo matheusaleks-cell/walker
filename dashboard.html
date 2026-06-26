@@ -846,6 +846,16 @@
     }
     .btn-action-panel.reabrir:hover { background: var(--nardo); color: var(--navy); }
 
+    .btn-action-panel.aguardar-ass { background: #9b59b6; color: var(--white); }
+    .btn-action-panel.aguardar-ass:hover { background: #8e44ad; transform: translateY(-1px); }
+
+    .btn-action-panel:disabled {
+      opacity: 0.45;
+      cursor: not-allowed !important;
+      transform: none !important;
+      pointer-events: none;
+    }
+
     /* ==============================
        MODAL ESTEIRA — TABS & LAYOUT
     ============================== */
@@ -3954,11 +3964,12 @@
           </div>
         </div>
         <div class="modal-footer-actions" id="m-actions-panel">
-          <button class="btn-action-panel reabrir" id="m-btn-reabrir">↩ Reabrir</button>
+          <button class="btn-action-panel reabrir" id="m-btn-reabrir">↩ Recebida</button>
+          <button class="btn-action-panel iniciar" id="m-btn-iniciar">▶ Em Análise</button>
+          <button class="btn-action-panel aguardar-ass" id="m-btn-aguardar-ass">✍ Ag. Assinatura</button>
+          <button class="btn-action-panel aprovar" id="m-btn-aprovar">✓ Aprovada</button>
+          <button class="btn-action-panel pagar" id="m-btn-pagar">💰 Paga</button>
           <button class="btn-action-panel recusar" id="m-btn-recusar">✕ Recusar</button>
-          <button class="btn-action-panel iniciar" id="m-btn-iniciar">▶ Iniciar Análise</button>
-          <button class="btn-action-panel aprovar" id="m-btn-aprovar">✓ Aprovar</button>
-          <button class="btn-action-panel pagar" id="m-btn-pagar">💰 Liberar Recurso</button>
         </div>
       </div>
 
@@ -6713,27 +6724,25 @@
           margemEl.innerHTML = `<span style="color:var(--gray-light-text);">Salário líquido não informado</span>`;
         }
 
-        // Ações por status — oculta todos, mostra conforme o fluxo
+        // Ações de esteira — todos os botões visíveis; o status atual fica desabilitado
         const mBtnAprovar = document.getElementById("m-btn-aprovar");
         const mBtnPagar = document.getElementById("m-btn-pagar");
         const mBtnRecusar = document.getElementById("m-btn-recusar");
         const mBtnIniciar = document.getElementById("m-btn-iniciar");
         const mBtnReabrir = document.getElementById("m-btn-reabrir");
-        [mBtnAprovar, mBtnPagar, mBtnRecusar, mBtnIniciar, mBtnReabrir].forEach(b => b.style.display = "none");
-        const s = lead.status;
-        if (s === "Recebida" || s === "Aguardando Averbação") {
-          mBtnIniciar.style.display = "inline-flex";
-          mBtnRecusar.style.display = "inline-flex";
-        } else if (s === "Em Análise") {
-          mBtnAprovar.style.display = "inline-flex";
-          mBtnRecusar.style.display = "inline-flex";
-        } else if (s === "Aprovada" || s === "Aguardando Assinatura") {
-          mBtnPagar.style.display = "inline-flex";
-          mBtnRecusar.style.display = "inline-flex";
-        } else if (s === "Recusada") {
-          mBtnReabrir.style.display = "inline-flex";
-        }
-        // "Paga" → sem botões
+        const mBtnAguardarAss = document.getElementById("m-btn-aguardar-ass");
+        const allActionBtns = [mBtnReabrir, mBtnIniciar, mBtnAguardarAss, mBtnAprovar, mBtnPagar, mBtnRecusar];
+        allActionBtns.forEach(b => { b.style.display = "inline-flex"; b.disabled = false; });
+        const statusBtnMap = {
+          "Recebida": mBtnReabrir, "Aguardando Averbação": mBtnReabrir,
+          "Em Análise": mBtnIniciar,
+          "Aguardando Assinatura": mBtnAguardarAss,
+          "Aprovada": mBtnAprovar,
+          "Paga": mBtnPagar,
+          "Recusada": mBtnRecusar
+        };
+        const curBtn = statusBtnMap[lead.status];
+        if (curBtn) curBtn.disabled = true;
 
         modal.classList.add("active");
         document.body.style.overflow = "hidden";
@@ -6781,12 +6790,17 @@
           const lead = getLeads().find(l => l.id === id);
           const leadInfo = lead ? `${lead.lead?.nome || ''} (${lead.lead?.cpf || ''})` : id;
 
-          const { error } = await supabaseClient
+          const { data: deleted, error } = await supabaseClient
             .from('leads')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .select('id');
 
           if (error) throw error;
+
+          if (!deleted || deleted.length === 0) {
+            throw new Error('Nenhuma linha foi removida do banco. Verifique as permissões de exclusão (RLS) no Supabase — execute o script supabase_profiles_setup.sql para recriar as políticas.');
+          }
 
           recordLog('EXCLUSAO_LEAD', `Lead ${leadInfo} excluído permanentemente por ${userObj.nome}.`, lead, { usuario: userObj.nome });
 
@@ -7184,11 +7198,14 @@
         if (confirmed) onConfirm();
       };
 
-      document.getElementById("m-btn-iniciar").addEventListener("click", () => {
-        confirmAction("Confirmar início da análise desta proposta?", "var(--blue-info)", () => changeStatus("Em Análise"));
+      document.getElementById("m-btn-reabrir").addEventListener("click", () => {
+        confirmAction("Mover proposta para RECEBIDA?", "#7f8c8d", () => changeStatus("Recebida"));
       });
-      document.getElementById("m-btn-recusar").addEventListener("click", () => {
-        confirmAction("Tem certeza que deseja RECUSAR esta proposta?", "var(--red-error)", () => changeStatus("Recusada"));
+      document.getElementById("m-btn-iniciar").addEventListener("click", () => {
+        confirmAction("Mover proposta para EM ANÁLISE?", "var(--blue-info)", () => changeStatus("Em Análise"));
+      });
+      document.getElementById("m-btn-aguardar-ass").addEventListener("click", () => {
+        confirmAction("Mover proposta para AGUARDANDO ASSINATURA?", "#9b59b6", () => changeStatus("Aguardando Assinatura"));
       });
       document.getElementById("m-btn-aprovar").addEventListener("click", () => {
         confirmAction("Confirmar APROVAÇÃO desta proposta?", "var(--green-success)", () => changeStatus("Aprovada"));
@@ -7196,8 +7213,8 @@
       document.getElementById("m-btn-pagar").addEventListener("click", () => {
         confirmAction("Confirmar LIBERAÇÃO DE RECURSOS (marcar como Paga)?", "var(--dark-gold)", () => changeStatus("Paga"));
       });
-      document.getElementById("m-btn-reabrir").addEventListener("click", () => {
-        confirmAction("Reabrir proposta? O status voltará para Recebida.", "#7f8c8d", () => changeStatus("Recebida"));
+      document.getElementById("m-btn-recusar").addEventListener("click", () => {
+        confirmAction("Tem certeza que deseja RECUSAR esta proposta?", "var(--red-error)", () => changeStatus("Recusada"));
       });
 
       // HBI acessível no modo visualização — ativa edição + dispara consulta
@@ -9218,19 +9235,21 @@
             }
             cfg.operadores_config[opId].excluido = true;
             cfg.operadores_config[opId].ativo = false;
-            
-            safeSaveConfigs(cfg);
-            
+
             if (sessionStorage.getItem("walker_demo_mode") !== "true") {
               try {
-                await supabaseClient.from('configs').upsert({ id: 'default', data: cfg });
+                const { error: cfgErr } = await supabaseClient.from('configs').upsert({ id: 'default', data: cfg });
+                if (cfgErr) throw cfgErr;
               } catch(e) {
                 console.error("Erro ao salvar exclusão lógica no Supabase:", e);
+                showToast(`Erro ao desvincular operador no banco de dados. Verifique a conexão e tente novamente.`, "var(--red-error)");
+                return;
               }
             }
 
+            safeSaveConfigs(cfg);
             OPERADORES = OPERADORES.filter(o => o.id !== opId);
-            
+
             showToast(`Operador ${opNome} desvinculado com sucesso!`, "var(--green-success)");
             renderOperadoresConfigList();
             updateProfileSelectorOptions();
