@@ -845,19 +845,16 @@
       font-weight: 500;
     }
 
-    /* Prazo Selection (Pills 24x - 96x) */
+    /* Prazo Selection (Pills 24x - 120x) */
     .prazo-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 8px;
     }
 
     @media (max-width: 576px) {
       .prazo-grid {
         grid-template-columns: repeat(3, 1fr);
-      }
-      .prazo-grid button:last-child {
-        grid-column: span 3;
       }
     }
 
@@ -1910,7 +1907,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
           <h3 class="benefit-title">Parcelas que cabem no bolso</h3>
-          <p class="benefit-desc">Opções de parcelamento estendidas em até 96 meses. Você simula e escolhe o valor e o prazo ideais.</p>
+          <p class="benefit-desc">Opções de parcelamento estendidas em até 120 meses. Você simula e escolhe o valor e o prazo ideais.</p>
         </div>
         <!-- Benefit 4 -->
         <div class="benefit-card" data-aos="fade-up" data-aos-delay="300">
@@ -1974,6 +1971,7 @@
                 <button type="button" class="pill-btn" data-prazo="48">48x</button>
                 <button type="button" class="pill-btn" data-prazo="72">72x</button>
                 <button type="button" class="pill-btn" data-prazo="96">96x</button>
+                <button type="button" class="pill-btn" data-prazo="120">120x</button>
               </div>
             </div>
             
@@ -2160,7 +2158,7 @@
           <ul class="convenio-features">
             <li>Sem burocracia ou intermediários</li>
             <li>Amortização direta em folha</li>
-            <li>Prazo estendido em até 96 meses</li>
+            <li>Prazo estendido em até 120 meses</li>
           </ul>
         </div>
 
@@ -2941,7 +2939,7 @@
             .eq('id', 'default')
             .single();
 
-          if (error) throw error;
+          if (error && error.code !== 'PGRST116') throw error;
           if (data && data.data) {
             try {
               localStorage.setItem("walker_configs", JSON.stringify(data.data));

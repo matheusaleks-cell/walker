@@ -63,6 +63,7 @@
       --gray-text: #606266;
       --gray-light-text: #8e9094;
       --green-success: #2ecc71;
+      --red-error: #e74c3c;
       --font-title: 'Giga Sans', sans-serif;
       --font-body: 'Giga Sans', sans-serif;
       --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1531,6 +1532,19 @@
           </p>
         </div>
 
+        <!-- Tela de Erro no Envio -->
+        <div class="success-screen" id="error-view" style="display: none;">
+          <div class="success-icon" style="background: rgba(231,76,60,0.12); color: var(--red-error);">✕</div>
+          <h2 style="font-size: 1.8rem; color: var(--navy); margin-bottom: 12px;">Instabilidade no envio</h2>
+          <p style="color: var(--gray-text); max-width: 480px; margin: 0 auto 24px auto;">
+            Seus dados foram salvos localmente. Entre em contato com seu consultor ou tente novamente em instantes.
+          </p>
+          <button class="btn-nav btn-next" style="display: inline-flex; width: 220px; justify-content: center; cursor: pointer; border: none;"
+            onclick="document.getElementById('error-view').style.display='none'; document.getElementById('loading-view').style.display='none'; window.submitForm();">
+            Tentar novamente
+          </button>
+        </div>
+
         <!-- Tela de Sucesso Final -->
         <div class="success-screen" id="success-view">
           <div class="success-icon">✓</div>
@@ -1612,6 +1626,8 @@
   <!-- Firebase SDK Compat (Para envio de SMS gratuito via Phone Auth) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <!-- Configuração do Firebase em arquivo separado (ver firebase-config.js para restrições de domínio) -->
+  <script src="firebase-config.js"></script>
 
   <!-- Supabase JS Client (Local) -->
   <script src="supabase.js"></script>
@@ -1630,6 +1646,9 @@
       const supabaseUrl = "https://jmbolyzmpfnggvoedaiu.supabase.co";
       const supabaseKey = "sb_publishable_EuvTPlZxoQqG9Owc3Yr9Uw_L1rTcLnP";
       const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+      // ID persistido para evitar duplicação de leads em retentativas
+      let pendingLeadId = sessionStorage.getItem("walker_pending_lead_id") || null;
 
       /* ==========================================================================
          Leitura de Dados da Simulação Anterior
@@ -1653,7 +1672,11 @@
       };
 
       if (simulacaoDataStr) {
-        simulacaoData = JSON.parse(simulacaoDataStr);
+        try {
+          simulacaoData = JSON.parse(simulacaoDataStr);
+        } catch (e) {
+          console.warn("[Walker Bank] Dados de simulação corrompidos, usando padrão.", e);
+        }
       }
 
       // Configurações globais de convênios para cálculo e validação reativa de margem
@@ -1952,18 +1975,27 @@
             cpf.nextElementSibling.style.display = "block";
             isValid = false;
           }
-          // Data Nascimento simples check (DD/MM/AAAA)
-          if (nascimento.value.length !== 10) {
-            nascimento.classList.add("error");
-            nascimento.nextElementSibling.style.display = "block";
-            isValid = false;
+          // Data Nascimento: valida formato e maioridade de 18 anos
+          {
+            const partes = nascimento.value.split('/');
+            const dataNasc = partes.length === 3 ? new Date(+partes[2], +partes[1] - 1, +partes[0]) : null;
+            const hoje = new Date();
+            const idadeAnos = dataNasc
+              ? hoje.getFullYear() - dataNasc.getFullYear()
+                - (hoje < new Date(hoje.getFullYear(), dataNasc.getMonth(), dataNasc.getDate()) ? 1 : 0)
+              : -1;
+            if (!dataNasc || isNaN(dataNasc.getTime()) || idadeAnos < 18 || idadeAnos > 110) {
+              nascimento.classList.add("error");
+              nascimento.nextElementSibling.style.display = "block";
+              isValid = false;
+            }
           }
           if (celular.value.length < 14) {
             celular.classList.add("error");
             celular.nextElementSibling.style.display = "block";
             isValid = false;
           }
-          if (!email.value.includes("@") || !email.value.includes(".")) {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
             email.classList.add("error");
             email.nextElementSibling.style.display = "block";
             isValid = false;
@@ -2388,16 +2420,8 @@
       let countdownInterval = null;
       let isFirebaseActive = false;
 
-      // CONFIGURAÇÃO: Insira suas chaves do Firebase Console abaixo para ativar o envio de SMS real
-      const firebaseConfig = {
-        apiKey: "AIzaSyCixgpmAOGLsHmMlzYUva5aSBRY714_2VY",
-        authDomain: "walkerbank-ad9f7.firebaseapp.com",
-        projectId: "walkerbank-ad9f7",
-        storageBucket: "walkerbank-ad9f7.firebasestorage.app",
-        messagingSenderId: "955169886474",
-        appId: "1:955169886474:web:44fb3687cd1f18d443eaf3",
-        measurementId: "G-J5KFPQEYCC"
-      };
+      // Configuração do Firebase carregada de firebase-config.js (arquivo separado)
+      const firebaseConfig = window.WALKER_FIREBASE_CONFIG || {};
 
       // Inicializa o Firebase apenas se configurado
       if (typeof firebase !== "undefined" && firebaseConfig.apiKey && firebaseConfig.apiKey !== "SUA_API_KEY_AQUI") {
@@ -2851,8 +2875,12 @@
         loadingView.style.display = "block";
 
         try {
-          // Gera o ID do lead antes dos uploads para usá-lo como nome de pasta
-          const leadId = `proposta-${Math.random().toString(36).substr(2, 9)}`;
+          // Reutiliza o ID se for uma retentativa, para evitar duplicação no banco
+          if (!pendingLeadId) {
+            pendingLeadId = `proposta-${Math.random().toString(36).substr(2, 9)}`;
+            sessionStorage.setItem("walker_pending_lead_id", pendingLeadId);
+          }
+          const leadId = pendingLeadId;
 
           // Comprime as imagens previamente (se forem imagens) para evitar arquivos pesados
           let rgFile = documentosAnexados.rg;
@@ -3031,8 +3059,25 @@
 
             if (dbError) throw dbError;
             console.log("[Walker Bank] Proposta salva no Supabase com sucesso.");
+            
+            // Cria notificação para os administradores
+            try {
+              await supabaseClient
+                .from('notifications')
+                .insert([{
+                  tipo: 'lead_novo',
+                  user_id: 'admin',
+                  titulo: 'Novo Lead Recebido',
+                  mensagem: `O cliente ${newLead.lead.nome} cadastrou uma nova proposta de ${newLead.dados_funcionais.convenio} no valor de R$ ${Number(newLead.proposta.valor_solicitado).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}.`,
+                  lida: false
+                }]);
+              console.log("[Walker Bank] Notificação de novo lead enviada para o Supabase.");
+            } catch (notifErr) {
+              console.error("[Walker Bank] Erro ao criar notificação de lead novo:", notifErr);
+            }
           } catch(dbErr) {
             console.error("[Walker Bank] Erro ao salvar no Supabase:", dbErr);
+            throw dbErr;
           }
 
           console.log("[Walker Bank] Enviando proposta payload:", payload);
@@ -3056,6 +3101,10 @@
             await new Promise(resolve => setTimeout(resolve, 1500));
           }
 
+          // Limpa o ID pendente — proposta salva com sucesso, não haverá retentativa
+          sessionStorage.removeItem("walker_pending_lead_id");
+          pendingLeadId = null;
+
           // Se tudo der certo, oculta loading e exibe sucesso
           loadingView.style.display = "none";
           
@@ -3067,17 +3116,12 @@
         } catch (error) {
           console.error("[Walker Bank] Erro ao enviar proposta:", error);
           loadingView.style.display = "none";
-          
-          // Alerta do erro de forma amigável, mas permitindo visualizar o sucesso para não travar a experiência do usuário
-          alert("Ocorreu uma instabilidade na transmissão dos dados. Tentaremos reenviar sua proposta em segundo plano.");
-          
-          // Exibe a tela de sucesso de qualquer forma para manter a UX fluida (com aviso de retentativa no console)
-          const nomeCompleto = document.getElementById("nome").value;
-          const primeiroNome = nomeCompleto.trim().split(" ")[0];
-          document.getElementById("success-user-name").textContent = primeiroNome;
-          successView.style.display = "block";
+          const errorView = document.getElementById("error-view");
+          if (errorView) errorView.style.display = "block";
         }
       };
+
+      window.submitForm = submitForm;
 
       // Inicia a visualização do primeiro passo
       updateProgressView();

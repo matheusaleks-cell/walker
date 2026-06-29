@@ -464,11 +464,70 @@
         window.location.href = "dashboard.html";
       });
 
+      // 3. RATE LIMITING: máx. 5 tentativas em 15 minutos
+      const LOGIN_MAX_ATTEMPTS = 5;
+      const LOGIN_LOCKOUT_MS   = 15 * 60 * 1000; // 15 min
+      let lockoutTimer = null;
+
+      const getLoginState = () => {
+        try { return JSON.parse(localStorage.getItem("wb_login_state") || "{}"); } catch(e) { return {}; }
+      };
+      const saveLoginState = (s) => {
+        try { localStorage.setItem("wb_login_state", JSON.stringify(s)); } catch(e) {}
+      };
+
+      const checkLockout = () => {
+        const s = getLoginState();
+        if (!s.lockedUntil) return false;
+        const remaining = s.lockedUntil - Date.now();
+        if (remaining <= 0) { saveLoginState({}); return false; }
+        return remaining;
+      };
+
+      const startLockoutCountdown = (remaining) => {
+        const getBtn = () => document.getElementById("btn-submit");
+        const tick = () => {
+          const s = getLoginState();
+          const rem = (s.lockedUntil || 0) - Date.now();
+          if (rem <= 0) {
+            saveLoginState({});
+            const b = getBtn();
+            if (b) { b.disabled = false; b.textContent = "Entrar no Sistema"; }
+            errorMsg.textContent = "Bloqueio encerrado. Tente novamente.";
+            errorMsg.style.display = "block";
+            clearInterval(lockoutTimer);
+            return;
+          }
+          const mins = Math.ceil(rem / 60000);
+          const b = getBtn();
+          if (b) b.textContent = `Bloqueado por ${mins} min`;
+        };
+        tick();
+        const b = getBtn();
+        if (b) b.disabled = true;
+        lockoutTimer = setInterval(tick, 10000);
+      };
+
+      // Verifica bloqueio ao carregar a página
+      const initialLockout = checkLockout();
+      if (initialLockout) {
+        errorMsg.textContent = `Muitas tentativas incorretas. Aguarde ${Math.ceil(initialLockout / 60000)} minuto(s).`;
+        errorMsg.style.display = "block";
+        startLockoutCountdown(initialLockout);
+      }
+
       // 3. EVENTO DE LOGIN (E-MAIL E SENHA)
       const btnSubmit = document.getElementById("btn-submit");
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        
+
+        const remaining = checkLockout();
+        if (remaining) {
+          errorMsg.textContent = `Conta temporariamente bloqueada. Aguarde ${Math.ceil(remaining / 60000)} minuto(s).`;
+          errorMsg.style.display = "block";
+          return;
+        }
+
         const user = document.getElementById("email").value.trim();
         const pass = document.getElementById("password").value;
 
@@ -483,11 +542,24 @@
           });
 
           if (error) {
-            errorMsg.textContent = "E-mail ou senha inválidos. Verifique suas credenciais e tente novamente.";
-            errorMsg.style.display = "block";
-            btnSubmit.textContent = "Entrar no Sistema";
-            btnSubmit.disabled = false;
+            const s = getLoginState();
+            const attempts = (s.attempts || 0) + 1;
+            if (attempts >= LOGIN_MAX_ATTEMPTS) {
+              const lockedUntil = Date.now() + LOGIN_LOCKOUT_MS;
+              saveLoginState({ attempts, lockedUntil });
+              errorMsg.textContent = `Muitas tentativas incorretas. Acesso bloqueado por 15 minutos.`;
+              errorMsg.style.display = "block";
+              startLockoutCountdown(LOGIN_LOCKOUT_MS);
+            } else {
+              saveLoginState({ attempts });
+              const restam = LOGIN_MAX_ATTEMPTS - attempts;
+              errorMsg.textContent = `E-mail ou senha inválidos. ${restam} tentativa${restam > 1 ? 's' : ''} restante${restam > 1 ? 's' : ''}.`;
+              errorMsg.style.display = "block";
+              btnSubmit.textContent = "Entrar no Sistema";
+              btnSubmit.disabled = false;
+            }
           } else {
+            saveLoginState({}); // reseta contador em login bem-sucedido
             // Busca o perfil do usuário no banco e salva na sessão
             try {
               const { data: profile } = await supabaseClient
