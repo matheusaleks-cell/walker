@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -126,6 +126,11 @@
        MAIN CONTENT
   ======================================== -->
   <div class="main-wrapper">
+
+    <!-- Banner Modo Demo -->
+    <div id="demo-mode-banner" style="display:none; background: #f59e0b; color: #1a1a1a; text-align:center; padding: 7px 16px; font-size: 0.78rem; font-weight: 700; font-family: Arial; letter-spacing: 0.03em; position: sticky; top: 0; z-index: 9999;">
+      ⚠️ MODO DEMONSTRAÇÃO — Nenhum dado real é lido ou gravado. Apenas para apresentações.
+    </div>
 
     <!-- Top Bar -->
     <div class="topbar">
@@ -1228,6 +1233,9 @@
                   <button type="button" class="btn-action" id="btn-prosp-sem-interesse" style="background: rgba(149, 165, 166, 0.15); border: 1px solid #7f8c8d; color: #7f8c8d; font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
                     ⚫ Não Tem Interesse
                   </button>
+                  <button type="button" class="btn-action" id="btn-prosp-sem-margem" style="background: rgba(230, 126, 34, 0.15); border: 1px solid #e67e22; color: #e67e22; font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
+                    🟠 Sem Margem
+                  </button>
                   <button type="button" class="btn-action" id="btn-prosp-retorno" style="background: rgba(41, 128, 185, 0.12); border: 1px solid var(--blue-info); color: var(--blue-info); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                     📅 Agendar Retorno
                   </button>
@@ -1872,6 +1880,19 @@
                       </select>
                     </div>
                     <span class="hint">Tempo padrão: 90 Dias (3 meses)</span>
+                  </div>
+
+                  <div class="config-field">
+                    <label>🟠 Status: Sem Margem</label>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="number" id="cfg-prosp-bloqueio-sem-margem-valor" min="0" style="flex: 1; padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); font-size: 0.88rem; outline: none;">
+                      <select id="cfg-prosp-bloqueio-sem-margem-unidade" style="width: 120px; background: white; padding: 10px 14px; border: 1.5px solid rgba(24,27,44,0.15); border-radius: 6px; font-size: 0.88rem; outline: none; color: var(--navy);">
+                        <option value="m">Minutos</option>
+                        <option value="h">Horas</option>
+                        <option value="d">Dias</option>
+                      </select>
+                    </div>
+                    <span class="hint">Tempo padrão: 30 Dias (1 mês)</span>
                   </div>
 
                 </div>
@@ -2873,6 +2894,12 @@
         window.location.href = "login.html";
       }
 
+      // Exibe banner de aviso quando em modo demonstração
+      if (isDemoMode) {
+        const demoBanner = document.getElementById("demo-mode-banner");
+        if (demoBanner) demoBanner.style.display = "block";
+      }
+
       document.getElementById("logout-btn").addEventListener("click", async () => {
         try {
           const user = getActiveUserObj();
@@ -3109,6 +3136,12 @@
       window.getActiveUserObj = getActiveUserObj;
 
       const changeUserProfile = (profileId) => {
+        // Bloqueia operadores reais de trocar de perfil (mesmo via console)
+        const realProfile = getCurrentUserProfile();
+        if (realProfile && realProfile.role === 'operador') {
+          console.warn("[Walker Bank] Operador real não pode trocar de perfil.");
+          return;
+        }
         const previousUser = getActiveUserObj();
         sessionStorage.setItem("walker_active_profile", profileId);
         updateSidebarUserUI();
@@ -8286,6 +8319,9 @@
         document.getElementById("cfg-prosp-bloqueio-sem-interesse-valor").value = cfg.prosp_bloqueio_sem_interesse_valor !== undefined ? cfg.prosp_bloqueio_sem_interesse_valor : '90';
         document.getElementById("cfg-prosp-bloqueio-sem-interesse-unidade").value = cfg.prosp_bloqueio_sem_interesse_unidade || 'd';
 
+        document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value = cfg.prosp_bloqueio_sem_margem_valor !== undefined ? cfg.prosp_bloqueio_sem_margem_valor : '30';
+        document.getElementById("cfg-prosp-bloqueio-sem-margem-unidade").value = cfg.prosp_bloqueio_sem_margem_unidade || 'd';
+
         const notifToggle = document.getElementById("cfg-notif-realtime");
         const notifLabel = document.getElementById("cfg-notif-label");
         const isNotif = cfg.notif_realtime === true;
@@ -8618,12 +8654,12 @@
         document.querySelectorAll(".op-cfg-meta").forEach(input => {
           const id = input.dataset.id;
           if (!operadoresConfig[id]) operadoresConfig[id] = {};
-          operadoresConfig[id].meta_mensal = parseFloat(input.value.replace(/[^\d.,]/g, '').replace(',', '.')) || 100000;
+          operadoresConfig[id].meta_mensal = parseMoeda(input.value) || 100000;
         });
         document.querySelectorAll(".op-cfg-salario").forEach(input => {
           const id = input.dataset.id;
           if (!operadoresConfig[id]) operadoresConfig[id] = {};
-          operadoresConfig[id].salario_base = parseFloat(input.value.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+          operadoresConfig[id].salario_base = parseMoeda(input.value) || 0;
         });
         document.querySelectorAll(".op-cfg-role").forEach(select => {
           const id = select.dataset.id;
@@ -8666,6 +8702,9 @@
 
           prosp_bloqueio_sem_interesse_valor: parseInt(document.getElementById("cfg-prosp-bloqueio-sem-interesse-valor").value) >= 0 ? parseInt(document.getElementById("cfg-prosp-bloqueio-sem-interesse-valor").value) : 90,
           prosp_bloqueio_sem_interesse_unidade: document.getElementById("cfg-prosp-bloqueio-sem-interesse-unidade").value,
+
+          prosp_bloqueio_sem_margem_valor: parseInt(document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value) >= 0 ? parseInt(document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value) : 30,
+          prosp_bloqueio_sem_margem_unidade: document.getElementById("cfg-prosp-bloqueio-sem-margem-unidade").value,
 
           convenios: currentConvenios,
           operadores_config: operadoresConfig
@@ -8724,7 +8763,8 @@
               .update({
                 nome: opInfo.nome,
                 meta_mensal: opInfo.meta_mensal,
-                role: opInfo.role
+                role: opInfo.role,
+                salario_base: opInfo.salario_base
               })
               .eq('id', opId);
               
@@ -9955,6 +9995,9 @@
         } else if (status === "Não Tem Interesse") {
           val = configs.prosp_bloqueio_sem_interesse_valor !== undefined ? parseInt(configs.prosp_bloqueio_sem_interesse_valor) : 90;
           unit = configs.prosp_bloqueio_sem_interesse_unidade || "d";
+        } else if (status === "Sem Margem") {
+          val = configs.prosp_bloqueio_sem_margem_valor !== undefined ? parseInt(configs.prosp_bloqueio_sem_margem_valor) : 30;
+          unit = configs.prosp_bloqueio_sem_margem_unidade || "d";
         }
 
         if (val > 0) {
@@ -10404,6 +10447,8 @@
       if (btnWppEnviado) btnWppEnviado.addEventListener("click", () => prospRegistrarTentativa("WhatsApp Enviado"));
       const btnProspSemInteresse = document.getElementById("btn-prosp-sem-interesse");
       if (btnProspSemInteresse) btnProspSemInteresse.addEventListener("click", () => prospRegistrarTentativa("Não Tem Interesse"));
+      const btnProspSemMargem = document.getElementById("btn-prosp-sem-margem");
+      if (btnProspSemMargem) btnProspSemMargem.addEventListener("click", () => prospRegistrarTentativa("Sem Margem"));
       
       const btnProspEdit = document.getElementById("btn-prosp-editar-contato");
       if (btnProspEdit) btnProspEdit.addEventListener("click", () => prospAbrirModalEditar());
