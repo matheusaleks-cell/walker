@@ -4029,6 +4029,18 @@
           return [];
         }
       };
+
+      const updateLocalLeadsCache = (lead) => {
+        const leads = getLeads();
+        const idx = leads.findIndex(l => l.id === lead.id);
+        if (idx !== -1) {
+          currentLeads = leads.map(l => l.id === lead.id ? lead : l);
+        } else {
+          currentLeads = [lead, ...leads];
+        }
+        safeSaveLeads(currentLeads);
+      };
+
       const getConfigs = () => {
         if (currentConfigs && Object.keys(currentConfigs).length > 0) {
           return currentConfigs;
@@ -4054,7 +4066,7 @@
         }
         try {
           // Query leve: extrai campos estruturados diretamente do JSONB sem carregar as imagens base64 de 'arquivos' para evitar estouro de memória
-          const { data, error } = await supabaseClient
+          let query = supabaseClient
             .from('leads')
             .select(`
               id,
@@ -4072,7 +4084,14 @@
               historico_contatos:payload->historico_contatos,
               operador_id:payload->>operador_id,
               operador_nome:payload->>operador_nome
-            `)
+            `);
+
+          const realProfile = getCurrentUserProfile();
+          if (realProfile && realProfile.role === 'operador') {
+            query = query.or(`status.in.("Consulta de Margem","Importado"),payload->>operador_id.eq.${realProfile.id}`);
+          }
+
+          const { data, error } = await query
             .order('created_at', { ascending: false })
             .range(0, LEADS_PAGE_SIZE - 1);
 
@@ -4152,7 +4171,7 @@
         try {
           const from = currentLeads.length;
           const to   = from + LEADS_PAGE_SIZE - 1;
-          const { data, error } = await supabaseClient
+          let query = supabaseClient
             .from('leads')
             .select(`
               id, created_at, nome, cpf, status, convenio, valor_solicitado,
@@ -4164,7 +4183,14 @@
               historico_contatos:payload->historico_contatos,
               operador_id:payload->>operador_id,
               operador_nome:payload->>operador_nome
-            `)
+            `);
+
+          const realProfile = getCurrentUserProfile();
+          if (realProfile && realProfile.role === 'operador') {
+            query = query.or(`status.in.("Consulta de Margem","Importado"),payload->>operador_id.eq.${realProfile.id}`);
+          }
+
+          const { data, error } = await query
             .order('created_at', { ascending: false })
             .range(from, to);
           if (error) throw error;
@@ -5582,9 +5608,12 @@
         const mBtnProspectado = document.getElementById("m-btn-prospectado");
         const mBtnConsultaMargem = document.getElementById("m-btn-consulta-margem");
         const allActionBtns = [mBtnReabrir, mBtnIniciar, mBtnAguardarAss, mBtnAprovar, mBtnPagar, mBtnRecusar, mBtnPendente];
-        allActionBtns.forEach(b => { b.style.display = "inline-flex"; b.disabled = false; });
-
         const isAdmin = getActiveProfile() === "admin";
+        allActionBtns.forEach(b => {
+          b.style.display = isAdmin ? "inline-flex" : "none";
+          b.disabled = false;
+        });
+
         if (mBtnProspectado) {
           mBtnProspectado.style.display = isAdmin ? "inline-flex" : "none";
           mBtnProspectado.disabled = lead.status === "Prospectado";
@@ -5592,6 +5621,11 @@
         if (mBtnConsultaMargem) {
           mBtnConsultaMargem.style.display = isAdmin ? "inline-flex" : "none";
           mBtnConsultaMargem.disabled = lead.status === "Consulta de Margem";
+        }
+
+        const actionsPanel = document.getElementById("m-actions-panel");
+        if (actionsPanel) {
+          actionsPanel.style.display = isAdmin ? "flex" : "none";
         }
 
         const statusBtnMap = {
@@ -9707,9 +9741,7 @@
             // Restaura status para prospecção
             foundLead.status = "Consulta de Margem";
             delete foundLead.data_retorno;
-            let leads = getLeads();
-            currentLeads = leads.map(l => l.id === foundLead.id ? foundLead : l);
-            safeSaveLeads(currentLeads);
+            updateLocalLeadsCache(foundLead);
             showToast("📅 Retorno agendado pronto! Lead carregado para prospecção.", "var(--blue-info)");
           } else {
             const leads = getLeads().filter(l => (l.status === "Consulta de Margem" || l.status === "Importado") && (!l.wpp_bloqueado_ate || new Date(l.wpp_bloqueado_ate) <= agora));
@@ -9754,9 +9786,7 @@
                   if (!foundLead.dados_funcionais.convenio && leadData.convenio) foundLead.dados_funcionais.convenio = leadData.convenio;
                   delete foundLead.data_retorno;
                   // Atualiza local
-                  let leads = getLeads();
-                  currentLeads = leads.map(l => l.id === foundLead.id ? foundLead : l);
-                  safeSaveLeads(currentLeads);
+                  updateLocalLeadsCache(foundLead);
                   // Atualiza no Supabase
                   const sanitized = await sanitizeLeadPayload(foundLead);
                   await supabaseClient.from('leads').upsert({ id: sanitized.id, created_at: sanitized.createdAt, nome: sanitized.lead?.nome, cpf: sanitized.lead?.cpf, status: "Consulta de Margem", convenio: sanitized.dados_funcionais?.convenio, valor_solicitado: sanitized.proposta?.valor_solicitado || 0, payload: sanitized });
@@ -10017,10 +10047,7 @@
         }
 
         // Salva local e Supabase mantendo Consulta de Margem
-        let leads = getLeads();
-        const updatedLeads = leads.map(l => l.id === prospActiveLead.id ? prospActiveLead : l);
-        currentLeads = updatedLeads;
-        safeSaveLeads(currentLeads);
+        updateLocalLeadsCache(prospActiveLead);
 
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
@@ -10147,9 +10174,7 @@
         prospActiveLead.historico_contatos.push(notaEdicao);
         
         // Salva local e remota
-        let leads = getLeads();
-        currentLeads = leads.map(l => l.id === prospActiveLead.id ? prospActiveLead : l);
-        safeSaveLeads(currentLeads);
+        updateLocalLeadsCache(prospActiveLead);
         
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
@@ -10200,9 +10225,7 @@
         if (!lead.historico_contatos) lead.historico_contatos = [];
         lead.historico_contatos.push(novaTentativa);
 
-        let leads = getLeads();
-        currentLeads = leads.map(l => l.id === lead.id ? lead : l);
-        safeSaveLeads(currentLeads);
+        updateLocalLeadsCache(lead);
 
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
@@ -10296,9 +10319,7 @@
           observacao: observacao || "Proposta gerada diretamente da prospecção."
         });
 
-        let leads = getLeads();
-        currentLeads = leads.map(l => l.id === lead.id ? lead : l);
-        safeSaveLeads(currentLeads);
+        updateLocalLeadsCache(lead);
 
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
