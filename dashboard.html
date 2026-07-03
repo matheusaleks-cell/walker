@@ -1045,6 +1045,7 @@
             <option value="Nao_Atendeu">🔕 Não atendeu</option>
             <option value="Remarcado">📅 Remarcou para outra data</option>
             <option value="Não Tem Interesse">❌ Sem interesse no momento</option>
+            <option value="Não Autoriza Margem">🚫 Não Autoriza Margem</option>
           </select>
           <textarea id="acomp-nota-obs" placeholder="Observações do contato..." rows="3" style="width:100%; padding:10px 14px; border:1.5px solid rgba(24,27,44,0.15); border-radius:8px; font-size:0.85rem; font-family:var(--font-body); resize:vertical; box-sizing:border-box; margin-bottom:16px;"></textarea>
           <div style="display:flex; justify-content:flex-end; gap:10px;">
@@ -1235,6 +1236,9 @@
                   </button>
                   <button type="button" class="btn-action" id="btn-prosp-sem-margem" style="background: rgba(230, 126, 34, 0.15); border: 1px solid #e67e22; color: #e67e22; font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
                     🟠 Sem Margem
+                  </button>
+                  <button type="button" class="btn-action" id="btn-prosp-nao-autoriza-margem" style="background: rgba(192, 57, 43, 0.15); border: 1px solid var(--red-error); color: var(--red-error); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
+                    🚫 Não Autoriza Margem
                   </button>
                   <button type="button" class="btn-action" id="btn-prosp-retorno" style="background: rgba(41, 128, 185, 0.12); border: 1px solid var(--blue-info); color: var(--blue-info); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                     📅 Agendar Retorno
@@ -1893,6 +1897,19 @@
                       </select>
                     </div>
                     <span class="hint">Tempo padrão: 30 Dias (1 mês)</span>
+                  </div>
+
+                  <div class="config-field">
+                    <label>🚫 Status: Não Autoriza Margem</label>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="number" id="cfg-prosp-bloqueio-nao-autoriza-margem-valor" min="0" style="flex: 1; padding: 10px 14px; border-radius: 6px; border: 1.5px solid rgba(24,27,44,0.15); font-size: 0.88rem; outline: none;">
+                      <select id="cfg-prosp-bloqueio-nao-autoriza-margem-unidade" style="width: 120px; background: white; padding: 10px 14px; border: 1.5px solid rgba(24,27,44,0.15); border-radius: 6px; font-size: 0.88rem; outline: none; color: var(--navy);">
+                        <option value="m">Minutos</option>
+                        <option value="h">Horas</option>
+                        <option value="d">Dias</option>
+                      </select>
+                    </div>
+                    <span class="hint">Tempo padrão: 180 Dias (6 meses)</span>
                   </div>
 
                 </div>
@@ -7237,6 +7254,36 @@
         if (!lead.historico_contatos) lead.historico_contatos = [];
         lead.historico_contatos.push(novaNota);
 
+        // Bloqueio dinâmico na anotação de acompanhamento
+        let tempoBloqueioMs = 0;
+        const configs = getConfigs();
+        let val = 0;
+        let unit = "d";
+
+        if (statusNota === "Não Tem Interesse") {
+          val = configs.prosp_bloqueio_sem_interesse_valor !== undefined ? parseInt(configs.prosp_bloqueio_sem_interesse_valor) : 90;
+          unit = configs.prosp_bloqueio_sem_interesse_unidade || "d";
+        } else if (statusNota === "Não Autoriza Margem") {
+          val = configs.prosp_bloqueio_nao_autoriza_margem_valor !== undefined ? parseInt(configs.prosp_bloqueio_nao_autoriza_margem_valor) : 180;
+          unit = configs.prosp_bloqueio_nao_autoriza_margem_unidade || "d";
+        } else if (statusNota === "Nao_Atendeu") {
+          val = configs.prosp_bloqueio_nao_atendeu_valor !== undefined ? parseInt(configs.prosp_bloqueio_nao_atendeu_valor) : 0;
+          unit = configs.prosp_bloqueio_nao_atendeu_unidade || "m";
+        }
+
+        if (val > 0) {
+          if (unit === "m") {
+            tempoBloqueioMs = val * 60 * 1000;
+          } else if (unit === "h") {
+            tempoBloqueioMs = val * 60 * 60 * 1000;
+          } else if (unit === "d") {
+            tempoBloqueioMs = val * 24 * 60 * 60 * 1000;
+          }
+          lead.wpp_bloqueado_ate = new Date(Date.now() + tempoBloqueioMs).toISOString();
+        } else {
+          if (lead.wpp_bloqueado_ate) delete lead.wpp_bloqueado_ate;
+        }
+
         let leads = getLeads();
         currentLeads = leads.map(l => l.id === lead.id ? lead : l);
         safeSaveLeads(currentLeads);
@@ -8400,6 +8447,9 @@
         document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value = cfg.prosp_bloqueio_sem_margem_valor !== undefined ? cfg.prosp_bloqueio_sem_margem_valor : '30';
         document.getElementById("cfg-prosp-bloqueio-sem-margem-unidade").value = cfg.prosp_bloqueio_sem_margem_unidade || 'd';
 
+        document.getElementById("cfg-prosp-bloqueio-nao-autoriza-margem-valor").value = cfg.prosp_bloqueio_nao_autoriza_margem_valor !== undefined ? cfg.prosp_bloqueio_nao_autoriza_margem_valor : '180';
+        document.getElementById("cfg-prosp-bloqueio-nao-autoriza-margem-unidade").value = cfg.prosp_bloqueio_nao_autoriza_margem_unidade || 'd';
+
         const notifToggle = document.getElementById("cfg-notif-realtime");
         const notifLabel = document.getElementById("cfg-notif-label");
         const isNotif = cfg.notif_realtime === true;
@@ -8781,8 +8831,11 @@
           prosp_bloqueio_sem_interesse_valor: parseInt(document.getElementById("cfg-prosp-bloqueio-sem-interesse-valor").value) >= 0 ? parseInt(document.getElementById("cfg-prosp-bloqueio-sem-interesse-valor").value) : 90,
           prosp_bloqueio_sem_interesse_unidade: document.getElementById("cfg-prosp-bloqueio-sem-interesse-unidade").value,
 
-          prosp_bloqueio_sem_margem_valor: parseInt(document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value) >= 0 ? parseInt(document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value) : 30,
+           prosp_bloqueio_sem_margem_valor: parseInt(document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value) >= 0 ? parseInt(document.getElementById("cfg-prosp-bloqueio-sem-margem-valor").value) : 30,
           prosp_bloqueio_sem_margem_unidade: document.getElementById("cfg-prosp-bloqueio-sem-margem-unidade").value,
+
+          prosp_bloqueio_nao_autoriza_margem_valor: parseInt(document.getElementById("cfg-prosp-bloqueio-nao-autoriza-margem-valor").value) >= 0 ? parseInt(document.getElementById("cfg-prosp-bloqueio-nao-autoriza-margem-valor").value) : 180,
+          prosp_bloqueio_nao_autoriza_margem_unidade: document.getElementById("cfg-prosp-bloqueio-nao-autoriza-margem-unidade").value,
 
           convenios: currentConvenios,
           operadores_config: operadoresConfig
@@ -10072,6 +10125,9 @@
         } else if (status === "Sem Margem") {
           val = configs.prosp_bloqueio_sem_margem_valor !== undefined ? parseInt(configs.prosp_bloqueio_sem_margem_valor) : 30;
           unit = configs.prosp_bloqueio_sem_margem_unidade || "d";
+        } else if (status === "Não Autoriza Margem") {
+          val = configs.prosp_bloqueio_nao_autoriza_margem_valor !== undefined ? parseInt(configs.prosp_bloqueio_nao_autoriza_margem_valor) : 180;
+          unit = configs.prosp_bloqueio_nao_autoriza_margem_unidade || "d";
         }
 
         if (val > 0) {
@@ -10515,6 +10571,8 @@
       if (btnProspSemInteresse) btnProspSemInteresse.addEventListener("click", () => prospRegistrarTentativa("Não Tem Interesse"));
       const btnProspSemMargem = document.getElementById("btn-prosp-sem-margem");
       if (btnProspSemMargem) btnProspSemMargem.addEventListener("click", () => prospRegistrarTentativa("Sem Margem"));
+      const btnProspNaoAutorizaMargem = document.getElementById("btn-prosp-nao-autoriza-margem");
+      if (btnProspNaoAutorizaMargem) btnProspNaoAutorizaMargem.addEventListener("click", () => prospRegistrarTentativa("Não Autoriza Margem"));
       
       const btnProspEdit = document.getElementById("btn-prosp-editar-contato");
       if (btnProspEdit) btnProspEdit.addEventListener("click", () => prospAbrirModalEditar());
