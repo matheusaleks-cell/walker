@@ -261,7 +261,7 @@
                   <div class="shortcut-desc">Gerencie retornos e o histórico de contatos agendados.</div>
                 </div>
 
-                <div class="shortcut-card" onclick="navigateTo('mesa-analise')">
+                <div class="shortcut-card" onclick="navigateTo('mesa-analise')" id="shortcut-mesa">
                   <div class="shortcut-icon" style="background: rgba(212, 188, 110, 0.1); color: var(--gold);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
                   </div>
@@ -277,7 +277,7 @@
                   <div class="shortcut-desc">Monitore conciliação bancária, comissões de operadores e volume pago.</div>
                 </div>
 
-                <div class="shortcut-card" onclick="navigateTo('configuracoes')">
+                <div class="shortcut-card" onclick="navigateTo('configuracoes')" id="shortcut-config">
                   <div class="shortcut-icon" style="background: rgba(212, 188, 110, 0.1); color: var(--gold);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                   </div>
@@ -2961,6 +2961,12 @@
         } catch(e) { return null; }
       };
 
+      const isCurrentUserAdmin = () => {
+        const realProfile = getCurrentUserProfile();
+        return realProfile && realProfile.role === 'admin';
+      };
+      window.isCurrentUserAdmin = isCurrentUserAdmin;
+
       const fetchOperadoresFromSupabase = async () => {
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
           try {
@@ -3174,6 +3180,7 @@
         const user = getActiveUserObj();
         const realProfile = getCurrentUserProfile();
         const isRealOperator = realProfile && realProfile.role === 'operador';
+        const isRealAdmin = isCurrentUserAdmin();
 
         const avatarEl = document.getElementById("sidebar-avatar-text");
         const nameEl = document.getElementById("sidebar-user-name-text");
@@ -3189,16 +3196,36 @@
         const switcherWrapper = document.getElementById("profile-switcher-wrapper");
         if (switcherWrapper) switcherWrapper.style.display = isRealOperator ? "none" : "";
 
-        // Logs e Configurações: visíveis apenas para admin
+        // Logs e Configurações: visíveis apenas para admin real
         const logsNav = document.getElementById("nav-logs");
         const cfgNav = document.getElementById("nav-config");
         const convNav = document.getElementById("nav-convenios");
         const baseGeralNav = document.getElementById("nav-base-geral");
-        const isAdmin = !isRealOperator;
-        if (logsNav) logsNav.style.display = isAdmin ? "" : "none";
-        if (cfgNav) cfgNav.style.display = isAdmin ? "" : "none";
-        if (convNav) convNav.style.display = isAdmin ? "" : "none";
-        if (baseGeralNav) baseGeralNav.style.display = isAdmin ? "" : "none";
+        
+        if (logsNav) logsNav.style.display = isRealAdmin ? "" : "none";
+        if (cfgNav) cfgNav.style.display = isRealAdmin ? "" : "none";
+        if (convNav) convNav.style.display = isRealAdmin ? "" : "none";
+        if (baseGeralNav) baseGeralNav.style.display = isRealAdmin ? "" : "none";
+
+        // Ajusta texto do menu "Mesa de Análise" dinamicamente
+        const mesaNavSpan = document.querySelector("#nav-mesa span:not(.nav-icon):not(.nav-count)");
+        if (mesaNavSpan) {
+          mesaNavSpan.textContent = isRealAdmin ? "Mesa de Análise" : "Minhas Propostas";
+        }
+
+        // Ajusta atalhos da página inicial (Início)
+        const shortcutMesa = document.getElementById("shortcut-mesa");
+        if (shortcutMesa) {
+          const titleEl = shortcutMesa.querySelector(".shortcut-title");
+          const descEl = shortcutMesa.querySelector(".shortcut-desc");
+          if (titleEl) titleEl.textContent = isRealAdmin ? "Mesa de Crédito" : "Minhas Propostas";
+          if (descEl) descEl.textContent = isRealAdmin ? "Analise propostas, valide SMS e execute fluxos comerciais." : "Acompanhe o andamento das suas propostas sob análise.";
+        }
+
+        const shortcutConfig = document.getElementById("shortcut-config");
+        if (shortcutConfig) {
+          shortcutConfig.style.display = isRealAdmin ? "" : "none";
+        }
 
         // Se operador estiver numa página restrita, redireciona para início
         const activeSection = document.querySelector(".page-section.active");
@@ -4088,7 +4115,7 @@
 
           const realProfile = getCurrentUserProfile();
           if (realProfile && realProfile.role === 'operador') {
-            query = query.or(`status.in.("Consulta de Margem","Importado"),payload->>operador_id.eq.${realProfile.id}`);
+            query = query.or(`status.eq.Consulta de Margem,status.eq.Importado,status.eq.Prospectado,status.eq.Agendado,payload->>operador_id.eq.${realProfile.id}`);
           }
 
           const { data, error } = await query
@@ -4187,7 +4214,7 @@
 
           const realProfile = getCurrentUserProfile();
           if (realProfile && realProfile.role === 'operador') {
-            query = query.or(`status.in.("Consulta de Margem","Importado"),payload->>operador_id.eq.${realProfile.id}`);
+            query = query.or(`status.eq.Consulta de Margem,status.eq.Importado,status.eq.Prospectado,status.eq.Agendado,payload->>operador_id.eq.${realProfile.id}`);
           }
 
           const { data, error } = await query
@@ -4326,7 +4353,13 @@
         // Atualiza topbar
         const info = pageMap[page];
         if (info) {
-          document.getElementById('topbar-title').innerHTML = `${info.title} <small>${info.sub}</small>`;
+          let title = info.title;
+          let sub = info.sub;
+          if (page === 'mesa-analise' && !isCurrentUserAdmin()) {
+            title = 'Minhas Propostas';
+            sub = 'Acompanhe o andamento das suas propostas';
+          }
+          document.getElementById('topbar-title').innerHTML = `${title} <small>${sub}</small>`;
         }
 
         // Renderiza conteúdo da página (limpa dirty flag)
@@ -4578,9 +4611,8 @@
           `;
 
           // Coluna de Operador (Dropdown para Admin, Texto Estático para Operador)
-          const activeProfile = getActiveProfile();
           let operatorCol = "";
-          if (activeProfile === "admin") {
+          if (isCurrentUserAdmin()) {
             const options = OPERADORES.map(op => 
               `<option value="${op.id}" ${lead.operador_id === op.id ? 'selected' : ''}>${op.nome}</option>`
             ).join('');
@@ -4628,15 +4660,15 @@
             ${operatorCol}
             <td style="text-align: right; white-space: nowrap;">
               <div style="display: inline-flex; align-items: center; gap: 8px;">
-                ${activeProfile === "admin" ? `
+                ${isCurrentUserAdmin() ? `
                   <button class="btn-action-sm btn-delete-lead" title="Excluir Lead" data-delete-id="${lead.id}" style="background: rgba(192, 57, 43, 0.1); color: var(--red-error); border: 1px solid rgba(192, 57, 43, 0.3); width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; padding: 0; font-size: 0.85rem; cursor: pointer;">🗑️</button>
                 ` : ""}
-                <button class="btn-action" data-id="${lead.id}">Analisar</button>
+                <button class="btn-action" data-id="${lead.id}">${isCurrentUserAdmin() ? 'Analisar' : 'Ver Detalhes'}</button>
               </div>
             </td>
           `;
           tr.querySelector(".btn-action").addEventListener("click", () => openLeadDetails(lead.id));
-          if (activeProfile === "admin") {
+          if (isCurrentUserAdmin()) {
             const delBtn = tr.querySelector(".btn-delete-lead");
             if (delBtn) {
               delBtn.addEventListener("click", (e) => {
@@ -5354,10 +5386,18 @@
         }
 
         // Modo visualização
-        document.getElementById("m-btn-editar").style.display = "inline-flex";
         document.getElementById("m-btn-salvar").style.display = "none";
         document.getElementById("m-btn-cancelar").style.display = "none";
-        if (profile === "admin") {
+        const isRealAdmin = isCurrentUserAdmin();
+        const isMesaStatusActive = ["Recebida", "Em Análise", "Aguardando Assinatura", "Aprovada", "Recusada", "Paga"].includes(lead.status);
+
+        if (isRealAdmin || !isMesaStatusActive) {
+          document.getElementById("m-btn-editar").style.display = "inline-flex";
+        } else {
+          document.getElementById("m-btn-editar").style.display = "none";
+        }
+
+        if (isRealAdmin) {
           document.getElementById("m-btn-excluir").style.display = "inline-flex";
         } else {
           document.getElementById("m-btn-excluir").style.display = "none";
@@ -5608,7 +5648,7 @@
         const mBtnProspectado = document.getElementById("m-btn-prospectado");
         const mBtnConsultaMargem = document.getElementById("m-btn-consulta-margem");
         const allActionBtns = [mBtnReabrir, mBtnIniciar, mBtnAguardarAss, mBtnAprovar, mBtnPagar, mBtnRecusar, mBtnPendente];
-        const isAdmin = getActiveProfile() === "admin";
+        const isAdmin = isCurrentUserAdmin();
         allActionBtns.forEach(b => {
           b.style.display = isAdmin ? "inline-flex" : "none";
           b.disabled = false;
@@ -6014,6 +6054,10 @@
       // Alterar Status
       const changeStatus = async (newStatus) => {
         if (!activeLeadId) return;
+        if (!isCurrentUserAdmin()) {
+          showToast("Apenas administradores podem alterar o status de propostas na Mesa de Análise.", "var(--red-error)");
+          return;
+        }
         const leads = getLeads();
         const justificativaVal = document.getElementById("m-wpp-justificativa").value.trim();
         let targetLead = null;
@@ -7434,7 +7478,7 @@
         const fragBase = document.createDocumentFragment();
         pageLeads.forEach(c => {
           const tr = document.createElement("tr");
-          const btnDescartarHTML = profile === "admin"
+          const btnDescartarHTML = isCurrentUserAdmin()
             ? `<button class="btn-action-sm descartar-btn" data-cpf="${c.cpf}" style="background: rgba(192, 57, 43, 0.15); border: 1px solid var(--red-error); color: var(--red-error); margin-left: 6px;">Descartar</button>`
             : '';
 
@@ -7452,7 +7496,7 @@
             </td>
           `;
           tr.querySelector(".ver-ficha-btn").addEventListener("click", () => openClientFicha(c.cpf));
-          if (profile === "admin") {
+          if (isCurrentUserAdmin()) {
             tr.querySelector(".descartar-btn").addEventListener("click", () => descartarLeadPeloAdmin(c.cpf));
           }
           fragBase.appendChild(tr);
@@ -10240,6 +10284,7 @@
               valor_solicitado: sanitizedLead.proposta?.valor_solicitado || 0,
               payload: sanitizedLead
             });
+            updateLocalLeadsCache(lead);
           } catch (err) {
             console.error("[Walker Bank] Erro ao registrar Prospectado:", err);
           }
