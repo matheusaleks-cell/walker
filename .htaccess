@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# 1. Redirecionar acessos diretos com .html para a URL limpa (ex: /proposta.html -> /proposta)
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.html [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# 2. Mapear internamente a URL limpa para o arquivo .html correspondente
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*)$ $1.html [NC,L]

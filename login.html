@@ -372,7 +372,7 @@
 
       // Se já estiver no modo demonstrativo offline, redireciona diretamente
       if (sessionStorage.getItem("walker_demo_mode") === "true" && sessionStorage.getItem("walker_admin_session") === "true") {
-        window.location.href = "dashboard.html";
+        window.location.href = "dashboard";
         return;
       }
 
@@ -450,7 +450,7 @@
               } catch(e) {}
             }
             sessionStorage.setItem("walker_admin_session", "true");
-            window.location.href = "dashboard.html";
+            window.location.href = "dashboard";
           }
         }).catch(err => {
           console.warn("Erro ao obter sessão no Supabase (esperado se estiver suspenso):", err);
@@ -461,7 +461,7 @@
       document.getElementById("btn-demo").addEventListener("click", () => {
         sessionStorage.setItem("walker_admin_session", "true");
         sessionStorage.setItem("walker_demo_mode", "true");
-        window.location.href = "dashboard.html";
+        window.location.href = "dashboard";
       });
 
       // 3. RATE LIMITING: máx. 5 tentativas em 15 minutos
@@ -569,7 +569,7 @@
               console.warn("[Walker Bank] Perfil não encontrado, prosseguindo como admin.");
             }
             sessionStorage.setItem("walker_admin_session", "true");
-            window.location.href = "dashboard.html";
+            window.location.href = "dashboard";
           }
         } catch (err) {
           console.error("Erro na autenticação:", err);
@@ -672,7 +672,7 @@
             setTimeout(() => {
               // Limpa o hash de redefinição da URL
               window.location.hash = "";
-              window.location.href = "dashboard.html";
+              window.location.href = "dashboard";
             }, 2000);
           }
         } catch (err) {

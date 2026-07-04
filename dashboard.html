@@ -2914,7 +2914,7 @@
       const isDemoMode = sessionStorage.getItem("walker_demo_mode") === "true";
 
       if (!hasSessionStorage && !hasLocalStorage && !isDemoMode) {
-        window.location.href = "login.html";
+        window.location.href = "login";
       }
 
       // Exibe banner de aviso quando em modo demonstração
@@ -2947,7 +2947,7 @@
           sessionStorage.removeItem("walker_active_profile");
           sessionStorage.removeItem("walker_user_profile");
           sessionStorage.removeItem("walker_session_logged");
-          window.location.href = "login.html";
+          window.location.href = "login";
           return;
         }
         try {
@@ -2959,7 +2959,7 @@
         sessionStorage.removeItem("walker_active_profile");
         sessionStorage.removeItem("walker_user_profile");
         sessionStorage.removeItem("walker_session_logged");
-        window.location.href = "login.html";
+        window.location.href = "login";
       });
 
       // Data no topbar
@@ -8282,7 +8282,7 @@
             btn.disabled = true;
             try {
               const { error } = await supabaseClient.auth.resetPasswordForEmail(opEmail, {
-                redirectTo: window.location.origin + "/login.html"
+                redirectTo: window.location.origin + "/login"
               });
               if (error) throw error;
               showToast(`Link de redefinição enviado para o e-mail de ${opNome}!`, "var(--green-success)");
@@ -11432,7 +11432,7 @@
               if (!session) {
                 sessionStorage.removeItem("walker_admin_session");
                 sessionStorage.removeItem("walker_user_profile");
-                window.location.href = "login.html";
+                window.location.href = "login";
                 return;
               }
               sessionStorage.setItem("walker_admin_session", "true");
@@ -11453,7 +11453,7 @@
             } catch (e) {
               console.error("Erro ao validar sessão com o Supabase:", e);
               sessionStorage.removeItem("walker_admin_session");
-              window.location.href = "login.html";
+              window.location.href = "login";
               return;
             }
 
@@ -11474,7 +11474,7 @@
               if (sessionStorage.getItem("walker_demo_mode") !== "true") {
                 try { await supabaseClient.auth.signOut(); } catch(se) {}
               }
-              window.location.href = "login.html?blocked=true";
+              window.location.href = "login?blocked=true";
               return;
             }
           }
