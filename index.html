@@ -73,18 +73,21 @@
       --container-width: 1200px;
     }
     
-    html {
+     html {
       scroll-behavior: smooth;
       font-size: 16px;
       color: var(--navy);
       font-family: var(--font-body);
-      background-color: var(--white);
+      background-color: var(--navy);
       -webkit-font-smoothing: antialiased;
     }
     
     body {
       overflow-x: hidden;
       line-height: 1.6;
+      background-color: var(--navy);
+      margin: 0;
+      padding: 0;
     }
     
     img {
@@ -1378,7 +1381,7 @@
       background-size: cover, 100px 100px;
       color: var(--white);
       text-align: center;
-      padding: 100px 0 60px 0;
+      padding: 100px 0 5px 0;
     }
 
     .cta-final-content {
@@ -1446,6 +1449,10 @@
       color: var(--gray-light-text);
       flex-wrap: wrap;
       gap: 16px;
+    }
+
+    .footer-bottom p {
+      margin: 0;
     }
 
     @media (max-width: 768px) {
@@ -2298,6 +2305,7 @@
       
       <div class="footer-bottom">
         <p>Walker Bank © 2025  |  Todos os direitos reservados</p>
+        <p style="font-size: 0.72rem; opacity: 0.55; margin-top: 4px; letter-spacing: 0.03em;">WALKER BANK FINANCIAL SOLUTIONS LTDA &nbsp;·&nbsp; CNPJ 55.777.762/0001-90</p>
         <div class="footer-links">
           <a href="#politica" id="politica-link">Política de Privacidade</a>
           <a href="#termos" id="termos-link">Termos de Uso</a>

@@ -1190,8 +1190,17 @@
                   <!-- Injetado via JS -->
                 </div>
 
+                <!-- Banner de aviso: cliente optante por não divulgar margem -->
+                <div id="prosp-aviso-nao-autoriza-margem" style="display: none; margin-bottom: 16px; background: linear-gradient(135deg, rgba(230, 126, 34, 0.12) 0%, rgba(230, 126, 34, 0.06) 100%); border: 1.5px solid rgba(230, 126, 34, 0.5); border-radius: 10px; padding: 14px 18px; display: none; align-items: flex-start; gap: 12px;">
+                  <div style="font-size: 1.4rem; line-height: 1; flex-shrink: 0;">⚠️</div>
+                  <div>
+                    <div style="font-size: 0.82rem; font-weight: 800; color: #c0392b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px;">Cliente Optante por Não Divulgar Margem</div>
+                    <div style="font-size: 0.78rem; color: #7f4000; line-height: 1.5;">Este cliente <strong>optou por não autorizar</strong> a consulta da sua margem consignável junto ao órgão pagador. Os valores de margem exibidos abaixo podem não refletir a realidade. <strong>Entre em contato diretamente com ele para negociar.</strong></div>
+                  </div>
+                </div>
+
                 <!-- Grid de Valores de Margem -->
-                <div style="background: rgba(24, 27, 44, 0.02); border: 1px solid rgba(24, 27, 44, 0.06); border-radius: 12px; padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <div id="prosp-card-margem-grid" style="background: rgba(24, 27, 44, 0.02); border: 1px solid rgba(24, 27, 44, 0.06); border-radius: 12px; padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
                   <div>
                     <span style="font-size: 0.725rem; color: var(--gray-light-text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Salário Líquido</span>
                     <strong id="prosp-card-salario" style="font-size: 1.15rem; color: var(--navy);">R$ 0,00</strong>
@@ -1233,9 +1242,6 @@
                   </button>
                   <button type="button" class="btn-action" id="btn-prosp-sem-interesse" style="background: rgba(149, 165, 166, 0.15); border: 1px solid #7f8c8d; color: #7f8c8d; font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
                     ⚫ Não Tem Interesse
-                  </button>
-                  <button type="button" class="btn-action" id="btn-prosp-sem-margem" style="background: rgba(230, 126, 34, 0.15); border: 1px solid #e67e22; color: #e67e22; font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
-                    🟠 Sem Margem
                   </button>
                   <button type="button" class="btn-action" id="btn-prosp-nao-autoriza-margem" style="background: rgba(192, 57, 43, 0.15); border: 1px solid var(--red-error); color: var(--red-error); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
                     🚫 Não Autoriza Margem
@@ -10008,6 +10014,20 @@
         const margemConsignavelNegativa = margemConsignavelRaw < 0;
         const margemConsignavel = Math.max(0, margemConsignavelRaw);
 
+        // Detecção automática de optante por não divulgar margem:
+        // Quando mg_margem_bruta e mg_margem_cartao_beneficio_bruta são ambos zero (ou nulos),
+        // significa que o cliente optou por não autorizar a consulta da sua margem.
+        const mgBruta = parseFloat(lead.dados_funcionais?.mg_margem_bruta);
+        const mgCartaoBeneficioBruta = parseFloat(lead.dados_funcionais?.mg_margem_cartao_beneficio_bruta);
+        const mgMargem = parseFloat(lead.dados_funcionais?.mg_margem);
+        const temDadosBrutos = !isNaN(mgBruta) && !isNaN(mgCartaoBeneficioBruta) && !isNaN(mgMargem);
+        const isNaoAutorizaMargem = temDadosBrutos && mgBruta === 0 && mgCartaoBeneficioBruta === 0 && mgMargem === 0;
+
+        const avisoNaoAutorizaEl = document.getElementById("prosp-aviso-nao-autoriza-margem");
+        if (avisoNaoAutorizaEl) {
+          avisoNaoAutorizaEl.style.display = isNaoAutorizaMargem ? 'flex' : 'none';
+        }
+
         const salEl = document.getElementById("prosp-card-salario");
         const margEmpEl = document.getElementById("prosp-card-margem-emp");
         const margCardEl = document.getElementById("prosp-card-margem-cartao");
@@ -10172,7 +10192,35 @@
 
         showToast(`Tentativa de contato (${status}) registrada com sucesso!`, "var(--gold)");
 
-        // Reseta
+        // Se WhatsApp Enviado, mover lead para Prospectado e ir para aba de Acompanhamento
+        if (status === "WhatsApp Enviado" && prospActiveLead) {
+          const leadParaProspectar = prospActiveLead;
+          const userAtual = getActiveUserObj();
+          leadParaProspectar.status = "Prospectado";
+          leadParaProspectar.operador_id = userAtual.id;
+          leadParaProspectar.operador_nome = userAtual.nome;
+          updateLocalLeadsCache(leadParaProspectar);
+          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+            sanitizeLeadPayload(leadParaProspectar).then(sanitized => {
+              supabaseClient.from("leads").upsert({
+                id: sanitized.id,
+                created_at: sanitized.createdAt,
+                nome: sanitized.lead?.nome,
+                cpf: sanitized.lead?.cpf,
+                status: sanitized.status,
+                convenio: sanitized.dados_funcionais?.convenio,
+                valor_solicitado: sanitized.proposta?.valor_solicitado || 0,
+                payload: sanitized
+              }).catch(err => console.error("[Walker Bank] Erro ao mover lead para Prospectado via WhatsApp:", err));
+            });
+          }
+          markDirty('acompanhamento', 'base-geral', 'inicio', 'dashboard-geral');
+          prospActiveLead = null;
+          navigateTo("acompanhamento");
+          return;
+        }
+
+        // Reseta (para outros status)
         const cardLead = document.getElementById("prosp-lead-card");
         const emptyState = document.getElementById("prosp-empty-state");
         const prospCpf = document.getElementById("prosp-search-cpf");
@@ -10570,8 +10618,7 @@
       if (btnWppEnviado) btnWppEnviado.addEventListener("click", () => prospRegistrarTentativa("WhatsApp Enviado"));
       const btnProspSemInteresse = document.getElementById("btn-prosp-sem-interesse");
       if (btnProspSemInteresse) btnProspSemInteresse.addEventListener("click", () => prospRegistrarTentativa("Não Tem Interesse"));
-      const btnProspSemMargem = document.getElementById("btn-prosp-sem-margem");
-      if (btnProspSemMargem) btnProspSemMargem.addEventListener("click", () => prospRegistrarTentativa("Sem Margem"));
+      // Botão "Sem Margem" removido: o aviso é detectado automaticamente pela ficha do lead (mg_margem_bruta === 0).
       const btnProspNaoAutorizaMargem = document.getElementById("btn-prosp-nao-autoriza-margem");
       if (btnProspNaoAutorizaMargem) btnProspNaoAutorizaMargem.addEventListener("click", () => prospRegistrarTentativa("Não Autoriza Margem"));
       
