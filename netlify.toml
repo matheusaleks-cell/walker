@@ -38,3 +38,10 @@
   from = "/dashboard"
   to = "/dashboard.html"
   status = 200
+
+# Servir dashboard.html internamente ao acessar qualquer subdiretório de /dashboard/ (ex: /dashboard/prospeccao)
+[[redirects]]
+  from = "/dashboard/*"
+  to = "/dashboard.html"
+  status = 200
+

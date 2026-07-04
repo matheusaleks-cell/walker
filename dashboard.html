@@ -4352,9 +4352,38 @@
         'logs': { title: 'Logs de Atividade', sub: 'Auditoria e rastreamento de ações do sistema' }
       };
 
-      const navigateTo = (page) => {
+      const getInitialPage = () => {
+        const pathParts = window.location.pathname.split('/');
+        const dbIndex = pathParts.indexOf('dashboard');
+        if (dbIndex !== -1 && pathParts[dbIndex + 1]) {
+          const page = pathParts[dbIndex + 1].trim();
+          const validPages = ['inicio', 'mesa-analise', 'dashboard-geral', 'relatorio-financeiro', 'relatorio-leads', 'consulta-margem', 'base-geral', 'clientes', 'convenios', 'configuracoes', 'logs', 'acompanhamento', 'mural', 'prospeccao'];
+          if (validPages.includes(page)) {
+            return page;
+          }
+        }
+        return sessionStorage.getItem("walker_active_page") || "inicio";
+      };
+
+      window.addEventListener("popstate", (event) => {
+        if (event.state && event.state.page) {
+          navigateTo(event.state.page, true);
+        } else {
+          navigateTo(getInitialPage(), true);
+        }
+      });
+
+      const navigateTo = (page, skipPushState = false) => {
         // Salva a página ativa no sessionStorage para o F5/Refresh
         sessionStorage.setItem("walker_active_page", page);
+
+        if (!skipPushState) {
+          const currentPath = window.location.pathname;
+          const targetPath = `/dashboard/${page}`;
+          if (currentPath !== targetPath && currentPath !== targetPath + '/') {
+            window.history.pushState({ page: page }, "", targetPath);
+          }
+        }
 
         // Desativa todos
         document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
@@ -11498,8 +11527,8 @@
           updateSidebarUserUI();
 
           // Renderiza local cache primeiro
-          const initPage = sessionStorage.getItem("walker_active_page") || 'inicio';
-          navigateTo(initPage);
+          const initPage = getInitialPage();
+          navigateTo(initPage, true);
 
           // Carrega configurações
           try {
@@ -11537,7 +11566,7 @@
           }
 
           // Renderiza a mesa e páginas com dados do Supabase
-          navigateTo(sessionStorage.getItem("walker_active_page") || 'inicio');
+          navigateTo(getInitialPage(), true);
 
           // Configuração de listeners adicionais para filtros do Dashboard Geral
           ['dash-data-inicio', 'dash-data-fim', 'dash-convenio'].forEach(id => {
