@@ -2972,11 +2972,8 @@
       // CONTROLE DE SESSÃO DE OPERADORES
       // ==========================================
 
-      // Em modo demo, os operadores são mocks; em produção, são carregados do Supabase (profiles table)
-      let OPERADORES = [
-        { id: "op-joao", nome: "João Silva", avatar: "JS", meta: 100000, funcao: "Operador de Consignado" },
-        { id: "op-maria", nome: "Maria Santos", avatar: "MS", meta: 100000, funcao: "Analista de Crédito" }
-      ];
+      // Em modo demo, os operadores são carregados das configurações locais; em produção, são carregados do Supabase (profiles table)
+      let OPERADORES = [];
 
       const getCurrentUserProfile = () => {
         try {
@@ -2995,10 +2992,7 @@
           try {
             const cfg = getConfigs();
             const localOps = cfg.operadores_config || {};
-            const baseOps = [
-              { id: "op-joao", nome: "João Silva", avatar: "JS", meta: 100000, funcao: "Operador de Consignado" },
-              { id: "op-maria", nome: "Maria Santos", avatar: "MS", meta: 100000, funcao: "Analista de Crédito" }
-            ];
+            const baseOps = [];
             
             const opsMap = new Map();
             baseOps.forEach(op => opsMap.set(op.id, op));
