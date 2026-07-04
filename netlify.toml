@@ -1,0 +1,40 @@
+# Configurações de Redirecionamento e URLs Limpas para o Netlify
+
+# 1. Redirecionar proposta.html para /proposta (URL Limpa)
+[[redirects]]
+  from = "/proposta.html"
+  to = "/proposta"
+  status = 301
+  force = true
+
+# Servir proposta.html internamente ao acessar /proposta
+[[redirects]]
+  from = "/proposta"
+  to = "/proposta.html"
+  status = 200
+
+# 2. Redirecionar login.html para /login (URL Limpa)
+[[redirects]]
+  from = "/login.html"
+  to = "/login"
+  status = 301
+  force = true
+
+# Servir login.html internamente ao acessar /login
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 200
+
+# 3. Redirecionar dashboard.html para /dashboard (URL Limpa)
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/dashboard"
+  status = 301
+  force = true
+
+# Servir dashboard.html internamente ao acessar /dashboard
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
+  status = 200
