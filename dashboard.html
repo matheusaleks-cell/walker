@@ -1939,24 +1939,24 @@
         <!-- KPIs -->
         <div class="metrics-grid" style="margin-bottom: 24px;">
           <div class="metric-card">
-            <span class="metric-label">Total de Ações</span>
+            <span class="metric-label">Total de Ações (Hoje)</span>
             <div class="metric-value" id="log-kpi-total">0</div>
-            <div class="metric-sub"><span>eventos registrados</span></div>
+            <div class="metric-sub"><span>eventos registrados hoje</span></div>
           </div>
           <div class="metric-card">
-            <span class="metric-label">Mudanças de Status</span>
+            <span class="metric-label">Consultas de Margem (Hoje)</span>
             <div class="metric-value" id="log-kpi-status">0</div>
-            <div class="metric-sub"><span>alterações de status em propostas</span></div>
+            <div class="metric-sub"><span>CPFs consultados hoje</span></div>
           </div>
           <div class="metric-card">
-            <span class="metric-label">WhatsApps Enviados</span>
+            <span class="metric-label">Prospecções Realizadas (Hoje)</span>
             <div class="metric-value" id="log-kpi-wpp">0</div>
-            <div class="metric-sub"><span>mensagens disparadas pela mesa</span></div>
+            <div class="metric-sub"><span>leads trabalhados hoje</span></div>
           </div>
           <div class="metric-card highlight">
-            <span class="metric-label">Edições de Proposta</span>
+            <span class="metric-label">Simulações Iniciadas (Hoje)</span>
             <div class="metric-value" id="log-kpi-edit">0</div>
-            <div class="metric-sub"><span style="color:rgba(255,255,255,0.6)">dados alterados por operadores</span></div>
+            <div class="metric-sub"><span style="color:rgba(255,255,255,0.6)">propostas iniciadas hoje</span></div>
           </div>
         </div>
 
@@ -1976,7 +1976,6 @@
                   <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Consultas Margem</th>
                   <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Prospecções</th>
                   <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Simulações Iniciadas</th>
-                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">WhatsApps</th>
                   <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Total Ações</th>
                 </tr>
               </thead>
@@ -11162,23 +11161,29 @@
           return true;
         });
 
-        // KPIs (sempre do total geral, não do filtrado)
-        document.getElementById("log-kpi-total").textContent  = allLogs.length;
-        document.getElementById("log-kpi-status").textContent = allLogs.filter(l => l.tipo === 'status_change').length;
-        document.getElementById("log-kpi-wpp").textContent    = allLogs.filter(l => l.tipo === 'wpp_sent').length;
-        document.getElementById("log-kpi-edit").textContent   = allLogs.filter(l => l.tipo === 'lead_edit').length;
+        // Filtrar os logs de hoje
+        const hoje = new Date();
+        hoje.setHours(0,0,0,0);
+        
+        const logsHoje = allLogs.filter(log => {
+          const dtLog = new Date(log.timestamp);
+          return dtLog >= hoje;
+        });
+
+        // KPIs (filtrados apenas para Hoje)
+        document.getElementById("log-kpi-total").textContent  = logsHoje.length;
+        document.getElementById("log-kpi-status").textContent = logsHoje.filter(l => l.tipo === 'consulta_margem').length;
+        document.getElementById("log-kpi-wpp").textContent    = logsHoje.filter(l => 
+          l.tipo === 'prospeccao_tentativa' ||
+          l.tipo === 'prospeccao_prospectado' ||
+          l.tipo === 'prosp_retorno_agendado' ||
+          l.tipo === 'proposta_gerada'
+        ).length;
+        document.getElementById("log-kpi-edit").textContent   = logsHoje.filter(l => l.tipo === 'status_change' && l.meta?.para === 'Recebida').length;
 
         // Renderizar a tabela consolidada de atividades diárias
         const atividadesTbody = document.getElementById("logs-atividades-tbody");
         if (atividadesTbody) {
-          // Filtrar os logs de hoje
-          const hoje = new Date();
-          hoje.setHours(0,0,0,0);
-          
-          const logsHoje = allLogs.filter(log => {
-            const dtLog = new Date(log.timestamp);
-            return dtLog >= hoje;
-          });
 
           // Atualizar o título com a data de hoje formatada
           const dataResumoEl = document.getElementById("log-resumo-data");
@@ -11196,7 +11201,6 @@
               consultas: 0,
               prospeccoes: 0,
               simulacoes: 0,
-              whatsapps: 0,
               total: 0
             };
           });
@@ -11208,7 +11212,6 @@
               consultas: 0,
               prospeccoes: 0,
               simulacoes: 0,
-              whatsapps: 0,
               total: 0
             };
           }
@@ -11222,7 +11225,6 @@
                 consultas: 0,
                 prospeccoes: 0,
                 simulacoes: 0,
-                whatsapps: 0,
                 total: 0
               };
             }
@@ -11240,8 +11242,6 @@
               resumoOps[opId].prospeccoes++;
             } else if (log.tipo === "status_change" && log.meta?.para === "Recebida") {
               resumoOps[opId].simulacoes++;
-            } else if (log.tipo === "wpp_sent") {
-              resumoOps[opId].whatsapps++;
             }
           });
 
@@ -11253,13 +11253,12 @@
                 <td style="padding: 8px; text-align: center; color: var(--cobalt); font-weight: 700;">${r.consultas}</td>
                 <td style="padding: 8px; text-align: center; color: var(--gold); font-weight: 700;">${r.prospeccoes}</td>
                 <td style="padding: 8px; text-align: center; color: var(--green-success); font-weight: 700;">${r.simulacoes}</td>
-                <td style="padding: 8px; text-align: center; color: #25d366; font-weight: 700;">${r.whatsapps}</td>
                 <td style="padding: 8px; text-align: center; font-weight: 700; color: var(--navy); background: rgba(24, 27, 44, 0.02); border-radius: 4px;">${r.total}</td>
               </tr>
             `;
           }).join('');
 
-          atividadesTbody.innerHTML = rows || `<tr><td colspan="6" style="text-align:center; padding:12px; color:var(--gray-light-text);">Nenhuma atividade registrada hoje.</td></tr>`;
+          atividadesTbody.innerHTML = rows || `<tr><td colspan="5" style="text-align:center; padding:12px; color:var(--gray-light-text);">Nenhuma atividade registrada hoje.</td></tr>`;
         }
 
         const tbody = document.getElementById("logs-table-body");
