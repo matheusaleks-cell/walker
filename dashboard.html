@@ -11161,34 +11161,53 @@
           return true;
         });
 
-        // Filtrar os logs de hoje
+        // Determinar o período para os KPIs e para a Tabela de Resumo
+        let logsPeriodo = [];
+        let labelPeriodo = "Hoje";
         const hoje = new Date();
         hoje.setHours(0,0,0,0);
-        
-        const logsHoje = allLogs.filter(log => {
-          const dtLog = new Date(log.timestamp);
-          return dtLog >= hoje;
-        });
 
-        // KPIs (filtrados apenas para Hoje)
-        document.getElementById("log-kpi-total").textContent  = logsHoje.length;
-        document.getElementById("log-kpi-status").textContent = logsHoje.filter(l => l.tipo === 'consulta_margem').length;
-        document.getElementById("log-kpi-wpp").textContent    = logsHoje.filter(l => 
+        if (!dataInicio && !dataFim) {
+          logsPeriodo = allLogs.filter(log => new Date(log.timestamp) >= hoje);
+          labelPeriodo = `Hoje (${new Date().toLocaleDateString("pt-BR")})`;
+        } else {
+          logsPeriodo = allLogs.filter(log => {
+            const dtLog = new Date(log.timestamp);
+            if (dataInicio && dtLog < new Date(dataInicio + "T00:00:00")) return false;
+            if (dataFim) {
+              const endLimit = new Date(dataFim + "T23:59:59");
+              if (dtLog > endLimit) return false;
+            }
+            return true;
+          });
+
+          if (dataInicio && dataFim) {
+            labelPeriodo = `${new Date(dataInicio + "T00:00:00").toLocaleDateString("pt-BR")} a ${new Date(dataFim + "T00:00:00").toLocaleDateString("pt-BR")}`;
+          } else if (dataInicio) {
+            labelPeriodo = `A partir de ${new Date(dataInicio + "T00:00:00").toLocaleDateString("pt-BR")}`;
+          } else if (dataFim) {
+            labelPeriodo = `Até ${new Date(dataFim + "T00:00:00").toLocaleDateString("pt-BR")}`;
+          }
+        }
+
+        // KPIs (filtrados para o período)
+        document.getElementById("log-kpi-total").textContent  = logsPeriodo.length;
+        document.getElementById("log-kpi-status").textContent = logsPeriodo.filter(l => l.tipo === 'consulta_margem').length;
+        document.getElementById("log-kpi-wpp").textContent    = logsPeriodo.filter(l => 
           l.tipo === 'prospeccao_tentativa' ||
           l.tipo === 'prospeccao_prospectado' ||
           l.tipo === 'prosp_retorno_agendado' ||
           l.tipo === 'proposta_gerada'
         ).length;
-        document.getElementById("log-kpi-edit").textContent   = logsHoje.filter(l => l.tipo === 'status_change' && l.meta?.para === 'Recebida').length;
+        document.getElementById("log-kpi-edit").textContent   = logsPeriodo.filter(l => l.tipo === 'status_change' && l.meta?.para === 'Recebida').length;
 
-        // Renderizar a tabela consolidada de atividades diárias
+        // Renderizar a tabela consolidada de atividades
         const atividadesTbody = document.getElementById("logs-atividades-tbody");
         if (atividadesTbody) {
-
-          // Atualizar o título com a data de hoje formatada
+          // Atualizar o título com a data do período formatada
           const dataResumoEl = document.getElementById("log-resumo-data");
           if (dataResumoEl) {
-            dataResumoEl.textContent = new Date().toLocaleDateString("pt-BR");
+            dataResumoEl.textContent = labelPeriodo;
           }
 
           // Agrupar por operador
@@ -11216,8 +11235,8 @@
             };
           }
 
-          // Contabilizar logs
-          logsHoje.forEach(log => {
+          // Contabilizar logs do período
+          logsPeriodo.forEach(log => {
             const opId = log.operador_id || "admin";
             if (!resumoOps[opId]) {
               resumoOps[opId] = {
@@ -11258,7 +11277,7 @@
             `;
           }).join('');
 
-          atividadesTbody.innerHTML = rows || `<tr><td colspan="5" style="text-align:center; padding:12px; color:var(--gray-light-text);">Nenhuma atividade registrada hoje.</td></tr>`;
+          atividadesTbody.innerHTML = rows || `<tr><td colspan="5" style="text-align:center; padding:12px; color:var(--gray-light-text);">Nenhuma atividade registrada no período.</td></tr>`;
         }
 
         const tbody = document.getElementById("logs-table-body");
