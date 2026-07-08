@@ -108,6 +108,14 @@
         <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg></span>
         <span>Logs de Atividade</span>
       </div>
+      <div class="nav-item nav-subitem" data-page="resumo-atividades" id="nav-resumo-atividades" style="display:none;">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
+        <span>Resumo de Atividades</span>
+      </div>
+      <div class="nav-item nav-subitem" data-page="carteira-operador" id="nav-carteira-operador" style="display:none;">
+        <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg></span>
+        <span>Carteira por Operador</span>
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -141,7 +149,7 @@
         <div id="profile-switcher-wrapper" style="display: flex; align-items: center; gap: 8px; border-right: 1px solid rgba(24, 27, 44, 0.1); padding-right: 16px; margin-right: 4px;">
           <span style="font-size: 0.7rem; color: var(--gray-text); text-transform: uppercase; font-weight:700; letter-spacing: 0.05em; font-family: Arial;">Visualizar como:</span>
           <select id="user-profile-selector" onchange="changeUserProfile(this.value)" style="background: rgba(24, 27, 44, 0.05); color: var(--navy); border: 1.5px solid rgba(24, 27, 44, 0.15); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-family: Arial; font-weight:700; cursor:pointer; outline:none; transition: var(--transition-fast);">
-            <option value="admin">🔑 Administrador</option>
+            <option value="admin">🌐 Visão Geral (Todos os Operadores)</option>
           </select>
         </div>
 
@@ -1243,9 +1251,7 @@
                   <button type="button" class="btn-action" id="btn-prosp-sem-interesse" style="background: rgba(149, 165, 166, 0.15); border: 1px solid #7f8c8d; color: #7f8c8d; font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
                     ⚫ Não Tem Interesse
                   </button>
-                  <button type="button" class="btn-action" id="btn-prosp-nao-autoriza-margem" style="background: rgba(192, 57, 43, 0.15); border: 1px solid var(--red-error); color: var(--red-error); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer;">
-                    🚫 Não Autoriza Margem
-                  </button>
+
                   <button type="button" class="btn-action" id="btn-prosp-retorno" style="background: rgba(41, 128, 185, 0.12); border: 1px solid var(--blue-info); color: var(--blue-info); font-size: 0.8rem; font-weight: 700; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                     📅 Agendar Retorno
                   </button>
@@ -1996,7 +2002,7 @@
           <input type="date" class="filter-input" id="log-data-fim" title="Data fim">
           <select class="filter-select" id="log-filter-op">
             <option value="all">Todos os Operadores</option>
-            <option value="admin">Administrador</option>
+            <option value="admin">Administrador Geral (Legado)</option>
           </select>
           <select class="filter-select" id="log-filter-tipo">
             <option value="all">Todos os Tipos</option>
@@ -2043,6 +2049,131 @@
             <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
             <h3>Nenhum log encontrado</h3>
             <p>As ações realizadas no sistema aparecerão aqui.</p>
+          </div>
+          <!-- Linha de Paginação dos Logs -->
+          <div class="pagination-row" id="logs-pagination-row" style="display: none; align-items: center; justify-content: space-between; margin-top: 20px; padding: 12px 16px; border-top: 1px solid rgba(24, 27, 44, 0.08);">
+            <div class="pagination-info" id="logs-pagination-info" style="font-size: 0.8rem; color: var(--gray-light-text); font-weight: 500;">
+              Mostrando 0-0 de 0 registros
+            </div>
+            <div class="pagination-controls" id="logs-pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE: RESUMO DE ATIVIDADES (ADMIN ONLY)
+      ======================================== -->
+      <section class="page-section" id="sec-resumo-atividades">
+        <!-- Filtros -->
+        <div class="controls-row" style="margin-bottom: 16px;">
+          <input type="date" class="filter-input" id="resumo-data-inicio" title="Data início">
+          <input type="date" class="filter-input" id="resumo-data-fim" title="Data fim">
+          <select class="filter-select" id="resumo-filter-op">
+            <option value="all">Todos os Operadores</option>
+            <option value="admin">Administrador Geral (Legado)</option>
+          </select>
+          <button class="btn-filter" id="resumo-limpar">Limpar</button>
+        </div>
+
+        <div class="panel-card" style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1.5px solid rgba(24, 27, 44, 0.08); padding-bottom: 8px;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; margin: 0;">
+              📊 Volume de Ações por Operador
+            </h3>
+            <span style="font-size: 0.75rem; color: var(--gray-light-text); font-weight: 600;" id="resumo-atividades-periodo">-</span>
+          </div>
+          <div class="table-container">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+              <thead>
+                <tr style="border-bottom: 2px solid rgba(24, 27, 44, 0.06); text-align: left;">
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy);">Operador</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Total de Ações</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Consultas Margem</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Prospecção</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Aprovadas</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Recusadas</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Pagas</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Anotações</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Devolvidos p/ Prospecção</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Detalhamento</th>
+                </tr>
+              </thead>
+              <tbody id="resumo-atividades-tbody">
+                <!-- Injetado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="resumo-atividades-empty" style="display:none;">
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+            <h3>Nenhuma atividade registrada no período</h3>
+            <p>Ajuste os filtros de data ou operador para ver os resultados.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================
+           PAGE: CARTEIRA POR OPERADOR (ADMIN ONLY)
+      ======================================== -->
+      <section class="page-section" id="sec-carteira-operador">
+        <!-- KPIs -->
+        <div class="metrics-grid" style="margin-bottom: 24px;">
+          <div class="metric-card">
+            <span class="metric-label">Sem Operador (Fila)</span>
+            <div class="metric-value" id="carteira-kpi-fila">0</div>
+            <div class="metric-sub"><span>leads disponíveis para prospecção</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Em Acompanhamento (Geral)</span>
+            <div class="metric-value" id="carteira-kpi-acompanhamento">0</div>
+            <div class="metric-sub"><span>leads prospectados no total</span></div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Na Mesa de Análise (Geral)</span>
+            <div class="metric-value" id="carteira-kpi-mesa">0</div>
+            <div class="metric-sub"><span>propostas em andamento no total</span></div>
+          </div>
+          <div class="metric-card highlight">
+            <span class="metric-label">Concluídos (Aprovada + Paga)</span>
+            <div class="metric-value" id="carteira-kpi-concluidos">0</div>
+            <div class="metric-sub"><span style="color:rgba(255,255,255,0.6)">no total da base</span></div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="controls-row" style="margin-bottom: 16px;">
+          <select class="filter-select" id="carteira-filter-op">
+            <option value="all">Todos os Operadores</option>
+            <option value="admin">Administrador Geral (Legado)</option>
+          </select>
+          <button class="btn-filter" id="carteira-limpar">Limpar</button>
+        </div>
+
+        <div class="panel-card" style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1.5px solid rgba(24, 27, 44, 0.08); padding-bottom: 8px;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; margin: 0;">
+              🗂️ Onde Está Cada Lead, por Operador
+            </h3>
+          </div>
+          <div class="table-container">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+              <thead>
+                <tr style="border-bottom: 2px solid rgba(24, 27, 44, 0.06); text-align: left;">
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy);">Operador</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Base Geral</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Acompanhamento</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Agendado</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Mesa de Análise</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Aprovadas</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Pagas</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Recusadas</th>
+                  <th style="padding: 8px; font-weight: 700; color: var(--navy); text-align: center;">Total</th>
+                </tr>
+              </thead>
+              <tbody id="carteira-operador-tbody">
+                <!-- Injetado dinamicamente -->
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -2558,6 +2689,22 @@
     </div>
   </div>
 
+  <!-- Modal de Justificativa: Devolução de Lead para Prospecção (operador) -->
+  <div class="modal-overlay" id="acomp-motivo-modal" style="z-index: 2000;">
+    <div class="modal-container" style="max-width: 480px; padding: 24px; border-radius: 12px; background: var(--white); box-shadow: var(--shadow-lg); border: 1px solid rgba(212, 188, 110, 0.2); text-align: center;">
+      <div style="font-size: 2.5rem; margin-bottom: 16px;">↩</div>
+      <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 12px;">Motivo da Devolução</h3>
+      <p style="font-size: 0.875rem; color: var(--gray-text); margin-bottom: 16px; line-height: 1.4;">
+        Por favor, descreva o motivo de devolver este lead para a fila de Prospecção:
+      </p>
+      <textarea id="acomp-motivo-input" placeholder="Digite aqui o motivo da devolução..." style="width: 100%; height: 100px; padding: 10px 12px; border-radius: 8px; border: 1.5px solid rgba(24, 27, 44, 0.12); font-family: var(--font-body); font-size: 0.85rem; outline: none; resize: none; margin-bottom: 20px; box-sizing: border-box;"></textarea>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn-action" id="acomp-motivo-btn-cancel" style="background: var(--light-gray); border: 1.5px solid var(--nardo); color: var(--navy); font-size: 0.85rem; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancelar</button>
+        <button class="btn-action" id="acomp-motivo-btn-confirm" style="background: var(--navy); border: none; color: white; font-size: 0.85rem; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">Confirmar Devolução</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal de Confirmação Customizado (Anti-bloqueio de pop-up) -->
   <div class="modal-overlay" id="confirm-modal" style="z-index: 2000;">
     <div class="modal-container" style="max-width: 480px; padding: 24px; border-radius: 12px; text-align: center; background: var(--white); box-shadow: var(--shadow-lg); border: 1px solid rgba(212, 188, 110, 0.2);">
@@ -2732,6 +2879,11 @@
         <div class="proposal-section">
           <span class="section-title-mod">Análise de Crédito e Score</span>
           <div class="info-grid" id="cm-score"></div>
+        </div>
+        <!-- Histórico de Interações -->
+        <div class="proposal-section">
+          <span class="section-title-mod">Histórico de Interações</span>
+          <div id="cm-historico-timeline" class="history-timeline"></div>
         </div>
         <!-- Simulador de Crédito Consignado -->
         <div class="proposal-section" id="cm-simulador-section">
@@ -2913,7 +3065,7 @@
       const isDemoMode = sessionStorage.getItem("walker_demo_mode") === "true";
 
       if (!hasSessionStorage && !hasLocalStorage && !isDemoMode) {
-        window.location.href = "login";
+        window.location.href = "/login";
       }
 
       // Exibe banner de aviso quando em modo demonstração
@@ -2946,7 +3098,7 @@
           sessionStorage.removeItem("walker_active_profile");
           sessionStorage.removeItem("walker_user_profile");
           sessionStorage.removeItem("walker_session_logged");
-          window.location.href = "login";
+          window.location.href = "/login";
           return;
         }
         try {
@@ -2958,7 +3110,7 @@
         sessionStorage.removeItem("walker_active_profile");
         sessionStorage.removeItem("walker_user_profile");
         sessionStorage.removeItem("walker_session_logged");
-        window.location.href = "login";
+        window.location.href = "/login";
       });
 
       // Data no topbar
@@ -3082,7 +3234,7 @@
       const updateProfileSelectorOptions = () => {
         const selector = document.getElementById("user-profile-selector");
         if (selector) {
-          selector.innerHTML = `<option value="admin">🔑 Administrador Geral</option>` +
+          selector.innerHTML = `<option value="admin">🌐 Visão Geral (Todos os Operadores)</option>` +
             OPERADORES.map(op => {
               const icon = op.role === 'admin' ? '🔑' : '👤';
               const label = op.role === 'admin' ? `${icon} ${op.nome} (Admin)` : `${icon} ${op.nome}`;
@@ -3093,7 +3245,7 @@
         const logOpFilter = document.getElementById("log-filter-op");
         if (logOpFilter) {
           logOpFilter.innerHTML =
-            `<option value="all">Todos os Membros</option><option value="admin">Administrador Geral</option>` +
+            `<option value="all">Todos os Membros</option><option value="admin">Administrador Geral (Legado)</option>` +
             OPERADORES.map(op => `<option value="${op.id}">${op.nome} (${op.role === 'admin' ? 'Admin' : 'Operador'})</option>`).join('');
         }
         const finOpFilter = document.getElementById("fin-filter-op");
@@ -3130,12 +3282,12 @@
         }
 
         if (profileId === "admin") {
-          // Fallback: se o admin logado não tem profile no banco, usa o padrão
+          // Visão Geral (Todos os Operadores): atribui a ação ao admin real logado, não a um bucket genérico
           if (realProfile && realProfile.role === 'admin') {
             const cfgOverrides = (getConfigs().operadores_config) || {};
             const ov = cfgOverrides[realProfile.id] || {};
             return {
-              id: "admin",
+              id: realProfile.id,
               nome: ov.nome || realProfile.nome,
               role: ov.funcao || "Administrador",
               avatar: realProfile.avatar || (ov.nome || realProfile.nome).split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().substr(0, 2),
@@ -3169,10 +3321,11 @@
         updateSidebarUserUI();
 
         const newUser = getActiveUserObj();
-        // Loga a troca de perfil sempre como admin (quem efetivamente trocou)
+        // Loga a troca de perfil sempre como o admin real logado (quem efetivamente trocou),
+        // não como o novo perfil selecionado nem como um bucket genérico
         recordLog('profile_switch', `Visualizando como: ${newUser.nome}`, null,
           { de: previousUser.nome, para: newUser.nome },
-          { id: "admin", nome: "Equipe Comercial", role: "Administrador", avatar: "EC" }
+          { id: realProfile.id, nome: realProfile.nome, role: "Administrador", avatar: realProfile.avatar || "EC" }
         );
 
         // Se a página inicial (Início) estiver ativa, recalcula a meta/produção e reconstrói as propostas recentes
@@ -3206,7 +3359,9 @@
         if (avatarEl) avatarEl.textContent = user.avatar;
         if (nameEl) nameEl.textContent = user.nome;
         if (roleEl) roleEl.textContent = user.role;
-        if (selectorEl) selectorEl.value = user.id;
+        // O seletor reflete o modo de visualização escolhido (getActiveProfile), não a identidade de atribuição
+        // (getActiveUserObj().id) — para o admin em "Visão Geral" os dois já não são mais o mesmo valor.
+        if (selectorEl) selectorEl.value = getActiveProfile();
 
         // Seletor "Visualizar como": oculto para operadores reais (eles só veem seus próprios dados)
         const switcherWrapper = document.getElementById("profile-switcher-wrapper");
@@ -3217,11 +3372,15 @@
         const cfgNav = document.getElementById("nav-config");
         const convNav = document.getElementById("nav-convenios");
         const baseGeralNav = document.getElementById("nav-base-geral");
-        
+        const resumoAtividadesNav = document.getElementById("nav-resumo-atividades");
+        const carteiraOperadorNav = document.getElementById("nav-carteira-operador");
+
         if (logsNav) logsNav.style.display = isRealAdmin ? "" : "none";
         if (cfgNav) cfgNav.style.display = isRealAdmin ? "" : "none";
         if (convNav) convNav.style.display = isRealAdmin ? "" : "none";
         if (baseGeralNav) baseGeralNav.style.display = isRealAdmin ? "" : "none";
+        if (resumoAtividadesNav) resumoAtividadesNav.style.display = isRealAdmin ? "" : "none";
+        if (carteiraOperadorNav) carteiraOperadorNav.style.display = isRealAdmin ? "" : "none";
 
         // Ajusta texto do menu "Mesa de Análise" dinamicamente
         const mesaNavSpan = document.querySelector("#nav-mesa span:not(.nav-icon):not(.nav-count)");
@@ -3359,7 +3518,8 @@
         proposta_gerada:         '📄 Proposta Gerada',
         prosp_retorno_agendado:  '📅 Retorno Agendado',
         acompanhamento_nota:    '📝 Anotação de Contato',
-        EXCLUSAO_LEAD:          '🗑️ Exclusão de Lead'
+        EXCLUSAO_LEAD:          '🗑️ Exclusão de Lead',
+        lead_reassign:          '🔄 Reatribuição de Lead'
       };
 
       const getLogOperatorAvatar = (operadorId, operadorNome = '') => {
@@ -3720,6 +3880,8 @@
           'clientes': renderClientes,
           'acompanhamento': renderAcompanhamento,
           'logs': renderLogs,
+          'resumo-atividades': renderResumoAtividades,
+          'carteira-operador': renderCarteiraOperador,
           'convenios': renderConveniosPage,
           'configuracoes': loadConfigs
         };
@@ -4098,20 +4260,7 @@
       window.getConfigs = getConfigs;
 
       // Funções de sincronização com o Supabase
-      const fetchLeadsFromSupabase = async () => {
-        if (sessionStorage.getItem("walker_demo_mode") === "true") {
-          try {
-            currentLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
-          } catch (e) {
-            currentLeads = [];
-          }
-          return;
-        }
-        try {
-          // Query leve: extrai campos estruturados diretamente do JSONB sem carregar as imagens base64 de 'arquivos' para evitar estouro de memória
-          let query = supabaseClient
-            .from('leads')
-            .select(`
+      const LEADS_SELECT_FIELDS = `
               id,
               created_at,
               nome,
@@ -4127,7 +4276,70 @@
               historico_contatos:payload->historico_contatos,
               operador_id:payload->>operador_id,
               operador_nome:payload->>operador_nome
-            `);
+            `;
+
+      // Reconstrói o item estruturado leve trazendo tudo que veio do banco de forma segura,
+      // preservando campos já presentes localmente (existingLeads) que não vieram na query
+      const mapLeadRow = (row, existingLeads) => {
+        let statusMapped = row.status;
+        if (statusMapped === "Aguardando Averbação") {
+          statusMapped = "Recebida";
+        }
+
+        const existing = (existingLeads || []).find(l => l.id === row.id) || null;
+
+        return {
+          ...(existing || {}),
+          id: row.id,
+          createdAt: row.created_at,
+          status: statusMapped,
+          operador_id: row.operador_id || existing?.operador_id || null,
+          operador_nome: row.operador_nome || existing?.operador_nome || null,
+          lead: {
+            ...(existing?.lead || {}),
+            ...(row.lead || {}),
+            nome: row.nome || row.lead?.nome || '',
+            cpf: row.cpf || row.lead?.cpf || ''
+          },
+          dados_funcionais: {
+            ...(existing?.dados_funcionais || {}),
+            ...(row.dados_funcionais || {}),
+            convenio: row.convenio || row.dados_funcionais?.convenio || '',
+            matricula: row.dados_funcionais?.matricula || existing?.dados_funcionais?.matricula || ''
+          },
+          dados_bancarios: {
+            ...(existing?.dados_bancarios || {}),
+            ...(row.dados_bancarios || {})
+          },
+          proposta: {
+            ...(existing?.proposta || {}),
+            ...(row.proposta || {}),
+            valor_solicitado: row.valor_solicitado || row.proposta?.valor_solicitado || 0,
+            valor_parcela: row.proposta?.valor_parcela ? parseFloat(row.proposta.valor_parcela) : (existing?.proposta?.valor_parcela || 0),
+            prazo_meses: row.proposta?.prazo_meses ? parseInt(row.proposta.prazo_meses) : (existing?.proposta?.prazo_meses || 36),
+            assinatura_sms_validada: row.proposta?.assinatura_sms_validada === 'true' || row.proposta?.assinatura_sms_validada === true || existing?.proposta?.assinatura_sms_validada || false,
+            assinatura_manual_solicitada: row.proposta?.assinatura_manual_solicitada === 'true' || row.proposta?.assinatura_manual_solicitada === true || existing?.proposta?.assinatura_manual_solicitada || false
+          },
+          marketing: {
+            ...(existing?.marketing || {}),
+            ...(row.marketing || {})
+          },
+          historico_contatos: row.historico_contatos || existing?.historico_contatos || []
+        };
+      };
+
+      const fetchLeadsFromSupabase = async () => {
+        if (sessionStorage.getItem("walker_demo_mode") === "true") {
+          try {
+            currentLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
+          } catch (e) {
+            currentLeads = [];
+          }
+          return;
+        }
+        try {
+          // Query leve: extrai campos estruturados diretamente do JSONB sem carregar as imagens base64 de 'arquivos' para evitar estouro de memória
+          let query = supabaseClient.from('leads').select(LEADS_SELECT_FIELDS);
 
           const realProfile = getCurrentUserProfile();
           if (realProfile && realProfile.role === 'operador') {
@@ -4141,59 +4353,29 @@
           if (error) throw error;
           if (data) {
             hasMoreLeads = data.length === LEADS_PAGE_SIZE;
-            currentLeads = data.map(row => {
-              let statusMapped = row.status;
-              if (statusMapped === "Aguardando Averbação") {
-                statusMapped = "Recebida";
+            const previousLeads = currentLeads;
+            currentLeads = data.map(row => mapLeadRow(row, previousLeads));
+
+            // Leads "Prospectado" alimentam a tela de Acompanhamento e precisam aparecer
+            // mesmo quando ficam fora da janela de paginação por data de criação (ex.: base
+            // importada antiga). Para o admin (sem filtro .or acima), busca-se todos eles à parte.
+            if (!realProfile || realProfile.role !== 'operador') {
+              const loadedIds = new Set(currentLeads.map(l => l.id));
+              const { data: prospData, error: prospError } = await supabaseClient
+                .from('leads')
+                .select(LEADS_SELECT_FIELDS)
+                .eq('status', 'Prospectado')
+                .order('created_at', { ascending: false });
+              if (!prospError && prospData) {
+                const extras = prospData
+                  .filter(row => !loadedIds.has(row.id))
+                  .map(row => mapLeadRow(row, previousLeads));
+                currentLeads = [...currentLeads, ...extras];
+              } else if (prospError) {
+                console.warn("[Walker Bank] Erro ao buscar leads Prospectado fora da paginação:", prospError);
               }
+            }
 
-              // Fallback: cache local para dados que não estão no banco (se existirem)
-              const existing = (typeof currentLeads !== 'undefined' && currentLeads)
-                ? currentLeads.find(l => l.id === row.id)
-                : null;
-
-              // Reconstrói o item estruturado leve trazendo tudo que veio do banco de forma segura
-              const item = {
-                ...(existing || {}),
-                id: row.id,
-                createdAt: row.created_at,
-                status: statusMapped,
-                operador_id: row.operador_id || existing?.operador_id || null,
-                operador_nome: row.operador_nome || existing?.operador_nome || null,
-                lead: {
-                  ...(existing?.lead || {}),
-                  ...(row.lead || {}),
-                  nome: row.nome || row.lead?.nome || '',
-                  cpf: row.cpf || row.lead?.cpf || ''
-                },
-                dados_funcionais: {
-                  ...(existing?.dados_funcionais || {}),
-                  ...(row.dados_funcionais || {}),
-                  convenio: row.convenio || row.dados_funcionais?.convenio || '',
-                  matricula: row.dados_funcionais?.matricula || existing?.dados_funcionais?.matricula || ''
-                },
-                dados_bancarios: {
-                  ...(existing?.dados_bancarios || {}),
-                  ...(row.dados_bancarios || {})
-                },
-                proposta: {
-                  ...(existing?.proposta || {}),
-                  ...(row.proposta || {}),
-                  valor_solicitado: row.valor_solicitado || row.proposta?.valor_solicitado || 0,
-                  valor_parcela: row.proposta?.valor_parcela ? parseFloat(row.proposta.valor_parcela) : (existing?.proposta?.valor_parcela || 0),
-                  prazo_meses: row.proposta?.prazo_meses ? parseInt(row.proposta.prazo_meses) : (existing?.proposta?.prazo_meses || 36),
-                  assinatura_sms_validada: row.proposta?.assinatura_sms_validada === 'true' || row.proposta?.assinatura_sms_validada === true || existing?.proposta?.assinatura_sms_validada || false,
-                  assinatura_manual_solicitada: row.proposta?.assinatura_manual_solicitada === 'true' || row.proposta?.assinatura_manual_solicitada === true || existing?.proposta?.assinatura_manual_solicitada || false
-                },
-                marketing: {
-                  ...(existing?.marketing || {}),
-                  ...(row.marketing || {})
-                },
-                historico_contatos: row.historico_contatos || existing?.historico_contatos || []
-              };
-
-              return item;
-            });
             safeSaveLeads(currentLeads);
           }
         } catch (err) {
@@ -4342,7 +4524,9 @@
         'clientes': { title: 'Clientes', sub: 'Central de atendimento' },
         'convenios': { title: 'Convênios', sub: 'Taxas, margens e regras por convênio' },
         'configuracoes': { title: 'Configurações', sub: 'Parâmetros do sistema' },
-        'logs': { title: 'Logs de Atividade', sub: 'Auditoria e rastreamento de ações do sistema' }
+        'logs': { title: 'Logs de Atividade', sub: 'Auditoria e rastreamento de ações do sistema' },
+        'resumo-atividades': { title: 'Resumo de Atividades', sub: 'Volume de ações por operador, com detalhamento completo' },
+        'carteira-operador': { title: 'Carteira por Operador', sub: 'Onde estão os leads de cada operador agora' }
       };
 
       const getInitialPage = () => {
@@ -4350,7 +4534,7 @@
         const dbIndex = pathParts.indexOf('dashboard');
         if (dbIndex !== -1 && pathParts[dbIndex + 1]) {
           const page = pathParts[dbIndex + 1].trim();
-          const validPages = ['inicio', 'mesa-analise', 'dashboard-geral', 'relatorio-financeiro', 'relatorio-leads', 'consulta-margem', 'base-geral', 'clientes', 'convenios', 'configuracoes', 'logs', 'acompanhamento', 'mural', 'prospeccao'];
+          const validPages = ['inicio', 'mesa-analise', 'dashboard-geral', 'relatorio-financeiro', 'relatorio-leads', 'consulta-margem', 'base-geral', 'clientes', 'convenios', 'configuracoes', 'logs', 'acompanhamento', 'mural', 'prospeccao', 'resumo-atividades', 'carteira-operador'];
           if (validPages.includes(page)) {
             return page;
           }
@@ -4426,6 +4610,14 @@
             renderLogs();
           }
         }
+        if (page === 'resumo-atividades') {
+          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+            fetchLogsFromSupabase().then(() => renderResumoAtividades());
+          } else {
+            renderResumoAtividades();
+          }
+        }
+        if (page === 'carteira-operador') renderCarteiraOperador();
         if (page === 'acompanhamento') renderAcompanhamento();
         if (page === 'mural') {
           // Renderiza imediatamente (mostra o formulário para admin)
@@ -5007,8 +5199,7 @@
         const totalFin = parcela * prazo;
         const cet = (Math.pow(1 + taxaMensal, 12) - 1) * 100;
 
-        const profile = getActiveProfile();
-        const opObj = OPERADORES.find(o => o.id === profile);
+        const user = getActiveUserObj();
 
         const newLead = {
           id: (typeof crypto !== 'undefined' && crypto.randomUUID)
@@ -5016,8 +5207,8 @@
               : `lead-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`,
           createdAt: new Date().toISOString(),
           status: "Recebida",
-          operador_id: profile !== 'admin' ? profile : null,
-          operador_nome: opObj ? opObj.nome : null,
+          operador_id: user.id,
+          operador_nome: user.nome,
           lead: { nome, cpf, celular, email, genero: '', estado_civil: '', data_nascimento: '', nome_mae: '' },
           dados_funcionais: { convenio: convKey, matricula, salario_liquido: salarioNum, profissao: '' },
           proposta: {
@@ -5291,14 +5482,42 @@
       };
 
       // --- Histórico do lead ---
-      const renderLeadHistory = (lead) => {
+      const renderLeadHistory = async (lead) => {
         const container = document.getElementById('m-historico-timeline');
         if (!container) return;
 
-        // Busca logs deste lead no audit log
-        let logs = [];
-        try { logs = JSON.parse(localStorage.getItem('walker_audit_log') || '[]'); } catch(e) {}
-        const leadLogs = logs.filter(l => l.lead_id === lead.id);
+        // Busca logs deste lead diretamente no Supabase, para garantir o histórico completo
+        // (mudanças de status feitas por outros operadores/sessões nem sempre estão no cache local)
+        let leadLogs = [];
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            const { data, error } = await supabaseClient
+              .from('audit_log')
+              .select('*')
+              .eq('proposta_id', lead.id)
+              .order('created_at', { ascending: false });
+            if (error) throw error;
+            leadLogs = (data || []).map(row => ({
+              lead_id: row.proposta_id,
+              tipo: row.tipo,
+              descricao: row.detalhes?.descricao || row.tipo,
+              timestamp: row.created_at,
+              operador_nome: row.detalhes?.operador_nome || null,
+              meta: row.detalhes?.meta || {}
+            }));
+          } catch (err) {
+            console.warn("[Walker Bank] Erro ao buscar histórico de auditoria do lead, usando cache local:", err);
+            try {
+              const logs = JSON.parse(localStorage.getItem('walker_audit_log') || '[]');
+              leadLogs = logs.filter(l => l.lead_id === lead.id);
+            } catch (e) {}
+          }
+        } else {
+          try {
+            const logs = JSON.parse(localStorage.getItem('walker_audit_log') || '[]');
+            leadLogs = logs.filter(l => l.lead_id === lead.id);
+          } catch (e) {}
+        }
 
         // Sempre inclui a entrada de criação
         const entries = [];
@@ -5539,7 +5758,7 @@
         // Checklist de completude e histórico
         const checklist = buildChecklist(lead);
         renderChecklistUI(checklist);
-        renderLeadHistory(lead);
+        await renderLeadHistory(lead);
 
         // Reseta para a primeira aba ao abrir
         switchModalTab('pessoal');
@@ -7052,9 +7271,161 @@
         renderClientes();
       });
 
-      // 10B-EXTRA: ACOMPANHAMENTO DE LEADS (Leads Prospectados)
+// 10B-EXTRA: ACOMPANHAMENTO DE LEADS (Leads Prospectados)
       // ==========================================
       let acompLeadAtivo = null; // cpf do lead sendo anotado
+
+      // Modal de justificativa obrigatória para devolução de lead (operador)
+      const openMotivoDevolucaoModal = () => {
+        return new Promise((resolve) => {
+          const modal = document.getElementById("acomp-motivo-modal");
+          const input = document.getElementById("acomp-motivo-input");
+          const btnConfirm = document.getElementById("acomp-motivo-btn-confirm");
+          const btnCancel = document.getElementById("acomp-motivo-btn-cancel");
+
+          input.value = "";
+
+          const cleanup = () => {
+            modal.classList.remove("active");
+            const newConfirm = btnConfirm.cloneNode(true);
+            const newCancel = btnCancel.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
+            btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+          };
+
+          const handleConfirm = () => {
+            const val = input.value.trim();
+            if (!val) {
+              showToast("Por favor, informe o motivo da devolução.", "var(--red-error)");
+              return;
+            }
+            cleanup();
+            resolve(val);
+          };
+
+          const handleCancel = () => {
+            cleanup();
+            resolve(false);
+          };
+
+          btnConfirm.addEventListener("click", handleConfirm);
+          btnCancel.addEventListener("click", handleCancel);
+
+          modal.classList.add("active");
+        });
+      };
+
+      // Devolve um lead de Acompanhamento (Prospectado) para a fila de Prospecção.
+      // Admin pode fazer isso em qualquer lead; operador só no que já é seu, e precisa justificar o motivo.
+      const acompVoltarParaProspeccao = async (lead) => {
+        const profile = getActiveProfile();
+        const isOwner = lead.operador_id === profile;
+        const isAdminUser = isCurrentUserAdmin();
+        if (!isAdminUser && !isOwner) return;
+
+        let motivo = "";
+        if (isAdminUser) {
+          const confirmed = await openConfirmModal(
+            `Deseja mover "${lead.lead?.nome || 'este lead'}" de volta para a fila de Prospecção? Ele deixará o Acompanhamento e ficará disponível novamente para contato.`,
+            "Voltar para Prospecção",
+            "↩",
+            "var(--navy)",
+            "Confirmar"
+          );
+          if (!confirmed) return;
+        } else {
+          const justificativa = await openMotivoDevolucaoModal();
+          if (!justificativa) return;
+          motivo = justificativa;
+        }
+
+        const user = getActiveUserObj();
+        lead.status = "Consulta de Margem";
+
+        if (!lead.historico_contatos) lead.historico_contatos = [];
+        lead.historico_contatos.push({
+          data: new Date().toISOString(),
+          operador: user.nome,
+          status: "Retorno para Prospecção",
+          observacao: motivo
+            ? `Lead devolvido para a fila de prospecção por ${user.nome}. Motivo: ${motivo}`
+            : `Lead devolvido para a fila de prospecção por ${user.nome}.`
+        });
+
+        updateLocalLeadsCache(lead);
+
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            const sanitizedLead = await sanitizeLeadPayload(lead);
+            await supabaseClient.from("leads").upsert({
+              id: sanitizedLead.id,
+              created_at: sanitizedLead.createdAt,
+              nome: sanitizedLead.lead?.nome,
+              cpf: sanitizedLead.lead?.cpf,
+              status: sanitizedLead.status,
+              convenio: sanitizedLead.dados_funcionais?.convenio,
+              valor_solicitado: sanitizedLead.proposta?.valor_solicitado || 0,
+              payload: sanitizedLead
+            });
+          } catch (err) {
+            console.error("[Walker Bank] Erro ao devolver lead para prospecção:", err);
+          }
+        }
+
+        recordLog("status_change", `Lead devolvido para a fila de Prospecção por ${user.nome}.${motivo ? ` Motivo: ${motivo}` : ''}`, lead, { de: "Prospectado", para: "Consulta de Margem", motivo });
+
+        markDirty('base-geral', 'inicio', 'dashboard-geral');
+        showToast("Lead devolvido para a fila de Prospecção.", "var(--navy)");
+        renderAcompanhamento();
+      };
+
+      // Reatribui um lead em Acompanhamento para outro operador continuar o contato — ação exclusiva do admin
+      const acompReatribuirOperador = async (lead, newOperadorId) => {
+        if (!isCurrentUserAdmin()) { renderAcompanhamento(); return; }
+        if (!newOperadorId) { renderAcompanhamento(); return; }
+
+        const novoOp = OPERADORES.find(o => o.id === newOperadorId);
+        if (!novoOp) { renderAcompanhamento(); return; }
+
+        if (novoOp.id === lead.operador_id) return;
+
+        const nomeAntigo = lead.operador_nome || "Ninguém";
+        lead.operador_id = novoOp.id;
+        lead.operador_nome = novoOp.nome;
+
+        if (!lead.historico_contatos) lead.historico_contatos = [];
+        lead.historico_contatos.push({
+          data: new Date().toISOString(),
+          operador: getActiveUserObj().nome,
+          status: "Reatribuição",
+          observacao: `Lead reatribuído de ${nomeAntigo} para ${novoOp.nome}.`
+        });
+
+        updateLocalLeadsCache(lead);
+
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            const sanitizedLead = await sanitizeLeadPayload(lead);
+            await supabaseClient.from("leads").upsert({
+              id: sanitizedLead.id,
+              created_at: sanitizedLead.createdAt,
+              nome: sanitizedLead.lead?.nome,
+              cpf: sanitizedLead.lead?.cpf,
+              status: sanitizedLead.status,
+              convenio: sanitizedLead.dados_funcionais?.convenio,
+              valor_solicitado: sanitizedLead.proposta?.valor_solicitado || 0,
+              payload: sanitizedLead
+            });
+          } catch (err) {
+            console.error("[Walker Bank] Erro ao reatribuir lead:", err);
+          }
+        }
+
+        recordLog("lead_reassign", `Lead reatribuído de ${nomeAntigo} para ${novoOp.nome}.`, lead, { de: nomeAntigo, para: novoOp.nome });
+
+        showToast(`Lead atribuído a ${novoOp.nome}.`, "var(--green-success)");
+        renderAcompanhamento();
+      };
 
       const renderAcompanhamento = () => {
         const leads = getLeads();
@@ -7090,7 +7461,16 @@
         // Filtra leads com status Prospectado
         let prospLeads = leads.filter(l => l.status === "Prospectado");
 
-        // Se for operador, vê apenas os seus próprios
+        // Conta quantos leads pertencem a este operador (ou no total se for admin) sem os filtros adicionais
+        let meusProspLeads = [...prospLeads];
+        if (profile !== 'admin') {
+          meusProspLeads = meusProspLeads.filter(l => l.operador_id === profile);
+        } else if (filterOperador !== 'all') {
+          meusProspLeads = meusProspLeads.filter(l => l.operador_id === filterOperador);
+        }
+        const totalSemFiltros = meusProspLeads.length;
+
+        // Se for operador, vê apenas os seus próprios na tabela
         if (profile !== 'admin') {
           prospLeads = prospLeads.filter(l => l.operador_id === profile);
         } else if (filterOperador !== 'all') {
@@ -7148,9 +7528,16 @@
         }
 
         // Atualiza contador sidebar e badge
-        const allProspCount = leads.filter(l => l.status === "Prospectado").length;
+        // Se operador logado, a contagem na sidebar exibe apenas os leads pertencentes a ele para ser consistente
+        const allProspCount = profile === 'admin' 
+          ? leads.filter(l => l.status === "Prospectado").length
+          : leads.filter(l => l.status === "Prospectado" && l.operador_id === profile).length;
+
         const navCount = document.getElementById("nav-count-acompanhamento");
-        if (navCount) navCount.textContent = allProspCount;
+        if (navCount) {
+          navCount.textContent = allProspCount;
+          navCount.style.display = allProspCount > 0 ? 'inline-flex' : 'none';
+        }
         const badge = document.getElementById("acomp-total-badge");
         if (badge) badge.textContent = `${prospLeads.length} lead${prospLeads.length !== 1 ? 's' : ''}`;
 
@@ -7160,12 +7547,47 @@
 
         if (!tbody || !empty || !table) return;
 
+        const emptyTitle = empty.querySelector("h3");
+        const emptyDesc = empty.querySelector("p");
+        let btnLimparFiltros = document.getElementById("btn-acomp-limpar-filtros-empty");
+
         if (prospLeads.length === 0) {
           empty.style.display = "flex";
           table.style.display = "none";
+          
+          if (totalSemFiltros > 0) {
+            if (emptyTitle) emptyTitle.textContent = "Nenhum lead corresponde aos filtros";
+            if (emptyDesc) emptyDesc.innerHTML = `Você possui <strong>${totalSemFiltros} lead(s)</strong> em acompanhamento, mas eles estão ocultos pelos filtros de busca, convênio ou status ativos.`;
+            
+            if (!btnLimparFiltros) {
+              btnLimparFiltros = document.createElement("button");
+              btnLimparFiltros.id = "btn-acomp-limpar-filtros-empty";
+              btnLimparFiltros.type = "button";
+              btnLimparFiltros.style.cssText = "margin-top: 16px; background: var(--cobalt); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer;";
+              btnLimparFiltros.textContent = "Limpar Filtros e Exibir Todos";
+              btnLimparFiltros.addEventListener("click", () => {
+                const searchEl = document.getElementById("acomp-search");
+                const convEl = document.getElementById("acomp-convenio");
+                const stEl = document.getElementById("acomp-status-filtro");
+                if (searchEl) searchEl.value = "";
+                if (convEl) convEl.value = "all";
+                if (stEl) stEl.value = "all";
+                renderAcompanhamento();
+              });
+              empty.appendChild(btnLimparFiltros);
+            } else {
+              btnLimparFiltros.style.display = "";
+            }
+          } else {
+            if (emptyTitle) emptyTitle.textContent = "Nenhum lead em acompanhamento";
+            if (emptyDesc) emptyDesc.textContent = "Leads prospectados aparecerão aqui para acompanhamento comercial.";
+            if (btnLimparFiltros) btnLimparFiltros.style.display = "none";
+          }
           return;
         }
+        
         empty.style.display = "none";
+        if (btnLimparFiltros) btnLimparFiltros.style.display = "none";
         table.style.display = "table";
 
         // Ordena por data de atualização mais recente
@@ -7176,6 +7598,8 @@
         });
 
         const frag = document.createDocumentFragment();
+        const isAdminUser = isCurrentUserAdmin();
+        const activeProfileNow = getActiveProfile();
         prospLeads.forEach(lead => {
           const cpfClean = (lead.lead?.cpf || '').replace(/\D/g, '');
           const nome = escapeHtml(lead.lead?.nome || '-');
@@ -7183,12 +7607,19 @@
           const convenio = escapeHtml(lead.dados_funcionais?.convenio || '-');
           const margemVal = parseFloat(lead.dados_funcionais?.margem_pre_aprovada) || 0;
           const margem = margemVal > 0 ? formatBRL(margemVal) : '-';
+          const canReturnToProspeccao = isAdminUser || lead.operador_id === activeProfileNow;
 
           // Último contato
           const historico = lead.historico_contatos || [];
           const ultimoContato = historico.length > 0 ? historico[historico.length - 1] : null;
           const ultObs = ultimoContato ? escapeHtml(ultimoContato.observacao || ultimoContato.status || '-') : 'Nenhuma observação';
           const ultData = ultimoContato ? formatDateBR(ultimoContato.data) : formatDateBR(lead.createdAt);
+
+          const reatribuirOptions = isAdminUser
+            ? `<option value="">-- Atribuir a --</option>` + OPERADORES.map(op =>
+                `<option value="${op.id}" ${lead.operador_id === op.id ? 'selected' : ''}>${escapeHtml(op.nome)}</option>`
+              ).join('')
+            : '';
 
           const tr = document.createElement('tr');
           tr.style.borderBottom = '1px solid rgba(24,27,44,0.06)';
@@ -7205,14 +7636,20 @@
             </td>
             <td style="padding: 14px 16px; font-size: 0.78rem; color: var(--gray-text); text-align:center; white-space:nowrap;">${ultData}</td>
             <td style="padding: 14px 16px; text-align:right;">
-              <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+              <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; align-items:center;">
+                ${isAdminUser ? `<select class="filter-select acomp-select-reatribuir" data-lead-id="${lead.id}" style="font-size:0.75rem; padding:4px 8px;">${reatribuirOptions}</select>` : ''}
                 <button class="btn-action-sm btn-acomp-ficha" data-cpf="${cpfClean}" style="background:var(--cobalt); color:white; border:none;">Ver Ficha / Negociar</button>
                 <button class="btn-action-sm btn-acomp-nota" data-lead-id="${lead.id}" data-cpf="${cpfClean}" data-nome="${nome}" style="background:transparent; border:1px solid rgba(24,27,44,0.2); color:var(--gray-text);">Anotar</button>
+                ${canReturnToProspeccao ? `<button class="btn-action-sm btn-acomp-voltar" data-lead-id="${lead.id}" style="background:transparent; border:1px solid rgba(24,27,44,0.2); color:var(--gray-text);">↩ Voltar p/ Prospecção</button>` : ''}
               </div>
             </td>
           `;
           tr.querySelector('.btn-acomp-ficha').addEventListener('click', () => openClientFicha(cpfClean));
           tr.querySelector('.btn-acomp-nota').addEventListener('click', () => abrirModalNota(lead));
+          const btnVoltar = tr.querySelector('.btn-acomp-voltar');
+          if (btnVoltar) btnVoltar.addEventListener('click', () => acompVoltarParaProspeccao(lead));
+          const selReatribuir = tr.querySelector('.acomp-select-reatribuir');
+          if (selReatribuir) selReatribuir.addEventListener('change', (e) => acompReatribuirOperador(lead, e.target.value));
           frag.appendChild(tr);
         });
         tbody.innerHTML = '';
@@ -7611,8 +8048,78 @@
         renderBaseGeral();
       });
 
+      // Monta o histórico combinado (tentativas de contato + auditoria) de todos os registros do cliente pelo CPF
+      const renderClientHistory = async (clientLeads) => {
+        const container = document.getElementById('cm-historico-timeline');
+        if (!container) return;
+
+        const contatoDotMap = {
+          "Não Atendeu": "dot-recusada", "Nao_Atendeu": "dot-recusada", "Sem_Interesse": "dot-recusada", "Não Tem Interesse": "dot-recusada",
+          "Ocupado": "dot-analise", "Agendado": "dot-analise", "Edição de Lead": "dot-edit", "Retornar": "dot-analise", "Remarcado": "dot-analise",
+          "Retorno para Prospecção": "dot-analise", "Reatribuição": "dot-edit",
+          "Prospectado": "dot-aprovada", "Proposta Gerada": "dot-aprovada", "WhatsApp Enviado": "dot-wpp", "Interessado": "dot-aprovada"
+        };
+        const auditDotMap = { status_change: 'dot-analise', lead_edit: 'dot-edit', lead_reassign: 'dot-edit', wpp_sent: 'dot-wpp' };
+
+        const entries = [];
+        clientLeads.forEach(lead => {
+          const origem = lead.marketing?.utm_source || 'formulário web';
+          entries.push({ data: lead.createdAt, acao: `Registro recebido via ${origem}`, dot: 'dot-received', usuario: null });
+          (lead.historico_contatos || []).forEach(contato => {
+            entries.push({
+              data: contato.data,
+              acao: `${contato.status}${contato.observacao ? ` — ${contato.observacao}` : ''}`,
+              dot: contatoDotMap[contato.status] || 'dot-default',
+              usuario: contato.operador || ''
+            });
+          });
+        });
+
+        if (sessionStorage.getItem("walker_demo_mode") !== "true") {
+          try {
+            const ids = clientLeads.map(l => l.id);
+            const { data, error } = await supabaseClient
+              .from('audit_log')
+              .select('*')
+              .in('proposta_id', ids)
+              .order('created_at', { ascending: false });
+            if (error) throw error;
+            (data || []).forEach(row => {
+              entries.push({
+                data: row.created_at,
+                acao: row.detalhes?.descricao || row.tipo,
+                dot: auditDotMap[row.tipo] || 'dot-default',
+                usuario: row.detalhes?.operador_nome || null
+              });
+            });
+          } catch (err) {
+            console.warn("[Walker Bank] Erro ao buscar histórico de auditoria do cliente:", err);
+          }
+        }
+
+        entries.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+        if (entries.length === 0) {
+          container.innerHTML = `<div class="history-empty">Nenhum registro de atividade encontrado para este cliente.</div>`;
+          return;
+        }
+
+        container.innerHTML = entries.map(e => {
+          const d = new Date(e.data);
+          const dateStr = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          return `
+            <div class="history-item">
+              <div class="history-dot ${e.dot}">●</div>
+              <div class="history-content">
+                <div class="history-action">${escapeHtml(e.acao)}</div>
+                <div class="history-meta">${dateStr}${e.usuario ? ` · por ${escapeHtml(e.usuario)}` : ''}</div>
+              </div>
+            </div>`;
+        }).join('');
+      };
+
       // Ficha do Cliente
-      const openClientFicha = (cpf) => {
+      const openClientFicha = async (cpf) => {
         activeClientCpf = cpf;
         const leads = getLeads();
         const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === cpf);
@@ -7766,8 +8273,13 @@
           setTimeout(() => calculateClientSim(), 50);
         }
 
+        const historicoContainer = document.getElementById("cm-historico-timeline");
+        if (historicoContainer) historicoContainer.innerHTML = `<div class="history-empty">Carregando histórico...</div>`;
+
         clientModal.classList.add("active");
         document.body.style.overflow = "hidden";
+
+        renderClientHistory(clientLeads);
       };
 
       const calculateClientSim = () => {
@@ -7878,7 +8390,6 @@
 
         if (clientLeads.length > 0) {
           const user = getActiveUserObj();
-          const profile = getActiveProfile();
 
           // Obter valores simulados ativos no modal
           const convenioSelect = document.getElementById("cm-sim-convenio");
@@ -7915,10 +8426,8 @@
           const updatedLeads = leads.map(l => {
             if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado")) {
               l.status = "Recebida";
-              if (profile !== "admin") {
-                l.operador_id = user.id;
-                l.operador_nome = user.nome;
-              }
+              l.operador_id = user.id;
+              l.operador_nome = user.nome;
               if (convenioVal) {
                 if (!l.dados_funcionais) l.dados_funcionais = {};
                 l.dados_funcionais.convenio = convenioVal;
@@ -9659,13 +10168,10 @@
           btnSimular.parentNode.replaceChild(newBtnSimular, btnSimular);
           newBtnSimular.addEventListener("click", async () => {
             const user = getActiveUserObj();
-            const profile = getActiveProfile();
 
             foundLead.status = "Recebida";
-            if (profile !== "admin") {
-              foundLead.operador_id = user.id;
-              foundLead.operador_nome = user.nome;
-            }
+            foundLead.operador_id = user.id;
+            foundLead.operador_nome = user.nome;
 
             // Calcula valores com base na margem pré-aprovada padrão para simulação inicial
             let margemPre = 0;
@@ -10168,9 +10674,6 @@
         } else if (status === "Sem Margem") {
           val = configs.prosp_bloqueio_sem_margem_valor !== undefined ? parseInt(configs.prosp_bloqueio_sem_margem_valor) : 30;
           unit = configs.prosp_bloqueio_sem_margem_unidade || "d";
-        } else if (status === "Não Autoriza Margem") {
-          val = configs.prosp_bloqueio_nao_autoriza_margem_valor !== undefined ? parseInt(configs.prosp_bloqueio_nao_autoriza_margem_valor) : 180;
-          unit = configs.prosp_bloqueio_nao_autoriza_margem_unidade || "d";
         }
 
         if (val > 0) {
@@ -10189,9 +10692,17 @@
           }
         }
 
-        // Salva local e Supabase mantendo Consulta de Margem
+        // Se WhatsApp Enviado, já move o lead para o status de Prospectado e atribui ao operador atual
+        if (status === "WhatsApp Enviado") {
+          prospActiveLead.status = "Prospectado";
+          prospActiveLead.operador_id = user.id;
+          prospActiveLead.operador_nome = user.nome;
+        }
+
+        // Salva no cache local
         updateLocalLeadsCache(prospActiveLead);
 
+        // Salva de forma síncrona no Supabase se não estiver no modo demo (evita concorrência e race condition)
         if (sessionStorage.getItem("walker_demo_mode") !== "true") {
           try {
             const sanitizedProsp = await sanitizeLeadPayload(prospActiveLead);
@@ -10206,7 +10717,7 @@
               payload: sanitizedProsp
             });
           } catch (err) {
-            console.error("[Walker Bank] Erro ao salvar tentativa no Supabase:", err);
+            console.error("[Walker Bank] Erro ao salvar alteração no Supabase:", err);
           }
         }
 
@@ -10214,35 +10725,15 @@
 
         showToast(`Tentativa de contato (${status}) registrada com sucesso!`, "var(--gold)");
 
-        // Se WhatsApp Enviado, mover lead para Prospectado e ir para aba de Acompanhamento
-        if (status === "WhatsApp Enviado" && prospActiveLead) {
-          const leadParaProspectar = prospActiveLead;
-          const userAtual = getActiveUserObj();
-          leadParaProspectar.status = "Prospectado";
-          leadParaProspectar.operador_id = userAtual.id;
-          leadParaProspectar.operador_nome = userAtual.nome;
-          updateLocalLeadsCache(leadParaProspectar);
-          if (sessionStorage.getItem("walker_demo_mode") !== "true") {
-            sanitizeLeadPayload(leadParaProspectar).then(sanitized => {
-              supabaseClient.from("leads").upsert({
-                id: sanitized.id,
-                created_at: sanitized.createdAt,
-                nome: sanitized.lead?.nome,
-                cpf: sanitized.lead?.cpf,
-                status: sanitized.status,
-                convenio: sanitized.dados_funcionais?.convenio,
-                valor_solicitado: sanitized.proposta?.valor_solicitado || 0,
-                payload: sanitized
-              }).catch(err => console.error("[Walker Bank] Erro ao mover lead para Prospectado via WhatsApp:", err));
-            });
-          }
+        // Se for WhatsApp Enviado, direciona imediatamente para a tela de Acompanhamento
+        if (status === "WhatsApp Enviado") {
           markDirty('acompanhamento', 'base-geral', 'inicio', 'dashboard-geral');
           prospActiveLead = null;
           navigateTo("acompanhamento");
           return;
         }
 
-        // Reseta (para outros status)
+        // Reseta estado da prospecção para outras tentativas (Não Atendeu, Ocupado, etc.)
         const cardLead = document.getElementById("prosp-lead-card");
         const emptyState = document.getElementById("prosp-empty-state");
         const prospCpf = document.getElementById("prosp-search-cpf");
@@ -10250,7 +10741,7 @@
         if (emptyState) emptyState.style.display = "block";
         if (prospCpf) prospCpf.value = "";
         prospActiveLead = null;
-      };
+      };;
 
       const prospAbrirModalEditar = () => {
         if (!prospActiveLead) return;
@@ -10641,8 +11132,7 @@
       const btnProspSemInteresse = document.getElementById("btn-prosp-sem-interesse");
       if (btnProspSemInteresse) btnProspSemInteresse.addEventListener("click", () => prospRegistrarTentativa("Não Tem Interesse"));
       // Botão "Sem Margem" removido: o aviso é detectado automaticamente pela ficha do lead (mg_margem_bruta === 0).
-      const btnProspNaoAutorizaMargem = document.getElementById("btn-prosp-nao-autoriza-margem");
-      if (btnProspNaoAutorizaMargem) btnProspNaoAutorizaMargem.addEventListener("click", () => prospRegistrarTentativa("Não Autoriza Margem"));
+
       
       const btnProspEdit = document.getElementById("btn-prosp-editar-contato");
       if (btnProspEdit) btnProspEdit.addEventListener("click", () => prospAbrirModalEditar());
@@ -10762,7 +11252,7 @@
         if ("Notification" in window && Notification.permission === "granted") {
           const notification = new Notification(title, {
             body: body,
-            icon: "LOGOTIPO/LOGO WALKER BANK BRANCO.png"
+            icon: "/LOGOTIPO/LOGO WALKER BANK BRANCO.png"
           });
           notification.onclick = () => {
             window.focus();
@@ -11126,6 +11616,9 @@
       // ==========================================
       // 13. LOGS DE ATIVIDADE (PÁGINA 7)
       // ==========================================
+      let currentPageLogs = 1;
+      const pageSizeLogs = 25;
+
       const renderLogs = () => {
         // Popular select de operadores dinamicamente
         const opSel = document.getElementById("log-filter-op");
@@ -11152,26 +11645,33 @@
         const dataInicio = document.getElementById("log-data-inicio")?.value;
         const dataFim    = document.getElementById("log-data-fim")?.value;
 
-        const filtered = allLogs.filter(log => {
+        // Filtros de tipo/operador/busca — compartilhados entre a tabela de logs e o Resumo por Operador/KPIs
+        const passesNonDateFilters = (log) => {
           if (filterTipo !== 'all' && log.tipo !== filterTipo) return false;
           if (filterOp !== 'all' && log.operador_id !== filterOp) return false;
           if (filterSearch && !log.descricao.toLowerCase().includes(filterSearch) && !(log.lead_nome || '').toLowerCase().includes(filterSearch)) return false;
+          return true;
+        };
+
+        const filtered = allLogs.filter(log => {
+          if (!passesNonDateFilters(log)) return false;
           if (dataInicio && new Date(log.timestamp) < new Date(dataInicio + "T00:00:00")) return false;
           if (dataFim) { const end = new Date(dataFim + "T00:00:00"); end.setHours(23,59,59); if (new Date(log.timestamp) > end) return false; }
           return true;
         });
 
-        // Determinar o período para os KPIs e para a Tabela de Resumo
+        // Determinar o período para os KPIs e para a Tabela de Resumo (respeita também tipo/operador/busca)
         let logsPeriodo = [];
         let labelPeriodo = "Hoje";
         const hoje = new Date();
         hoje.setHours(0,0,0,0);
 
         if (!dataInicio && !dataFim) {
-          logsPeriodo = allLogs.filter(log => new Date(log.timestamp) >= hoje);
+          logsPeriodo = allLogs.filter(log => passesNonDateFilters(log) && new Date(log.timestamp) >= hoje);
           labelPeriodo = `Hoje (${new Date().toLocaleDateString("pt-BR")})`;
         } else {
           logsPeriodo = allLogs.filter(log => {
+            if (!passesNonDateFilters(log)) return false;
             const dtLog = new Date(log.timestamp);
             if (dataInicio && dtLog < new Date(dataInicio + "T00:00:00")) return false;
             if (dataFim) {
@@ -11189,6 +11689,16 @@
             labelPeriodo = `Até ${new Date(dataFim + "T00:00:00").toLocaleDateString("pt-BR")}`;
           }
         }
+
+        // Acrescenta ao rótulo quando operador/tipo/busca também estão filtrando o resumo
+        const filtrosAtivos = [];
+        if (filterOp !== 'all') {
+          const opFiltrado = OPERADORES.find(o => o.id === filterOp);
+          filtrosAtivos.push(opFiltrado ? opFiltrado.nome : (filterOp === 'admin' ? 'Administrador' : filterOp));
+        }
+        if (filterTipo !== 'all') filtrosAtivos.push(LOG_TYPE_LABELS[filterTipo] || filterTipo);
+        if (filterSearch) filtrosAtivos.push(`busca: "${filterSearch}"`);
+        if (filtrosAtivos.length > 0) labelPeriodo += ` — filtrado por ${filtrosAtivos.join(', ')}`;
 
         // KPIs (filtrados para o período)
         document.getElementById("log-kpi-total").textContent  = logsPeriodo.length;
@@ -11224,10 +11734,10 @@
             };
           });
 
-          // Também inicializar o admin caso ele faça ações
+          // Também inicializar o bucket legado (ações registradas antes da atribuição por admin real)
           if (!resumoOps["admin"]) {
             resumoOps["admin"] = {
-              nome: "Administrador Geral",
+              nome: "Administrador Geral (Legado)",
               consultas: 0,
               prospeccoes: 0,
               simulacoes: 0,
@@ -11283,17 +11793,82 @@
         const tbody = document.getElementById("logs-table-body");
         const empty = document.getElementById("logs-empty");
         const table = document.getElementById("logs-table");
+        const pagRow = document.getElementById("logs-pagination-row");
         tbody.innerHTML = "";
 
         if (filtered.length === 0) {
           empty.style.display = "block";
           table.style.display = "none";
+          if (pagRow) pagRow.style.display = "none";
           return;
         }
         empty.style.display = "none";
         table.style.display = "table";
+        if (pagRow) pagRow.style.display = "flex";
 
-        filtered.forEach(log => {
+        // Paginação
+        const totalRecordsLogs = filtered.length;
+        const totalPagesLogs = Math.ceil(totalRecordsLogs / pageSizeLogs);
+        if (currentPageLogs > totalPagesLogs) currentPageLogs = totalPagesLogs || 1;
+        const startIdxLogs = (currentPageLogs - 1) * pageSizeLogs;
+        const endIdxLogs = Math.min(startIdxLogs + pageSizeLogs, totalRecordsLogs);
+        const pageLogs = filtered.slice(startIdxLogs, endIdxLogs);
+
+        const pagInfoLogs = document.getElementById("logs-pagination-info");
+        if (pagInfoLogs) pagInfoLogs.textContent = `Mostrando ${startIdxLogs + 1}-${endIdxLogs} de ${totalRecordsLogs} registros`;
+
+        const pagControlsLogs = document.getElementById("logs-pagination-controls");
+        if (pagControlsLogs) {
+          pagControlsLogs.innerHTML = "";
+
+          const btnPrev = document.createElement("button");
+          btnPrev.textContent = "Anterior";
+          btnPrev.style.cssText = "background: transparent; border: 1px solid rgba(24, 27, 44, 0.1); color: var(--navy); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;";
+          if (currentPageLogs === 1) {
+            btnPrev.disabled = true;
+            btnPrev.style.opacity = "0.4";
+            btnPrev.style.cursor = "not-allowed";
+          } else {
+            btnPrev.addEventListener("click", () => { currentPageLogs--; renderLogs(); });
+            btnPrev.addEventListener("mouseover", () => btnPrev.style.background = "rgba(24, 27, 44, 0.05)");
+            btnPrev.addEventListener("mouseout", () => btnPrev.style.background = "transparent");
+          }
+          pagControlsLogs.appendChild(btnPrev);
+
+          let startPageLogs = Math.max(1, currentPageLogs - 2);
+          let endPageLogs = Math.min(totalPagesLogs, startPageLogs + 4);
+          if (endPageLogs - startPageLogs < 4) startPageLogs = Math.max(1, endPageLogs - 4);
+
+          for (let p = startPageLogs; p <= endPageLogs; p++) {
+            const btnPage = document.createElement("button");
+            btnPage.textContent = p;
+            if (p === currentPageLogs) {
+              btnPage.style.cssText = "background: var(--navy); border: 1px solid var(--navy); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: default;";
+            } else {
+              btnPage.style.cssText = "background: transparent; border: 1px solid rgba(24, 27, 44, 0.1); color: var(--navy); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;";
+              btnPage.addEventListener("click", () => { currentPageLogs = p; renderLogs(); });
+              btnPage.addEventListener("mouseover", () => btnPage.style.background = "rgba(24, 27, 44, 0.05)");
+              btnPage.addEventListener("mouseout", () => btnPage.style.background = "transparent");
+            }
+            pagControlsLogs.appendChild(btnPage);
+          }
+
+          const btnNext = document.createElement("button");
+          btnNext.textContent = "Próximo";
+          btnNext.style.cssText = "background: transparent; border: 1px solid rgba(24, 27, 44, 0.1); color: var(--navy); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;";
+          if (currentPageLogs === totalPagesLogs) {
+            btnNext.disabled = true;
+            btnNext.style.opacity = "0.4";
+            btnNext.style.cursor = "not-allowed";
+          } else {
+            btnNext.addEventListener("click", () => { currentPageLogs++; renderLogs(); });
+            btnNext.addEventListener("mouseover", () => btnNext.style.background = "rgba(24, 27, 44, 0.05)");
+            btnNext.addEventListener("mouseout", () => btnNext.style.background = "transparent");
+          }
+          pagControlsLogs.appendChild(btnNext);
+        }
+
+        pageLogs.forEach(log => {
           const dt = new Date(log.timestamp);
           const dateStr = dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
           const avatar = getLogOperatorAvatar(log.operador_id);
@@ -11321,11 +11896,11 @@
       };
 
       // Event listeners dos filtros de log
-      const debouncedRenderLogs = debounce(renderLogs, 280);
+      const debouncedRenderLogs = debounce(() => { currentPageLogs = 1; renderLogs(); }, 280);
       ['log-search', 'log-data-inicio', 'log-data-fim', 'log-filter-op', 'log-filter-tipo'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.addEventListener('change', renderLogs);
+          el.addEventListener('change', () => { currentPageLogs = 1; renderLogs(); });
           el.addEventListener('input', debouncedRenderLogs);
         }
       });
@@ -11335,6 +11910,7 @@
         document.getElementById("log-data-fim").value = "";
         document.getElementById("log-filter-op").value = "all";
         document.getElementById("log-filter-tipo").value = "all";
+        currentPageLogs = 1;
         renderLogs();
       });
       document.getElementById("log-clear-all").addEventListener("click", () => {
@@ -11347,6 +11923,315 @@
         } else {
           showToast("Os logs de auditoria remotos são permanentes no Supabase para conformidade LGPD.", "orange");
         }
+      });
+
+      // ==========================================
+      // 13B. RESUMO DE ATIVIDADES POR OPERADOR (PÁGINA NOVA — SUBMENU DE LOGS)
+      // ==========================================
+      let resumoAtividadesExpandido = new Set(); // ids de operador com detalhamento aberto
+
+      const renderResumoAtividades = () => {
+        // Popular select de operadores dinamicamente (mesmo padrão da página de Logs)
+        const opSel = document.getElementById("resumo-filter-op");
+        if (opSel) {
+          const currentOpIds = new Set(OPERADORES.map(o => o.id));
+          const existingOpIds = new Set([...opSel.options].slice(2).map(o => o.value));
+          if (currentOpIds.size !== existingOpIds.size || [...currentOpIds].some(id => !existingOpIds.has(id))) {
+            const savedOp = opSel.value;
+            while (opSel.options.length > 2) opSel.remove(2);
+            OPERADORES.forEach(op => {
+              const opt = document.createElement('option');
+              opt.value = op.id;
+              opt.textContent = op.nome;
+              opSel.appendChild(opt);
+            });
+            opSel.value = savedOp;
+          }
+        }
+
+        const allLogs = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
+        const filterOp = document.getElementById("resumo-filter-op")?.value || 'all';
+        const dataInicio = document.getElementById("resumo-data-inicio")?.value;
+        const dataFim = document.getElementById("resumo-data-fim")?.value;
+
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        let logsPeriodo = [];
+        let labelPeriodo = "Hoje";
+        if (!dataInicio && !dataFim) {
+          logsPeriodo = allLogs.filter(log => new Date(log.timestamp) >= hoje && (filterOp === 'all' || log.operador_id === filterOp));
+          labelPeriodo = `Hoje (${new Date().toLocaleDateString("pt-BR")})`;
+        } else {
+          logsPeriodo = allLogs.filter(log => {
+            if (filterOp !== 'all' && log.operador_id !== filterOp) return false;
+            const dtLog = new Date(log.timestamp);
+            if (dataInicio && dtLog < new Date(dataInicio + "T00:00:00")) return false;
+            if (dataFim) { const end = new Date(dataFim + "T23:59:59"); if (dtLog > end) return false; }
+            return true;
+          });
+          if (dataInicio && dataFim) {
+            labelPeriodo = `${new Date(dataInicio + "T00:00:00").toLocaleDateString("pt-BR")} a ${new Date(dataFim + "T00:00:00").toLocaleDateString("pt-BR")}`;
+          } else if (dataInicio) {
+            labelPeriodo = `A partir de ${new Date(dataInicio + "T00:00:00").toLocaleDateString("pt-BR")}`;
+          } else if (dataFim) {
+            labelPeriodo = `Até ${new Date(dataFim + "T00:00:00").toLocaleDateString("pt-BR")}`;
+          }
+        }
+
+        const periodoEl = document.getElementById("resumo-atividades-periodo");
+        if (periodoEl) periodoEl.textContent = labelPeriodo;
+
+        // Agrupa por operador
+        const resumoOps = {};
+        OPERADORES.forEach(op => {
+          resumoOps[op.id] = { nome: op.nome, consultas: 0, prospeccoes: 0, aprovadas: 0, recusadas: 0, pagas: 0, anotacoes: 0, devolvidos: 0, total: 0, porTipo: {} };
+        });
+        if (!resumoOps["admin"]) {
+          resumoOps["admin"] = { nome: "Administrador Geral (Legado)", consultas: 0, prospeccoes: 0, aprovadas: 0, recusadas: 0, pagas: 0, anotacoes: 0, devolvidos: 0, total: 0, porTipo: {} };
+        }
+
+        logsPeriodo.forEach(log => {
+          const opId = log.operador_id || "admin";
+          if (!resumoOps[opId]) {
+            resumoOps[opId] = { nome: log.operador_nome || "Desconhecido", consultas: 0, prospeccoes: 0, aprovadas: 0, recusadas: 0, pagas: 0, anotacoes: 0, devolvidos: 0, total: 0, porTipo: {} };
+          }
+          const r = resumoOps[opId];
+          r.total++;
+          r.porTipo[log.tipo] = (r.porTipo[log.tipo] || 0) + 1;
+
+          if (log.tipo === "consulta_margem") r.consultas++;
+          else if (["prospeccao_tentativa", "prospeccao_prospectado", "prosp_retorno_agendado", "proposta_gerada"].includes(log.tipo)) r.prospeccoes++;
+          else if (log.tipo === "acompanhamento_nota") r.anotacoes++;
+          else if (log.tipo === "status_change") {
+            if (log.meta?.para === "Aprovada") r.aprovadas++;
+            else if (log.meta?.para === "Recusada") r.recusadas++;
+            else if (log.meta?.para === "Paga") r.pagas++;
+            else if (log.meta?.para === "Consulta de Margem" && log.meta?.de === "Prospectado") r.devolvidos++;
+          }
+        });
+
+        const tbody = document.getElementById("resumo-atividades-tbody");
+        const empty = document.getElementById("resumo-atividades-empty");
+        if (!tbody) return;
+
+        const entries = Object.entries(resumoOps).filter(([, r]) => r.total > 0 || filterOp === 'all');
+        if (entries.length === 0 || logsPeriodo.length === 0) {
+          tbody.innerHTML = "";
+          if (empty) empty.style.display = "block";
+          return;
+        }
+        if (empty) empty.style.display = "none";
+
+        const frag = document.createDocumentFragment();
+        entries.forEach(([opId, r]) => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid rgba(24, 27, 44, 0.04)';
+          tr.innerHTML = `
+            <td style="padding: 8px; font-weight: 600; color: var(--navy);">${escapeHtml(r.nome)}</td>
+            <td style="padding: 8px; text-align: center; font-weight: 700; color: var(--navy); background: rgba(24, 27, 44, 0.02); border-radius: 4px;">${r.total}</td>
+            <td style="padding: 8px; text-align: center; color: var(--cobalt); font-weight: 700;">${r.consultas}</td>
+            <td style="padding: 8px; text-align: center; color: var(--gold); font-weight: 700;">${r.prospeccoes}</td>
+            <td style="padding: 8px; text-align: center; color: var(--green-success); font-weight: 700;">${r.aprovadas}</td>
+            <td style="padding: 8px; text-align: center; color: var(--red-error); font-weight: 700;">${r.recusadas}</td>
+            <td style="padding: 8px; text-align: center; color: var(--dark-gold); font-weight: 700;">${r.pagas}</td>
+            <td style="padding: 8px; text-align: center; color: var(--gray-text); font-weight: 700;">${r.anotacoes}</td>
+            <td style="padding: 8px; text-align: center; color: var(--blue-info); font-weight: 700;">${r.devolvidos}</td>
+            <td style="padding: 8px; text-align: center;">
+              <button class="btn-action-sm btn-resumo-detalhe" data-op-id="${opId}" style="background: transparent; border: 1px solid rgba(24,27,44,0.2); color: var(--gray-text); font-size: 0.7rem;">
+                ${resumoAtividadesExpandido.has(opId) ? 'Ocultar ▲' : 'Ver tudo ▼'}
+              </button>
+            </td>
+          `;
+          frag.appendChild(tr);
+
+          if (resumoAtividadesExpandido.has(opId)) {
+            const trDetalhe = document.createElement('tr');
+            const tiposOrdenados = Object.entries(r.porTipo).sort((a, b) => b[1] - a[1]);
+            const itemsHtml = tiposOrdenados.length > 0
+              ? tiposOrdenados.map(([tipo, count]) => `
+                  <div style="display:flex; justify-content:space-between; gap:12px; padding:4px 10px; background:white; border:1px solid rgba(24,27,44,0.06); border-radius:6px; font-size:0.72rem;">
+                    <span style="color:var(--gray-text);">${escapeHtml(LOG_TYPE_LABELS[tipo] || tipo)}</span>
+                    <strong style="color:var(--navy);">${count}</strong>
+                  </div>
+                `).join('')
+              : '<span style="font-size:0.75rem; color:var(--gray-light-text);">Nenhuma ação detalhada neste período.</span>';
+            trDetalhe.innerHTML = `
+              <td colspan="10" style="padding: 12px 8px 16px; background: rgba(24,27,44,0.02);">
+                <div style="font-size:0.7rem; font-weight:700; color:var(--navy); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Detalhamento completo — ${escapeHtml(r.nome)}</div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:6px;">${itemsHtml}</div>
+              </td>
+            `;
+            frag.appendChild(trDetalhe);
+          }
+        });
+
+        tbody.innerHTML = "";
+        tbody.appendChild(frag);
+
+        tbody.querySelectorAll('.btn-resumo-detalhe').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const opId = btn.dataset.opId;
+            if (resumoAtividadesExpandido.has(opId)) resumoAtividadesExpandido.delete(opId);
+            else resumoAtividadesExpandido.add(opId);
+            renderResumoAtividades();
+          });
+        });
+      };
+
+      ['resumo-data-inicio', 'resumo-data-fim', 'resumo-filter-op'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', renderResumoAtividades);
+      });
+      document.getElementById("resumo-limpar").addEventListener("click", () => {
+        document.getElementById("resumo-data-inicio").value = "";
+        document.getElementById("resumo-data-fim").value = "";
+        document.getElementById("resumo-filter-op").value = "all";
+        renderResumoAtividades();
+      });
+
+      // ==========================================
+      // 13C. CARTEIRA POR OPERADOR (PÁGINA NOVA — SUBMENU DE LOGS)
+      // ==========================================
+      // Busca leve (sem payload/anexos) de TODOS os leads, só id/status/operador — usada exclusivamente
+      // pela Carteira por Operador para que as contagens não fiquem presas à janela de paginação de 200
+      // registros usada nas demais telas (que carregam o payload completo para exibição/edição).
+      const fetchLeadsLeveParaCarteira = async () => {
+        const resultado = [];
+        const BATCH = 1000;
+        const MAX_BATCHES = 20; // trava de segurança (até 20.000 leads)
+        for (let i = 0; i < MAX_BATCHES; i++) {
+          const from = i * BATCH;
+          const to = from + BATCH - 1;
+          const { data, error } = await supabaseClient
+            .from('leads')
+            .select('id, status, operador_id:payload->>operador_id, operador_nome:payload->>operador_nome')
+            .range(from, to);
+          if (error) throw error;
+          if (!data || data.length === 0) break;
+          resultado.push(...data);
+          if (data.length < BATCH) break;
+        }
+        return resultado;
+      };
+
+      let carteiraLeadsCache = null; // cache em memória da busca leve, evita refazer a query a cada troca de filtro
+
+      // Renderiza a Carteira a partir de um array de leads já carregado (sem tocar a rede) — usado tanto
+      // pela carga inicial quanto pelos filtros (Operador/Limpar), que só precisam recalcular localmente.
+      const renderCarteiraFromLeads = (leads) => {
+        const filterOp = document.getElementById("carteira-filter-op")?.value || 'all';
+
+        const naMesaStatuses = ["Recebida", "Em Análise", "Aguardando Assinatura", "Pendente"];
+
+        // KPIs gerais (sempre sobre a base inteira, independente do filtro de operador)
+        const semOperadorFila = leads.filter(l => (l.status === "Consulta de Margem" || l.status === "Importado") && !l.operador_id).length;
+        const acompGeral = leads.filter(l => l.status === "Prospectado").length;
+        const mesaGeral = leads.filter(l => naMesaStatuses.includes(l.status)).length;
+        const concluidosGeral = leads.filter(l => l.status === "Aprovada" || l.status === "Paga").length;
+
+        const kpiFila = document.getElementById("carteira-kpi-fila");
+        const kpiAcomp = document.getElementById("carteira-kpi-acompanhamento");
+        const kpiMesa = document.getElementById("carteira-kpi-mesa");
+        const kpiConcluidos = document.getElementById("carteira-kpi-concluidos");
+        if (kpiFila) kpiFila.textContent = semOperadorFila;
+        if (kpiAcomp) kpiAcomp.textContent = acompGeral;
+        if (kpiMesa) kpiMesa.textContent = mesaGeral;
+        if (kpiConcluidos) kpiConcluidos.textContent = concluidosGeral;
+
+        // Agrupa por operador
+        const carteiraOps = {};
+        OPERADORES.forEach(op => {
+          carteiraOps[op.id] = { nome: op.nome, baseGeral: 0, acompanhamento: 0, agendado: 0, mesa: 0, aprovadas: 0, pagas: 0, recusadas: 0, total: 0 };
+        });
+        if (!carteiraOps["admin"]) {
+          carteiraOps["admin"] = { nome: "Administrador Geral (Legado)", baseGeral: 0, acompanhamento: 0, agendado: 0, mesa: 0, aprovadas: 0, pagas: 0, recusadas: 0, total: 0 };
+        }
+
+        leads.forEach(lead => {
+          if (!lead.operador_id) return; // leads sem operador ficam só no KPI de fila
+          const opId = lead.operador_id;
+          if (!carteiraOps[opId]) {
+            carteiraOps[opId] = { nome: lead.operador_nome || "Desconhecido", baseGeral: 0, acompanhamento: 0, agendado: 0, mesa: 0, aprovadas: 0, pagas: 0, recusadas: 0, total: 0 };
+          }
+          const c = carteiraOps[opId];
+
+          if (lead.status === "Consulta de Margem" || lead.status === "Importado") c.baseGeral++;
+          else if (lead.status === "Prospectado") c.acompanhamento++;
+          else if (lead.status === "Agendado") c.agendado++;
+          else if (naMesaStatuses.includes(lead.status)) c.mesa++;
+          else if (lead.status === "Aprovada") c.aprovadas++;
+          else if (lead.status === "Paga") c.pagas++;
+          else if (lead.status === "Recusada") c.recusadas++;
+          else return; // status não contabilizado (ex.: Descartado) não soma no total
+
+          c.total++;
+        });
+
+        const tbody = document.getElementById("carteira-operador-tbody");
+        if (!tbody) return;
+
+        const entries = Object.entries(carteiraOps).filter(([opId]) => filterOp === 'all' || opId === filterOp);
+        const rows = entries.map(([, c]) => `
+          <tr style="border-bottom: 1px solid rgba(24, 27, 44, 0.04);">
+            <td style="padding: 8px; font-weight: 600; color: var(--navy);">${escapeHtml(c.nome)}</td>
+            <td style="padding: 8px; text-align: center; color: var(--gray-text); font-weight: 700;">${c.baseGeral}</td>
+            <td style="padding: 8px; text-align: center; color: var(--gold); font-weight: 700;">${c.acompanhamento}</td>
+            <td style="padding: 8px; text-align: center; color: var(--blue-info); font-weight: 700;">${c.agendado}</td>
+            <td style="padding: 8px; text-align: center; color: var(--cobalt); font-weight: 700;">${c.mesa}</td>
+            <td style="padding: 8px; text-align: center; color: var(--green-success); font-weight: 700;">${c.aprovadas}</td>
+            <td style="padding: 8px; text-align: center; color: var(--dark-gold); font-weight: 700;">${c.pagas}</td>
+            <td style="padding: 8px; text-align: center; color: var(--red-error); font-weight: 700;">${c.recusadas}</td>
+            <td style="padding: 8px; text-align: center; font-weight: 700; color: var(--navy); background: rgba(24, 27, 44, 0.02); border-radius: 4px;">${c.total}</td>
+          </tr>
+        `).join('');
+
+        tbody.innerHTML = rows || `<tr><td colspan="9" style="text-align:center; padding:12px; color:var(--gray-light-text);">Nenhum lead atribuído encontrado.</td></tr>`;
+      };
+
+      // Carga inicial (ou navegação até a página): busca os dados na rede e preenche o cache.
+      // Filtros subsequentes reusam o cache via renderCarteiraFromLeads, sem nova consulta.
+      const renderCarteiraOperador = async () => {
+        const opSel = document.getElementById("carteira-filter-op");
+        if (opSel) {
+          const currentOpIds = new Set(OPERADORES.map(o => o.id));
+          const existingOpIds = new Set([...opSel.options].slice(2).map(o => o.value));
+          if (currentOpIds.size !== existingOpIds.size || [...currentOpIds].some(id => !existingOpIds.has(id))) {
+            const savedOp = opSel.value;
+            while (opSel.options.length > 2) opSel.remove(2);
+            OPERADORES.forEach(op => {
+              const opt = document.createElement('option');
+              opt.value = op.id;
+              opt.textContent = op.nome;
+              opSel.appendChild(opt);
+            });
+            opSel.value = savedOp;
+          }
+        }
+
+        const tbodyLoading = document.getElementById("carteira-operador-tbody");
+        if (tbodyLoading) tbodyLoading.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:12px; color:var(--gray-light-text);">Carregando carteira completa...</td></tr>`;
+
+        if (sessionStorage.getItem("walker_demo_mode") === "true") {
+          carteiraLeadsCache = getLeads();
+        } else {
+          try {
+            carteiraLeadsCache = await fetchLeadsLeveParaCarteira();
+          } catch (err) {
+            console.error("[Walker Bank] Erro ao buscar carteira completa, usando cache local (pode estar incompleto):", err);
+            carteiraLeadsCache = getLeads();
+          }
+        }
+
+        renderCarteiraFromLeads(carteiraLeadsCache);
+      };
+
+      document.getElementById("carteira-filter-op").addEventListener("change", () => {
+        renderCarteiraFromLeads(carteiraLeadsCache || getLeads());
+      });
+      document.getElementById("carteira-limpar").addEventListener("click", () => {
+        document.getElementById("carteira-filter-op").value = "all";
+        renderCarteiraFromLeads(carteiraLeadsCache || getLeads());
       });
 
       const renderActivePage = () => {
@@ -11363,6 +12248,8 @@
           'clientes': renderClientes,
           'acompanhamento': renderAcompanhamento,
           'logs': renderLogs,
+          'resumo-atividades': renderResumoAtividades,
+          'carteira-operador': renderCarteiraOperador,
           'convenios': renderConveniosPage,
           'configuracoes': loadConfigs,
           'mural': () => window.renderMuralPage?.()
@@ -11473,7 +12360,7 @@
               if (!session) {
                 sessionStorage.removeItem("walker_admin_session");
                 sessionStorage.removeItem("walker_user_profile");
-                window.location.href = "login";
+                window.location.href = "/login";
                 return;
               }
               sessionStorage.setItem("walker_admin_session", "true");
@@ -11494,7 +12381,7 @@
             } catch (e) {
               console.error("Erro ao validar sessão com o Supabase:", e);
               sessionStorage.removeItem("walker_admin_session");
-              window.location.href = "login";
+              window.location.href = "/login";
               return;
             }
 
@@ -11515,7 +12402,7 @@
               if (sessionStorage.getItem("walker_demo_mode") !== "true") {
                 try { await supabaseClient.auth.signOut(); } catch(se) {}
               }
-              window.location.href = "login?blocked=true";
+              window.location.href = "/login?blocked=true";
               return;
             }
           }

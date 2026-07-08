@@ -180,6 +180,20 @@
       border-radius: 10px;
     }
 
+    /* Submenu (itens indentados dentro de uma seção, ex.: sob "Logs de Atividade") */
+    .nav-subitem {
+      padding-left: 52px;
+      font-size: 0.78rem;
+    }
+    .nav-subitem .nav-icon {
+      width: 16px;
+      height: 16px;
+    }
+    .nav-subitem .nav-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
     .sidebar-footer {
       padding: 16px 20px;
       border-top: 1px solid rgba(212, 188, 110, 0.08);
