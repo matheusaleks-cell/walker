@@ -4259,6 +4259,16 @@
       };
       window.getConfigs = getConfigs;
 
+      // Retorna a lista de convênios que um operador está autorizado a prospectar (novos leads),
+      // ou null se não houver restrição (vê/pega todos). Admin em "Visão Geral" nunca é restringido.
+      const getOperatorAllowedConvenios = (profileId) => {
+        if (!profileId || profileId === 'admin') return null;
+        const cfg = getConfigs();
+        const ov = (cfg.operadores_config || {})[profileId];
+        if (!ov || !Array.isArray(ov.convenios_permitidos) || ov.convenios_permitidos.length === 0) return null;
+        return ov.convenios_permitidos;
+      };
+
       // Funções de sincronização com o Supabase
       const LEADS_SELECT_FIELDS = `
               id,
@@ -8679,6 +8689,8 @@
           return;
         }
         
+        const conveniosCatalog = (currentConvenios && Object.keys(currentConvenios).length) ? currentConvenios : defaultConvenios;
+
         container.innerHTML = activeOps.map(op => {
           const ov = overrides[op.id] || {};
           const nome = ov.nome !== undefined ? ov.nome : op.nome;
@@ -8688,6 +8700,8 @@
           const opRole = ov.role !== undefined ? ov.role : (op.role || "operador");
           const isAtivo = ov.ativo !== false;
           const isSelf = op.id === currentUserId;
+          const conveniosPermitidos = Array.isArray(ov.convenios_permitidos) && ov.convenios_permitidos.length > 0 ? ov.convenios_permitidos : null;
+          const isTodosConvenios = conveniosPermitidos === null;
 
           const badge = opRole === 'admin'
             ? `<span style="background: rgba(212, 188, 110, 0.15); color: var(--gold); padding: 1.5px 5px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(212, 188, 110, 0.4); margin-left: 6px;">Admin</span>`
@@ -8698,7 +8712,8 @@
             : 'background: rgba(231, 76, 60, 0.1); color: var(--red-error); border: 1px solid rgba(231, 76, 60, 0.2);';
 
           return `
-            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:grid;grid-template-columns:40px 1fr 0.9fr 0.9fr 0.9fr 100px 150px;gap:10px;align-items:center;">
+            <div style="background:rgba(24,27,44,0.02);border:1px solid rgba(24,27,44,0.08);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+            <div style="display:grid;grid-template-columns:40px 1fr 0.9fr 0.9fr 0.9fr 100px 150px;gap:10px;align-items:center;">
               <div style="width:40px;height:40px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:0.85rem;flex-shrink:0;">${op.avatar}</div>
               <div class="config-field">
                 <label style="display:flex; align-items:center;">Nome do Operador ${badge}</label>
@@ -8751,11 +8766,37 @@
                 </div>
               </div>
             </div>
+            <div style="border-top:1px dashed rgba(24,27,44,0.12); padding-top:10px;">
+              <label style="font-size:0.7rem; font-weight:700; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:8px;">Convênios que pode prospectar (novos leads)</label>
+              <div style="display:flex; flex-wrap:wrap; gap:6px 14px;">
+                <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:700; color:var(--navy); cursor:pointer;">
+                  <input type="checkbox" class="op-cfg-convenio-all" data-id="${op.id}" ${isTodosConvenios ? 'checked' : ''}> Todos os Convênios
+                </label>
+                ${Object.entries(conveniosCatalog).map(([key, conv]) => `
+                  <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.8rem; color:var(--navy); cursor:pointer;">
+                    <input type="checkbox" class="op-cfg-convenio-item" data-id="${op.id}" data-convenio="${key}" ${!isTodosConvenios && conveniosPermitidos.includes(key) ? 'checked' : ''} ${isTodosConvenios ? 'disabled' : ''}> ${escapeHtml(conv.nome || key)}
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+            </div>
           `;
         }).join('');
 
         container.querySelectorAll(".op-cfg-meta, .op-cfg-salario").forEach(input => {
           input.addEventListener("input", mascaraMoeda);
+        });
+
+        // Alterna checkboxes individuais quando "Todos os Convênios" é marcado/desmarcado
+        container.querySelectorAll(".op-cfg-convenio-all").forEach(cb => {
+          cb.addEventListener("change", () => {
+            const id = cb.dataset.id;
+            const itemCbs = container.querySelectorAll(`.op-cfg-convenio-item[data-id="${id}"]`);
+            itemCbs.forEach(itemCb => {
+              itemCb.disabled = cb.checked;
+              if (cb.checked) itemCb.checked = false;
+            });
+          });
         });
 
         initOperadoresActionListeners();
@@ -9331,6 +9372,19 @@
           const id = select.dataset.id;
           if (!operadoresConfig[id]) operadoresConfig[id] = {};
           operadoresConfig[id].role = select.value;
+        });
+        document.querySelectorAll(".op-cfg-convenio-all").forEach(cb => {
+          const id = cb.dataset.id;
+          if (!operadoresConfig[id]) operadoresConfig[id] = {};
+          // Inicializa vazio; se "Todos" estiver marcado os checkboxes individuais ficam desmarcados/desabilitados
+          // e a lista permanece vazia — vazio = sem restrição (ver getOperatorAllowedConvenios)
+          operadoresConfig[id].convenios_permitidos = [];
+        });
+        document.querySelectorAll(".op-cfg-convenio-item:checked").forEach(cb => {
+          const id = cb.dataset.id;
+          if (!operadoresConfig[id]) operadoresConfig[id] = {};
+          if (!Array.isArray(operadoresConfig[id].convenios_permitidos)) operadoresConfig[id].convenios_permitidos = [];
+          operadoresConfig[id].convenios_permitidos.push(cb.dataset.convenio);
         });
 
         // Aplica nomes/metas/funções/roles/salários editados ao array OPERADORES em memória
@@ -10333,6 +10387,14 @@
         btn.textContent = originalText;
         btn.disabled = false;
 
+        // Restringe pelo(s) convênio(s) que o operador está autorizado a prospectar
+        if (foundLead) {
+          const allowedConvenios = getOperatorAllowedConvenios(getActiveProfile());
+          if (allowedConvenios && !allowedConvenios.includes(foundLead.dados_funcionais?.convenio)) {
+            foundLead = null;
+          }
+        }
+
         if (foundLead) {
           prospActiveLead = foundLead;
           prospRenderCard(foundLead);
@@ -10361,6 +10423,8 @@
         let foundLead = null;
         const agora = new Date();
         const currentUser = getActiveUserObj();
+        // Leads já agendados/em carteira do operador não são afetados; a restrição vale só para leads novos da fila
+        const allowedConvenios = getOperatorAllowedConvenios(getActiveProfile());
 
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
           // Verifica retornos vencidos primeiro (filtrando pelo operador logado)
@@ -10376,7 +10440,7 @@
             updateLocalLeadsCache(foundLead);
             showToast("📅 Retorno agendado pronto! Lead carregado para prospecção.", "var(--blue-info)");
           } else {
-            const leads = getLeads().filter(l => (l.status === "Consulta de Margem" || l.status === "Importado") && (!l.wpp_bloqueado_ate || new Date(l.wpp_bloqueado_ate) <= agora));
+            const leads = getLeads().filter(l => (l.status === "Consulta de Margem" || l.status === "Importado") && (!l.wpp_bloqueado_ate || new Date(l.wpp_bloqueado_ate) <= agora) && (!allowedConvenios || allowedConvenios.includes(l.dados_funcionais?.convenio)));
             if (leads.length > 0) {
               const idx = Math.floor(Math.random() * leads.length);
               foundLead = leads[idx];
@@ -10428,8 +10492,10 @@
             }
 
             if (!foundLead) {
-              // Fila randômica normal
-              const { data, error } = await supabaseClient.from('leads').select('id, payload').in('status', ['Consulta de Margem', 'Importado']);
+              // Fila randômica normal (restrita ao(s) convênio(s) autorizado(s) para o operador, se houver)
+              let poolQuery = supabaseClient.from('leads').select('id, payload').in('status', ['Consulta de Margem', 'Importado']);
+              if (allowedConvenios) poolQuery = poolQuery.in('convenio', allowedConvenios);
+              const { data, error } = await poolQuery;
               if (error) throw error;
               if (data && data.length > 0) {
                 const qualificados = data.map(row => {
