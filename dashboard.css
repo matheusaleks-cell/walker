@@ -1181,6 +1181,25 @@
     }
 
     /* ======================================
+       OPERADOR — Dropdown de Convênios Permitidos
+       ====================================== */
+    .op-convenio-summary-btn:hover {
+      border-color: var(--gold) !important;
+    }
+
+    .op-convenio-chevron.open {
+      transform: rotate(180deg);
+    }
+
+    .op-convenio-row {
+      transition: background 0.12s ease;
+    }
+
+    .op-convenio-row:hover {
+      background: rgba(24, 27, 44, 0.04);
+    }
+
+    /* ======================================
        CONVÊNIOS — Tabela Inline Editável
     ====================================== */
     .convenios-table-wrapper { overflow-x: auto; }

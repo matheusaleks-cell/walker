@@ -4269,6 +4269,23 @@
         return ov.convenios_permitidos;
       };
 
+      // Texto resumido exibido no botão do dropdown de convênios permitidos (ex.: "INSS, Municipal")
+      const getConvenioSummaryText = (isTodos, permitidos, catalog) => {
+        if (isTodos || !permitidos || permitidos.length === 0) return "Todos os Convênios";
+        const nomes = permitidos.map(key => catalog[key]?.nome || key);
+        return nomes.join(", ");
+      };
+
+      // Indica se um lead ainda não reivindicado (Importado/Consulta de Margem) pode ser
+      // "pego" pelo operador ativo via Consultar Margem ou Clientes → Atender. Leads que já
+      // passaram pela fila de Prospecção (Prospectado) ou por qualquer status posterior já
+      // foram vetados na entrada e continuam acessíveis normalmente.
+      const isLeadClaimableByOperator = (lead, allowedConvenios) => {
+        if (lead.status !== "Consulta de Margem" && lead.status !== "Importado") return true;
+        if (!allowedConvenios) return true;
+        return allowedConvenios.includes(lead.dados_funcionais?.convenio);
+      };
+
       // Funções de sincronização com o Supabase
       const LEADS_SELECT_FIELDS = `
               id,
@@ -8153,7 +8170,12 @@
         }
 
         // Exibe ou oculta o botão de atendimento se o lead ainda não iniciou negociação
-        const hasConsultaMargem = clientLeads.some(l => l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado");
+        // (respeitando os convênios que o operador ativo está autorizado a prospectar)
+        const allowedConveniosFicha = getOperatorAllowedConvenios(getActiveProfile());
+        const hasConsultaMargem = clientLeads.some(l =>
+          (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado") &&
+          isLeadClaimableByOperator(l, allowedConveniosFicha)
+        );
         const cmFooter = document.getElementById("cm-footer-atendimento");
         if (cmFooter) {
           if (hasConsultaMargem) {
@@ -8396,7 +8418,15 @@
         btn.textContent = "Iniciando...";
 
         const leads = getLeads();
-        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado"));
+        const allowedConveniosAtender = getOperatorAllowedConvenios(getActiveProfile());
+        const clientLeads = leads.filter(l => (l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado") && isLeadClaimableByOperator(l, allowedConveniosAtender));
+
+        if (clientLeads.length === 0) {
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+          alert("Este lead não pertence a um convênio que você está autorizado a atender.");
+          return;
+        }
 
         if (clientLeads.length > 0) {
           const user = getActiveUserObj();
@@ -8434,7 +8464,7 @@
           }
 
           const updatedLeads = leads.map(l => {
-            if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado")) {
+            if ((l.lead?.cpf?.replace(/\D/g, "") || '') === activeClientCpf && (l.status === "Consulta de Margem" || l.status === "Importado" || l.status === "Prospectado") && isLeadClaimableByOperator(l, allowedConveniosAtender)) {
               l.status = "Recebida";
               l.operador_id = user.id;
               l.operador_nome = user.nome;
@@ -8768,15 +8798,22 @@
             </div>
             <div style="border-top:1px dashed rgba(24,27,44,0.12); padding-top:10px;">
               <label style="font-size:0.7rem; font-weight:700; color:var(--gray-text); text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:8px;">Convênios que pode prospectar (novos leads)</label>
-              <div style="display:flex; flex-wrap:wrap; gap:6px 14px;">
-                <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:700; color:var(--navy); cursor:pointer;">
-                  <input type="checkbox" class="op-cfg-convenio-all" data-id="${op.id}" ${isTodosConvenios ? 'checked' : ''}> Todos os Convênios
-                </label>
-                ${Object.entries(conveniosCatalog).map(([key, conv]) => `
-                  <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.8rem; color:var(--navy); cursor:pointer;">
-                    <input type="checkbox" class="op-cfg-convenio-item" data-id="${op.id}" data-convenio="${key}" ${!isTodosConvenios && conveniosPermitidos.includes(key) ? 'checked' : ''} ${isTodosConvenios ? 'disabled' : ''}> ${escapeHtml(conv.nome || key)}
+              <div class="op-convenio-dropdown" data-id="${op.id}" style="position:relative; max-width:340px;">
+                <button type="button" class="op-convenio-summary-btn" data-id="${op.id}" style="width:100%; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; border-radius:6px; border:1.5px solid rgba(24,27,44,0.15); background:white; font-size:0.8rem; color:var(--navy); cursor:pointer; font-family:var(--font-body); transition:var(--transition-fast);">
+                  <span class="op-convenio-summary-text" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(getConvenioSummaryText(isTodosConvenios, conveniosPermitidos, conveniosCatalog))}</span>
+                  <svg class="op-convenio-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; transition:transform 0.15s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="op-convenio-panel" data-id="${op.id}" style="display:none; position:absolute; z-index:20; top:calc(100% + 4px); left:0; right:0; background:white; border:1.5px solid rgba(24,27,44,0.15); border-radius:8px; box-shadow:0 8px 24px rgba(24,27,44,0.14); padding:6px; max-height:230px; overflow-y:auto;">
+                  <label class="op-convenio-row" style="display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:5px; font-size:0.8rem; font-weight:700; color:var(--navy); cursor:pointer;">
+                    <input type="checkbox" class="op-cfg-convenio-all" data-id="${op.id}" ${isTodosConvenios ? 'checked' : ''}> Todos os Convênios
                   </label>
-                `).join('')}
+                  <div style="border-top:1px solid rgba(24,27,44,0.08); margin:4px 2px;"></div>
+                  ${Object.entries(conveniosCatalog).map(([key, conv]) => `
+                    <label class="op-convenio-row" style="display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:5px; font-size:0.8rem; color:var(--navy); cursor:pointer;">
+                      <input type="checkbox" class="op-cfg-convenio-item" data-id="${op.id}" data-convenio="${key}" ${!isTodosConvenios && conveniosPermitidos.includes(key) ? 'checked' : ''} ${isTodosConvenios ? 'disabled' : ''}> ${escapeHtml(conv.nome || key)}
+                    </label>
+                  `).join('')}
+                </div>
               </div>
             </div>
             </div>
@@ -8787,6 +8824,33 @@
           input.addEventListener("input", mascaraMoeda);
         });
 
+        // Abre/fecha o dropdown de convênios permitidos ao clicar no botão-resumo
+        container.querySelectorAll(".op-convenio-summary-btn").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            const panel = container.querySelector(`.op-convenio-panel[data-id="${id}"]`);
+            const chevron = btn.querySelector(".op-convenio-chevron");
+            const isOpen = panel.style.display === "block";
+            // Fecha qualquer outro dropdown aberto antes de abrir este
+            container.querySelectorAll(".op-convenio-panel").forEach(p => { p.style.display = "none"; });
+            container.querySelectorAll(".op-convenio-chevron").forEach(c => c.classList.remove("open"));
+            if (!isOpen) {
+              panel.style.display = "block";
+              chevron.classList.add("open");
+            }
+          });
+        });
+
+        // Atualiza o texto-resumo do dropdown a partir do estado atual dos checkboxes
+        const refreshConvenioSummary = (id) => {
+          const btn = container.querySelector(`.op-convenio-summary-btn[data-id="${id}"] .op-convenio-summary-text`);
+          const allCb = container.querySelector(`.op-cfg-convenio-all[data-id="${id}"]`);
+          const itemCbs = [...container.querySelectorAll(`.op-cfg-convenio-item[data-id="${id}"]`)];
+          const selecionados = itemCbs.filter(cb => cb.checked).map(cb => cb.dataset.convenio);
+          btn.textContent = getConvenioSummaryText(allCb.checked, selecionados, conveniosCatalog);
+        };
+
         // Alterna checkboxes individuais quando "Todos os Convênios" é marcado/desmarcado
         container.querySelectorAll(".op-cfg-convenio-all").forEach(cb => {
           cb.addEventListener("change", () => {
@@ -8796,8 +8860,23 @@
               itemCb.disabled = cb.checked;
               if (cb.checked) itemCb.checked = false;
             });
+            refreshConvenioSummary(id);
           });
         });
+
+        container.querySelectorAll(".op-cfg-convenio-item").forEach(cb => {
+          cb.addEventListener("change", () => refreshConvenioSummary(cb.dataset.id));
+        });
+
+        // Fecha qualquer dropdown de convênios aberto ao clicar fora dele (listener único, sobrevive a re-renders)
+        if (!window._opConvenioDocListenerAttached) {
+          document.addEventListener("click", (e) => {
+            if (e.target.closest(".op-convenio-dropdown")) return;
+            document.querySelectorAll(".op-convenio-panel").forEach(p => { p.style.display = "none"; });
+            document.querySelectorAll(".op-convenio-chevron").forEach(c => c.classList.remove("open"));
+          });
+          window._opConvenioDocListenerAttached = true;
+        }
 
         initOperadoresActionListeners();
       };
@@ -10150,6 +10229,15 @@
 
         btn.innerHTML = originalText;
         btn.disabled = false;
+
+        // Bloqueia leads ainda não reivindicados (fila de prospecção) fora do(s) convênio(s)
+        // que o operador ativo está autorizado a atender
+        if (foundLead) {
+          const allowedConveniosMargem = getOperatorAllowedConvenios(getActiveProfile());
+          if (!isLeadClaimableByOperator(foundLead, allowedConveniosMargem)) {
+            foundLead = null;
+          }
+        }
 
         if (foundLead) {
           emptyState.style.display = "none";
