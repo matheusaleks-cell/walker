@@ -4260,9 +4260,17 @@
       window.getConfigs = getConfigs;
 
       // Retorna a lista de convênios que um operador está autorizado a prospectar (novos leads),
-      // ou null se não houver restrição (vê/pega todos). Admin em "Visão Geral" nunca é restringido.
+      // ou null se não houver restrição (vê/pega todos).
       const getOperatorAllowedConvenios = (profileId) => {
-        if (!profileId || profileId === 'admin') return null;
+        if (!profileId) return null;
+        // "admin" é o sentinel de "Visão Geral", não um id de conta. Resolve para o usuário
+        // real logado, pois quem efetivamente prospecta é essa pessoa — se ela (mesmo tendo
+        // role admin) tiver convênios restritos configurados, a restrição deve valer também aqui.
+        if (profileId === 'admin') {
+          const realProfile = getCurrentUserProfile();
+          if (!realProfile || !realProfile.id) return null;
+          profileId = realProfile.id;
+        }
         const cfg = getConfigs();
         const ov = (cfg.operadores_config || {})[profileId];
         if (!ov || !Array.isArray(ov.convenios_permitidos) || ov.convenios_permitidos.length === 0) return null;
@@ -9425,8 +9433,10 @@
 
       // Salvar config
       document.getElementById("btn-save-config").addEventListener("click", async () => {
-        // Coleta overrides de operadores
-        const operadoresConfig = {};
+        // Coleta overrides de operadores. Parte do que já está salvo (ativo, excluido, avatar,
+        // e qualquer operador não renderizado no momento, como os excluídos) para não perder
+        // esses campos — só os campos abaixo, vindos do formulário, são sobrescritos.
+        const operadoresConfig = JSON.parse(JSON.stringify((getConfigs().operadores_config) || {}));
         document.querySelectorAll(".op-cfg-nome").forEach(input => {
           const id = input.dataset.id;
           if (!operadoresConfig[id]) operadoresConfig[id] = {};
@@ -10511,13 +10521,13 @@
         let foundLead = null;
         const agora = new Date();
         const currentUser = getActiveUserObj();
-        // Leads já agendados/em carteira do operador não são afetados; a restrição vale só para leads novos da fila
+        // Aplica-se tanto a retornos agendados quanto a leads novos da fila
         const allowedConvenios = getOperatorAllowedConvenios(getActiveProfile());
 
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
-          // Verifica retornos vencidos primeiro (filtrando pelo operador logado)
+          // Verifica retornos vencidos primeiro (filtrando pelo operador logado e pelo(s) convênio(s) autorizado(s))
           const retornosVencidos = getLeads()
-            .filter(l => l.status === "Agendado" && l.data_retorno && new Date(l.data_retorno) <= agora && (getActiveProfile() === 'admin' || l.operador_id === currentUser.id))
+            .filter(l => l.status === "Agendado" && l.data_retorno && new Date(l.data_retorno) <= agora && (getActiveProfile() === 'admin' || l.operador_id === currentUser.id) && (!allowedConvenios || allowedConvenios.includes(l.dados_funcionais?.convenio)))
             .sort((a, b) => new Date(a.data_retorno) - new Date(b.data_retorno));
 
           if (retornosVencidos.length > 0) {
@@ -10552,7 +10562,7 @@
                   try { payload = typeof row.payload === 'string' ? JSON.parse(row.payload) : (row.payload || {}); } catch(e) {}
                   return { id: row.id, ...payload };
                 })
-                .filter(l => l.data_retorno && new Date(l.data_retorno) <= agora && (getActiveProfile() === 'admin' || l.operador_id === currentUser.id))
+                .filter(l => l.data_retorno && new Date(l.data_retorno) <= agora && (getActiveProfile() === 'admin' || l.operador_id === currentUser.id) && (!allowedConvenios || allowedConvenios.includes(l.dados_funcionais?.convenio)))
                 .sort((a, b) => new Date(a.data_retorno) - new Date(b.data_retorno));
 
               if (vencidos.length > 0) {
@@ -10609,6 +10619,11 @@
                     if (!foundLead.lead.cpf && leadData.cpf) foundLead.lead.cpf = leadData.cpf;
                     if (!foundLead.dados_funcionais) foundLead.dados_funcionais = {};
                     if (!foundLead.dados_funcionais.convenio && leadData.convenio) foundLead.dados_funcionais.convenio = leadData.convenio;
+                    // Revalida contra o payload (não só a coluna 'convenio' usada no filtro da query),
+                    // mesma camada de segurança já aplicada na busca por CPF
+                    if (allowedConvenios && !allowedConvenios.includes(foundLead.dados_funcionais?.convenio)) {
+                      foundLead = null;
+                    }
                   }
                 }
               }
