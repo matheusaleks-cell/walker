@@ -9987,14 +9987,28 @@
               }
             } else {
               logProgress('Conectando ao Supabase...', 'var(--navy)');
-              
+
               try {
-                const { data: supabaseRows, error: getErr } = await supabaseClient
-                  .from('leads')
-                  .select('id, cpf');
-                  
-                if (getErr) throw getErr;
-                
+                // Busca paginada: o Supabase/PostgREST limita a ~1000 linhas por requisição,
+                // então é preciso percorrer em blocos até trazer a tabela inteira
+                const supabaseRows = [];
+                const PAGE_SIZE = 1000;
+                let pageFrom = 0;
+                while (true) {
+                  const { data: page, error: getErr } = await supabaseClient
+                    .from('leads')
+                    .select('id, cpf')
+                    .range(pageFrom, pageFrom + PAGE_SIZE - 1);
+
+                  if (getErr) throw getErr;
+                  if (!page || page.length === 0) break;
+
+                  supabaseRows.push(...page);
+                  logProgress(`Carregados ${supabaseRows.length} registros do Supabase...`, 'var(--gray-light-text)');
+                  if (page.length < PAGE_SIZE) break;
+                  pageFrom += PAGE_SIZE;
+                }
+
                 logProgress(`Encontrados ${supabaseRows.length} registros no Supabase. Iniciando cruzamento...`, 'var(--navy)');
 
                 const matchedCpfs = new Set();
