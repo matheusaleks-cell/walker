@@ -9635,7 +9635,22 @@
               let f = parseFloat(valStr);
               return isNaN(f) ? 0.0 : f;
             };
-            
+
+            // Normaliza nomes de coluna (maiúsculas, sem acento) para aceitar planilhas
+            // com layouts diferentes (ex.: "base unificada" vs. exportações de órgãos como GOV_AM)
+            const normalizeHeader = (k) => String(k || '')
+              .normalize('NFD').replace(/[̀-ͯ]/g, '')
+              .toUpperCase().trim();
+
+            // Busca o valor da primeira coluna da linha cujo nome normalizado bata com algum candidato
+            const findByAliases = (rowKeysNorm, rowKeysOriginal, row, candidates) => {
+              for (const cand of candidates) {
+                const idx = rowKeysNorm.indexOf(normalizeHeader(cand));
+                if (idx !== -1) return row[rowKeysOriginal[idx]];
+              }
+              return undefined;
+            };
+
             json.forEach(row => {
               let cpfKey = Object.keys(row).find(k => k.toUpperCase() === 'CPF');
               let nomeKey = Object.keys(row).find(k => k.toUpperCase() === 'NOME');
@@ -9647,12 +9662,16 @@
 
               let nome = nomeKey ? row[nomeKey] : '';
 
-              let mgMargem = cleanVal(row['mg_margem']);
-              let mgMargemCartao = cleanVal(row['mg_margem_cartao']);
-              let mgMargemCartaoBeneficio = cleanVal(row['mg_margem_cartao_beneficio']);
-              let mgMargemBruta = cleanVal(row['mg_margem_bruta']);
-              let mgMargemCartaoBruta = cleanVal(row['mg_margem_cartao_bruta']);
-              let mgMargemCartaoBeneficioBruta = cleanVal(row['mg_margem_cartao_beneficio_bruta']);
+              const rowKeysOriginal = Object.keys(row);
+              const rowKeysNorm = rowKeysOriginal.map(normalizeHeader);
+              const alias = (...candidates) => findByAliases(rowKeysNorm, rowKeysOriginal, row, candidates);
+
+              let mgMargem = cleanVal(alias('mg_margem', 'MARGEM CONSIGNAVEL', 'MARGEM'));
+              let mgMargemCartao = cleanVal(alias('mg_margem_cartao', 'MARGEM CARTAO CONSIGNADO', 'MARGEM CARTAO'));
+              let mgMargemCartaoBeneficio = cleanVal(alias('mg_margem_cartao_beneficio', 'MARGEM CARTAO BENEFICIO'));
+              let mgMargemBruta = cleanVal(alias('mg_margem_bruta', 'SALARIO LIQUIDO', 'SALARIO', 'RENDA BRUTA'));
+              let mgMargemCartaoBruta = cleanVal(alias('mg_margem_cartao_bruta'));
+              let mgMargemCartaoBeneficioBruta = cleanVal(alias('mg_margem_cartao_beneficio_bruta'));
 
               const strVal = (v) => (v === null || v === undefined || String(v).trim().toLowerCase() === 'nan') ? '' : String(v).trim();
               let celular = '';
@@ -9660,6 +9679,12 @@
               const cel = strVal(row['CEL1']);
               if (ddd && cel) celular = ddd + cel;
               else if (cel) celular = cel;
+              else celular = strVal(alias('TEL 1', 'TELEFONE 1', 'TELEFONE'));
+
+              // Texto do órgão/vínculo: prioriza campos com frase completa (ex. "Governo do Estado do Amazonas")
+              // para permitir o casamento com o convênio correto cadastrado
+              const orgaoTexto = strVal(alias('mg_orgao', 'FOLHA', 'ORGAO')) || strVal(alias('ÓRGÃO'));
+              const tipoServidorTexto = strVal(alias('mg_tipo_servidor', 'TIPO DE CARGO', 'PERFIL'));
 
               excelParsedLeads[cpfNorm] = {
                 nome: nome,
@@ -9674,10 +9699,10 @@
                 data_nascimento: strVal(row['NASC']),
                 celular: celular.replace(/\D/g, ''),
                 email: strVal(row['EMAIL1']),
-                profissao: strVal(row['POSSIVEL_PROFISSAO']),
-                matricula: strVal(row['mg_matricula']),
-                mg_orgao: strVal(row['mg_orgao']),
-                mg_tipo_servidor: strVal(row['mg_tipo_servidor'])
+                profissao: strVal(alias('POSSIVEL_PROFISSAO', 'TIPO DE CARGO', 'CARGO')),
+                matricula: strVal(alias('mg_matricula', 'MATRICULA')),
+                mg_orgao: orgaoTexto,
+                mg_tipo_servidor: tipoServidorTexto
               };
               count++;
             });
@@ -9703,14 +9728,46 @@
         reader.readAsBinaryString(file);
       };
 
+      // Palavras genéricas demais para identificar um convênio específico (ex.: "Governo", "Estado")
+      const CONV_MATCH_STOPWORDS = new Set([
+        'governo', 'estado', 'estadual', 'municipio', 'municipal', 'prefeitura', 'secretaria',
+        'servidores', 'publico', 'publicos', 'cartao', 'beneficio', 'consignado',
+        'trabalhadores', 'empresas', 'privadas', 'privado', 'aposentados', 'pensionistas',
+        'forcas', 'armadas', 'exercito', 'marinha', 'aeronautica', 'nacional', 'federal'
+      ]);
+      const stripAccents = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
       const mapearConvenioExcel = (orgao, tipoServidor) => {
-        const o = String(orgao || '').toLowerCase();
-        const t = String(tipoServidor || '').toLowerCase();
+        const o = stripAccents(orgao);
+        const t = stripAccents(tipoServidor);
+        const texto = `${o} ${t}`;
+
+        const isMunicipal = /municipal|prefeitura|municipio/.test(texto);
+        const isEstadual = /estadual|estado/.test(texto);
+
+        // 1. Tenta casar com um convênio específico já cadastrado (ex.: "GOVERNO AM", "PREF. DE GUARULHOS"),
+        // usando palavras distintivas do nome/tipo do convênio (nomes de estado/cidade) e o nível de governo
+        const catalogo = (typeof currentConvenios !== 'undefined' && Object.keys(currentConvenios).length)
+          ? currentConvenios
+          : ((typeof getConfigs === 'function' && getConfigs().convenios && Object.keys(getConfigs().convenios).length) ? getConfigs().convenios : defaultConvenios);
+
+        for (const [key, conv] of Object.entries(catalogo)) {
+          const alvo = stripAccents(`${conv.nome || ''} ${conv.tipo || ''}`);
+          const alvoMunicipal = /municipal|prefeitura|municipio/.test(alvo);
+          const alvoEstadual = /estadual|estado/.test(alvo);
+          if (alvoMunicipal && !isMunicipal) continue;
+          if (alvoEstadual && !isEstadual) continue;
+
+          const palavras = (alvo.match(/[a-z]{5,}/g) || []).filter(p => !CONV_MATCH_STOPWORDS.has(p));
+          if (palavras.length && palavras.some(p => texto.includes(p))) return key;
+        }
+
+        // 2. Fallback genérico por categoria
         if (o.includes('inss') || t.includes('inss') || o.includes('aposentado') || o.includes('pensionista')) return 'inss';
         if (o.includes('siape') || o.includes('federal') || t.includes('siape')) return 'siape';
-        if (o.includes('estado') || o.includes('estadual') || o.includes('governo') || o.includes('est')) return 'est';
-        if (o.includes('municipal') || o.includes('prefeitura') || o.includes('mun')) return 'mun';
-        if (o.includes('militar') || o.includes('mil') || o.includes('forças')) return 'mil';
+        if (isEstadual || o.includes('governo')) return 'est';
+        if (isMunicipal) return 'mun';
+        if (o.includes('militar') || o.includes('mil') || o.includes('forcas')) return 'mil';
         if (o.includes('fgts')) return 'fgts';
         return 'inss';
       };
@@ -10074,6 +10131,10 @@
                         };
 
                         payload = await sanitizeLeadPayload(payload);
+
+                        // Marca como já conhecido para o canal realtime não disparar
+                        // som/toast/notificação nativa de "nova proposta" durante a importação em massa
+                        knownLeadIds.add(newId);
 
                         const { error: insertErr } = await supabaseClient
                           .from('leads')
