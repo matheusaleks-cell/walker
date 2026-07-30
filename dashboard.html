@@ -4391,24 +4391,28 @@
             const previousLeads = currentLeads;
             currentLeads = data.map(row => mapLeadRow(row, previousLeads));
 
-            // Leads "Prospectado" alimentam a tela de Acompanhamento e precisam aparecer
-            // mesmo quando ficam fora da janela de paginação por data de criação (ex.: base
-            // importada antiga). Para o admin (sem filtro .or acima), busca-se todos eles à parte.
-            if (!realProfile || realProfile.role !== 'operador') {
-              const loadedIds = new Set(currentLeads.map(l => l.id));
-              const { data: prospData, error: prospError } = await supabaseClient
-                .from('leads')
-                .select(LEADS_SELECT_FIELDS)
-                .eq('status', 'Prospectado')
-                .order('created_at', { ascending: false });
-              if (!prospError && prospData) {
-                const extras = prospData
-                  .filter(row => !loadedIds.has(row.id))
-                  .map(row => mapLeadRow(row, previousLeads));
-                currentLeads = [...currentLeads, ...extras];
-              } else if (prospError) {
-                console.warn("[Walker Bank] Erro ao buscar leads Prospectado fora da paginação:", prospError);
-              }
+            // Leads "Prospectado"/"Agendado" alimentam a tela de Acompanhamento e precisam
+            // aparecer mesmo quando ficam fora da janela de paginação por data de criação
+            // (ex.: importação em massa recente empurrando leads antigos para fora do range).
+            const loadedIds = new Set(currentLeads.map(l => l.id));
+            let followUpQuery = supabaseClient
+              .from('leads')
+              .select(LEADS_SELECT_FIELDS)
+              .in('status', ['Prospectado', 'Agendado'])
+              .order('created_at', { ascending: false });
+            // Para operador, restringe aos próprios leads (evita trazer a carteira toda de todo mundo);
+            // admin (sem filtro .or acima) já vê tudo, então busca-se todos eles à parte.
+            if (realProfile && realProfile.role === 'operador') {
+              followUpQuery = followUpQuery.eq('payload->>operador_id', realProfile.id);
+            }
+            const { data: prospData, error: prospError } = await followUpQuery;
+            if (!prospError && prospData) {
+              const extras = prospData
+                .filter(row => !loadedIds.has(row.id))
+                .map(row => mapLeadRow(row, previousLeads));
+              currentLeads = [...currentLeads, ...extras];
+            } else if (prospError) {
+              console.warn("[Walker Bank] Erro ao buscar leads Prospectado/Agendado fora da paginação:", prospError);
             }
 
             safeSaveLeads(currentLeads);
