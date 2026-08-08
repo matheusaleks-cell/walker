@@ -9601,6 +9601,9 @@
       // ==========================================
       let excelParsedLeads = {};
       let importCancelled = false;
+      // Enquanto true, novos leads/atualizações vindos da importação em massa
+      // não disparam som/toast/notificação nativa de "nova proposta"
+      let suppressLeadNotifications = false;
 
       const resetExcelImportState = () => {
         excelParsedLeads = {};
@@ -9672,7 +9675,7 @@
 
               let mgMargem = cleanVal(alias('mg_margem', 'MARGEM CONSIGNAVEL', 'MARGEM'));
               let mgMargemCartao = cleanVal(alias('mg_margem_cartao', 'MARGEM CARTAO CONSIGNADO', 'MARGEM CARTAO'));
-              let mgMargemCartaoBeneficio = cleanVal(alias('mg_margem_cartao_beneficio', 'MARGEM CARTAO BENEFICIO'));
+              let mgMargemCartaoBeneficio = cleanVal(alias('mg_margem_cartao_beneficio', 'MARGEM CARTAO BENEFICIO', 'MARGEM DISPONIVEL RMC', 'MARGEM RMC'));
               let mgMargemBruta = cleanVal(alias('mg_margem_bruta', 'SALARIO LIQUIDO', 'SALARIO', 'RENDA BRUTA'));
               let mgMargemCartaoBruta = cleanVal(alias('mg_margem_cartao_bruta'));
               let mgMargemCartaoBeneficioBruta = cleanVal(alias('mg_margem_cartao_beneficio_bruta'));
@@ -9835,6 +9838,7 @@
             if (progressCard) progressCard.style.display = 'block';
             if (progressDetails) progressDetails.innerHTML = '';
             importCancelled = false;
+            suppressLeadNotifications = true;
             
             const logProgress = (msg, color = 'var(--gray-light-text)') => {
               if (!progressDetails) return;
@@ -10215,6 +10219,7 @@
             btnImportar.disabled = false;
             btnImportar.style.opacity = '1';
             btnImportar.style.cursor = 'pointer';
+            suppressLeadNotifications = false;
           });
         }
 
@@ -11569,7 +11574,7 @@
 
               // Notifica apenas propostas recém-criadas (últimos 45 segundos)
               const createdTime = new Date(lead.createdAt).getTime();
-              if (Date.now() - createdTime < 45000) {
+              if (!suppressLeadNotifications && Date.now() - createdTime < 45000) {
                 showNewProposalAlert(lead);
                 recordLog('nova_proposta',
                   `Nova proposta recebida de ${lead.lead?.nome || 'Cliente Sem Nome'}`,
@@ -12551,13 +12556,15 @@
                     leadData.proposta.valor_solicitado = newRow.valor_solicitado;
                   }
 
-                  showNewProposalAlert(leadData);
-                  recordLog('nova_proposta',
-                    `Nova proposta recebida de ${leadData.lead?.nome || 'Cliente Sem Nome'}`,
-                    leadData,
-                    { convenio: leadData.dados_funcionais?.convenio, valor: leadData.proposta?.valor_solicitado },
-                    { id: "admin", nome: "Sistema", role: "Sistema", avatar: "SY" }
-                  );
+                  if (!suppressLeadNotifications) {
+                    showNewProposalAlert(leadData);
+                    recordLog('nova_proposta',
+                      `Nova proposta recebida de ${leadData.lead?.nome || 'Cliente Sem Nome'}`,
+                      leadData,
+                      { convenio: leadData.dados_funcionais?.convenio, valor: leadData.proposta?.valor_solicitado },
+                      { id: "admin", nome: "Sistema", role: "Sistema", avatar: "SY" }
+                    );
+                  }
                 }
               }
 

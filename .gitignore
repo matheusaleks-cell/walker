@@ -20,6 +20,9 @@ $RECYCLE.BIN/
 tmp/
 temp/
 
+# Planilhas com dados pessoais de clientes (CPF, telefone, renda, etc.)
+dados-planilhas/
+
 # Segurança e Credenciais
 .env
 .env.local
