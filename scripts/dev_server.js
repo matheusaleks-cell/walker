@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 8000;
+const ROOT_DIR = path.resolve(__dirname, '..');
 
 const MIME_TYPES = {
     '.html': 'text/html; charset=utf-8',
@@ -18,6 +19,8 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
+    console.log(`${new Date().toLocaleTimeString()} [${req.method}] ${req.url}`);
+
     // Remove query parameters and fragments
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
     let safePath = decodeURIComponent(parsedUrl.pathname);
@@ -34,25 +37,23 @@ const server = http.createServer((req, res) => {
         const ext = path.extname(lastPart);
 
         if (!ext) {
-            // Regras semelhantes ao dev_server.py
+            // Regras SPA / rotas limpas
             if (parts.includes('login')) {
-                filePath = path.join(__dirname, 'login.html');
+                filePath = path.join(ROOT_DIR, 'login.html');
             } else if (firstPart === 'dashboard') {
-                filePath = path.join(__dirname, 'dashboard.html');
-            } else if (firstPart === 'login' && parts.length === 1) {
-                filePath = path.join(__dirname, 'login.html');
+                filePath = path.join(ROOT_DIR, 'dashboard.html');
             } else if (firstPart === 'proposta' && parts.length === 1) {
-                filePath = path.join(__dirname, 'proposta.html');
+                filePath = path.join(ROOT_DIR, 'proposta.html');
             }
         }
     }
 
     if (!filePath) {
-        // Se for a raiz, padrão para index.html
+        // Se for a raiz, padrao para index.html
         if (safePath === '/' || safePath === '\\' || safePath === '.') {
-            filePath = path.join(__dirname, 'index.html');
+            filePath = path.join(ROOT_DIR, 'index.html');
         } else {
-            filePath = path.join(__dirname, safePath);
+            filePath = path.join(ROOT_DIR, safePath);
         }
     }
 
@@ -67,7 +68,12 @@ const server = http.createServer((req, res) => {
         const ext = path.extname(filePath).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-        res.writeHead(200, { 'Content-Type': contentType });
+        res.writeHead(200, {
+            'Content-Type': contentType,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        });
         const stream = fs.createReadStream(filePath);
         stream.pipe(res);
     });

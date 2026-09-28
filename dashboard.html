@@ -4714,7 +4714,7 @@
 
         // Nav count Base Geral
         const allLeadsForBase = getLeads();
-        const baseGeralCount = allLeadsForBase.filter(l => l.status === "Consulta de Margem" || l.status === "Importado").length;
+        const baseGeralCount = window._carteiraKpis ? window._carteiraKpis.semOperadorFila : allLeadsForBase.filter(l => l.status === "Consulta de Margem" || l.status === "Importado").length;
         const navCountBase = document.getElementById("nav-count-base");
         if (navCountBase) {
           navCountBase.textContent = baseGeralCount;
@@ -7821,7 +7821,7 @@
       let currentPageBase = 1;
       const pageSizeBase = 10;
 
-      const renderBaseGeral = () => {
+      const renderBaseGeral = async () => {
         const leads = getLeads();
         const search = document.getElementById("base-search").value.toLowerCase();
         const filterConvenio = document.getElementById("base-convenio").value;
@@ -7912,10 +7912,30 @@
             const matchConvenio = getConvenioLabel(c.dados_funcionais?.convenio).toLowerCase().includes(search);
             return matchNome || matchCpf || matchCelular || matchEmail || matchConvenio;
           });
+
+          // Se não encontrou na fatia local de 200 leads, busca diretamente no Supabase em tempo real
+          if (baseLeads.length === 0 && sessionStorage.getItem("walker_demo_mode") !== "true") {
+            try {
+              let sbQuery = supabaseClient.from('leads').select(LEADS_SELECT_FIELDS).in('status', ['Consulta de Margem', 'Importado']);
+              if (searchDigits.length >= 4) {
+                sbQuery = sbQuery.ilike('cpf', `%${searchDigits}%`);
+              } else if (search.length >= 3) {
+                sbQuery = sbQuery.ilike('nome', `%${search}%`);
+              }
+              const { data: remoteRows } = await sbQuery.limit(50);
+              if (remoteRows && remoteRows.length > 0) {
+                const newMapped = remoteRows.map(r => mapLeadRow(r, currentLeads));
+                currentLeads = [...newMapped, ...currentLeads.filter(c => !remoteRows.some(r => r.id === c.id))];
+                return renderBaseGeral();
+              }
+            } catch (err) {
+              console.warn('[Walker Bank] Erro na busca remota da Base Geral:', err);
+            }
+          }
         }
 
         const navCountBase = document.getElementById("nav-count-base");
-        if (navCountBase) navCountBase.textContent = baseLeads.length;
+        if (navCountBase) navCountBase.textContent = window._carteiraKpis ? window._carteiraKpis.semOperadorFila : baseLeads.length;
 
         const tbody = document.getElementById("base-table-body");
         const empty = document.getElementById("base-empty");
@@ -7946,7 +7966,8 @@
         // Atualiza a legenda de registros
         const pagInfo = document.getElementById("base-pagination-info");
         if (pagInfo) {
-          pagInfo.textContent = `Mostrando ${startIndex + 1}-${endIndex} de ${totalRecords} registros`;
+          const totalNoBanco = window._carteiraKpis ? window._carteiraKpis.semOperadorFila : totalRecords;
+          pagInfo.textContent = `Mostrando ${startIndex + 1}-${endIndex} de ${totalRecords} registros carregados (Total na base: ${totalNoBanco})`;
         }
 
         // Renderiza botões de controle de paginação
@@ -12350,22 +12371,54 @@
       // pela Carteira por Operador para que as contagens não fiquem presas à janela de paginação de 200
       // registros usada nas demais telas (que carregam o payload completo para exibição/edição).
       const fetchLeadsLeveParaCarteira = async () => {
-        const resultado = [];
+        // Busca paralela otimizada: contagens exatas via Supabase (sem limite de 20.000) + leads com operador
+        const [filaRes, acompRes, mesaRes, concluidosRes] = await Promise.all([
+          supabaseClient
+            .from('leads')
+            .select('id', { count: 'exact', head: true })
+            .in('status', ['Consulta de Margem', 'Importado'])
+            .is('payload->>operador_id', null),
+          supabaseClient
+            .from('leads')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'Prospectado'),
+          supabaseClient
+            .from('leads')
+            .select('id', { count: 'exact', head: true })
+            .in('status', ['Recebida', 'Em Análise', 'Aguardando Assinatura', 'Pendente']),
+          supabaseClient
+            .from('leads')
+            .select('id', { count: 'exact', head: true })
+            .in('status', ['Aprovada', 'Paga'])
+        ]);
+
+        window._carteiraKpis = {
+          semOperadorFila: filaRes.count ?? 0,
+          acompGeral: acompRes.count ?? 0,
+          mesaGeral: mesaRes.count ?? 0,
+          concluidosGeral: concluidosRes.count ?? 0
+        };
+
+        const assignedLeads = [];
         const BATCH = 1000;
-        const MAX_BATCHES = 20; // trava de segurança (até 20.000 leads)
-        for (let i = 0; i < MAX_BATCHES; i++) {
-          const from = i * BATCH;
-          const to = from + BATCH - 1;
+        let from = 0;
+        while (true) {
           const { data, error } = await supabaseClient
             .from('leads')
             .select('id, status, operador_id:payload->>operador_id, operador_nome:payload->>operador_nome')
-            .range(from, to);
-          if (error) throw error;
+            .not('payload->>operador_id', 'is', null)
+            .range(from, from + BATCH - 1);
+          if (error) {
+            console.error('Erro ao buscar leads com operador:', error);
+            break;
+          }
           if (!data || data.length === 0) break;
-          resultado.push(...data);
+          assignedLeads.push(...data);
           if (data.length < BATCH) break;
+          from += BATCH;
         }
-        return resultado;
+
+        return assignedLeads;
       };
 
       let carteiraLeadsCache = null; // cache em memória da busca leve, evita refazer a query a cada troca de filtro
@@ -12378,10 +12431,10 @@
         const naMesaStatuses = ["Recebida", "Em Análise", "Aguardando Assinatura", "Pendente"];
 
         // KPIs gerais (sempre sobre a base inteira, independente do filtro de operador)
-        const semOperadorFila = leads.filter(l => (l.status === "Consulta de Margem" || l.status === "Importado") && !l.operador_id).length;
-        const acompGeral = leads.filter(l => l.status === "Prospectado").length;
-        const mesaGeral = leads.filter(l => naMesaStatuses.includes(l.status)).length;
-        const concluidosGeral = leads.filter(l => l.status === "Aprovada" || l.status === "Paga").length;
+        const semOperadorFila = window._carteiraKpis ? window._carteiraKpis.semOperadorFila : leads.filter(l => (l.status === "Consulta de Margem" || l.status === "Importado") && !l.operador_id).length;
+        const acompGeral = window._carteiraKpis ? window._carteiraKpis.acompGeral : leads.filter(l => l.status === "Prospectado").length;
+        const mesaGeral = window._carteiraKpis ? window._carteiraKpis.mesaGeral : leads.filter(l => naMesaStatuses.includes(l.status)).length;
+        const concluidosGeral = window._carteiraKpis ? window._carteiraKpis.concluidosGeral : leads.filter(l => l.status === "Aprovada" || l.status === "Paga").length;
 
         const kpiFila = document.getElementById("carteira-kpi-fila");
         const kpiAcomp = document.getElementById("carteira-kpi-acompanhamento");
@@ -12466,6 +12519,7 @@
         if (tbodyLoading) tbodyLoading.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:12px; color:var(--gray-light-text);">Carregando carteira completa...</td></tr>`;
 
         if (sessionStorage.getItem("walker_demo_mode") === "true") {
+          window._carteiraKpis = null;
           carteiraLeadsCache = getLeads();
         } else {
           try {
