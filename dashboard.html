@@ -4398,7 +4398,11 @@
             let followUpQuery = supabaseClient
               .from('leads')
               .select(LEADS_SELECT_FIELDS)
-              .in('status', ['Prospectado', 'Agendado'])
+              .in('status', [
+              'Prospectado', 'Agendado',
+              'Recebida', 'Novo', 'Pendente', 'Em Análise', 'Aguardando Assinatura',
+              'Aprovada', 'Aprovado', 'Recusada', 'Recusado', 'Paga', 'Em Digitação'
+            ])
               .order('created_at', { ascending: false });
             // Para operador, restringe aos próprios leads (evita trazer a carteira toda de todo mundo);
             // admin (sem filtro .or acima) já vê tudo, então busca-se todos eles à parte.
