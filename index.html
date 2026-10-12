@@ -2941,11 +2941,13 @@
       // Função para sincronizar configurações do Supabase em tempo real
       const syncConfigsFromSupabase = async () => {
         try {
-          const { data, error } = await supabaseClient
-            .from('configs')
-            .select('data')
-            .eq('id', 'default')
-            .single();
+          // config_publica() devolve só convênios e taxa (a tabela configs não é pública).
+          // Fallback para a leitura direta enquanto o SQL 005 não tiver sido aplicado.
+          let { data: cfgPublica, error } = await supabaseClient.rpc('config_publica');
+          let data = (!error && cfgPublica) ? { data: cfgPublica } : null;
+          if (!data) {
+            ({ data, error } = await supabaseClient.from('configs').select('data').eq('id', 'default').single());
+          }
 
           if (error && error.code !== 'PGRST116') throw error;
           if (data && data.data) {
