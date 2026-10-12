@@ -370,8 +370,24 @@
         errorMsg.style.display = "block";
       }
 
+      if (window.location.search.includes("pendente=true")) {
+        errorMsg.textContent = "Seu acesso ainda não foi liberado por um administrador.";
+        errorMsg.style.display = "block";
+      }
+
+      // Modo demonstração: disponível só em ambiente local de desenvolvimento
+      const isLocalDevHost = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+      if (!isLocalDevHost) {
+        const demoBtn = document.getElementById("btn-demo");
+        if (demoBtn) demoBtn.style.display = "none";
+        sessionStorage.removeItem("walker_demo_mode");
+      }
+
+      // Perfil sem acesso liberado ('pendente') não entra no painel
+      const isPerfilLiberado = (profile) => !profile || profile.role === "admin" || profile.role === "operador";
+
       // Se já estiver no modo demonstrativo offline, redireciona diretamente
-      if (sessionStorage.getItem("walker_demo_mode") === "true" && sessionStorage.getItem("walker_admin_session") === "true") {
+      if (isLocalDevHost && sessionStorage.getItem("walker_demo_mode") === "true" && sessionStorage.getItem("walker_admin_session") === "true") {
         window.location.href = "dashboard";
         return;
       }
@@ -446,6 +462,12 @@
               try {
                 const { data: profile } = await supabaseClient
                   .from('profiles').select('*').eq('id', session.user.id).single();
+                if (!isPerfilLiberado(profile)) {
+                  await supabaseClient.auth.signOut();
+                  errorMsg.textContent = "Seu acesso ainda não foi liberado por um administrador.";
+                  errorMsg.style.display = "block";
+                  return;
+                }
                 if (profile) sessionStorage.setItem("walker_user_profile", JSON.stringify(profile));
               } catch(e) {}
             }
@@ -459,6 +481,7 @@
 
       // Evento para o botão de modo de demonstração
       document.getElementById("btn-demo").addEventListener("click", () => {
+        if (!isLocalDevHost) return;
         sessionStorage.setItem("walker_admin_session", "true");
         sessionStorage.setItem("walker_demo_mode", "true");
         window.location.href = "dashboard";
@@ -564,6 +587,14 @@
             try {
               const { data: profile } = await supabaseClient
                 .from('profiles').select('*').eq('id', data.user.id).single();
+              if (!isPerfilLiberado(profile)) {
+                await supabaseClient.auth.signOut();
+                errorMsg.textContent = "Seu acesso ainda não foi liberado por um administrador.";
+                errorMsg.style.display = "block";
+                btnSubmit.textContent = "Entrar no Sistema";
+                btnSubmit.disabled = false;
+                return;
+              }
               if (profile) sessionStorage.setItem("walker_user_profile", JSON.stringify(profile));
             } catch(pe) {
               console.warn("[Walker Bank] Perfil não encontrado, prosseguindo como admin.");

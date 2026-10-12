@@ -1376,7 +1376,7 @@
               <div class="upload-zone" id="zone-rg">
                 <div class="upload-icon">📄</div>
                 <div class="upload-text">Arraste a foto ou <strong>clique para anexar</strong></div>
-                <input type="file" class="file-input" accept="image/*,application/pdf" data-type="rg">
+                <input type="file" class="file-input" accept="image/*,.heic,.heif,application/pdf" data-type="rg">
               </div>
               <div class="file-preview" id="preview-rg">
                 <div class="file-info">
@@ -1394,7 +1394,7 @@
               <div class="upload-zone" id="zone-contracheque">
                 <div class="upload-icon">💵</div>
                 <div class="upload-text">Arraste o extrato ou <strong>clique para anexar</strong></div>
-                <input type="file" class="file-input" accept="image/*,application/pdf" data-type="contracheque">
+                <input type="file" class="file-input" accept="image/*,.heic,.heif,application/pdf" data-type="contracheque">
               </div>
               <div class="file-preview" id="preview-contracheque">
                 <div class="file-info">
@@ -1412,7 +1412,7 @@
               <div class="upload-zone" id="zone-outros">
                 <div class="upload-icon">📁</div>
                 <div class="upload-text">Arraste outros arquivos ou <strong>clique para anexar</strong></div>
-                <input type="file" class="file-input" id="file-input-outros" multiple accept="image/*,application/pdf">
+                <input type="file" class="file-input" id="file-input-outros" multiple accept="image/*,.heic,.heif,application/pdf">
               </div>
               <div id="outros-files-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;"></div>
             </div>
@@ -2217,6 +2217,9 @@
               canvas.height = height;
 
               const ctx = canvas.getContext('2d');
+              // Fundo branco: PNG com transparência virava JPG com fundo preto (documento ilegível)
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, width, height);
               ctx.drawImage(img, 0, 0, width, height);
 
               canvas.toBlob((blob) => {
@@ -2252,6 +2255,27 @@
         contracheque: null
       };
 
+      // Validação única dos anexos. Imagens podem ser maiores que 10MB porque são
+      // redimensionadas/comprimidas antes do envio (foto de celular costuma passar de 10MB).
+      // Aceita também WEBP e HEIC/HEIF (foto de iPhone), que antes eram recusados.
+      const LIMITE_PDF = 10 * 1024 * 1024;
+      const LIMITE_IMAGEM = 25 * 1024 * 1024;
+      const validarDocumento = (file) => {
+        const nome = (file.name || '').toLowerCase();
+        const ehPdf = file.type === 'application/pdf' || nome.endsWith('.pdf');
+        const ehImagem = /^image\/(jpeg|jpg|png|webp|heic|heif)$/.test(file.type) || /\.(jpe?g|png|webp|heic|heif)$/.test(nome);
+        if (!ehPdf && !ehImagem) {
+          return `Arquivo "${file.name}" inválido. Envie uma foto (JPG, PNG, WEBP, HEIC) ou um PDF.`;
+        }
+        if (ehPdf && file.size > LIMITE_PDF) {
+          return `O PDF "${file.name}" excede o limite máximo de 10MB.`;
+        }
+        if (ehImagem && file.size > LIMITE_IMAGEM) {
+          return `A imagem "${file.name}" excede o limite máximo de 25MB.`;
+        }
+        return null;
+      };
+
       const initUploadZone = (zoneId, previewId, key) => {
         const zone = document.getElementById(zoneId);
         const preview = document.getElementById(previewId);
@@ -2265,17 +2289,10 @@
         fileInput.addEventListener("change", (e) => {
           if (e.target.files.length > 0) {
             const file = e.target.files[0];
-            
-            // Valida tipo do arquivo (MIME-type no navegador)
-            if (!TIPOS_PERMITIDOS.includes(file.type)) {
-              alert(`Arquivo "${file.name}" inválido. Permitido apenas imagens (JPG/PNG) ou PDF.`);
-              fileInput.value = "";
-              return;
-            }
-            
-            // Valida tamanho do arquivo (10MB)
-            if (file.size > TAMANHO_MAXIMO) {
-              alert(`Arquivo "${file.name}" excede o limite máximo de 10MB.`);
+
+            const erroDoc = validarDocumento(file);
+            if (erroDoc) {
+              alert(erroDoc);
               fileInput.value = "";
               return;
             }
@@ -2363,15 +2380,9 @@
 
         const processFiles = (files) => {
           Array.from(files).forEach(file => {
-            // Valida tipo do arquivo (MIME-type no navegador)
-            if (!TIPOS_PERMITIDOS.includes(file.type)) {
-              alert(`Arquivo "${file.name}" inválido. Permitido apenas imagens (JPG/PNG) ou PDF.`);
-              return;
-            }
-            
-            // Valida tamanho do arquivo (10MB)
-            if (file.size > TAMANHO_MAXIMO) {
-              alert(`Arquivo "${file.name}" excede o limite máximo de 10MB.`);
+            const erroDoc = validarDocumento(file);
+            if (erroDoc) {
+              alert(erroDoc);
               return;
             }
 
@@ -2853,14 +2864,27 @@
         }
       });
 
-      // Faz upload de um arquivo para o Supabase Storage e retorna o path
+      // Faz upload de um arquivo para o Supabase Storage e retorna o path.
+      // upsert: false — o visitante anônimo só tem permissão de INSERT no bucket; com
+      // upsert: true o Storage exige também SELECT/UPDATE, o upload era recusado e o
+      // documento caía no fallback base64 dentro do banco.
+      const MIME_POR_EXT = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif', pdf: 'application/pdf' };
       const uploadToStorage = async (file, leadId, type) => {
-        const ext = file.name.split('.').pop().toLowerCase() || 'bin';
+        const ext = (file.name && file.name.includes('.') ? file.name.split('.').pop() : '').toLowerCase()
+          || (file.type === 'application/pdf' ? 'pdf' : 'jpg');
         const path = `leads/${leadId}/${type}.${ext}`;
+        const contentType = file.type || MIME_POR_EXT[ext] || 'application/octet-stream';
         const { error } = await supabaseClient.storage
           .from('walkerbank-docs')
-          .upload(path, file, { upsert: true, contentType: file.type });
-        if (error) throw error;
+          .upload(path, file, { upsert: false, contentType });
+        if (error) {
+          // Retentativa do envio: o arquivo já subiu na tentativa anterior (mesmo lead id)
+          const msg = String(error.message || '').toLowerCase();
+          if (error.statusCode === '409' || error.statusCode === 409 || msg.includes('already exists') || msg.includes('duplicate')) {
+            return path;
+          }
+          throw error;
+        }
         return path;
       };
 
@@ -2877,7 +2901,9 @@
         try {
           // Reutiliza o ID se for uma retentativa, para evitar duplicação no banco
           if (!pendingLeadId) {
-            pendingLeadId = `proposta-${Math.random().toString(36).substr(2, 9)}`;
+            pendingLeadId = (window.crypto && typeof window.crypto.randomUUID === "function")
+              ? `proposta-${window.crypto.randomUUID()}`
+              : `proposta-${Math.random().toString(36).substr(2, 9)}${Date.now().toString(36)}`;
             sessionStorage.setItem("walker_pending_lead_id", pendingLeadId);
           }
           const leadId = pendingLeadId;
@@ -3018,7 +3044,10 @@
             }
           };
 
-          try {
+          // Só em ambiente local (teste com o modo demo do painel). Em produção, os dados
+          // pessoais do cliente não ficam gravados no navegador dele.
+          const isLocalDevHost = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+          if (isLocalDevHost) try {
             const localLeads = JSON.parse(localStorage.getItem("walker_leads") || "[]");
             localLeads.push(newLeadLocal);
             
@@ -3080,7 +3109,6 @@
             throw dbErr;
           }
 
-          console.log("[Walker Bank] Enviando proposta payload:", payload);
 
           // Se a URL do Webhook estiver configurada, faz o envio POST de verdade
           if (WEBHOOK_URL && WEBHOOK_URL.trim() !== "") {

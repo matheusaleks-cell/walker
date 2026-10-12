@@ -1,5 +1,84 @@
 # Configurações de Redirecionamento e URLs Limpas para o Netlify
 
+# 0. SEGURANÇA: nunca servir arquivos internos (planilhas de clientes, SQL,
+#    documentação, scripts, mock de leads). force = true faz a regra valer
+#    mesmo que o arquivo exista no deploy. Precisa ficar ANTES das demais.
+[[redirects]]
+  from = "/dados-planilhas/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/sql/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.claude/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/leads_mock.js"
+  to = "/404"
+  status = 404
+  force = true
+
+# Cabeçalhos de segurança em todas as páginas
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# Painel e login não devem ficar em cache compartilhado
+[[headers]]
+  for = "/dashboard"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/dashboard/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/dashboard.html"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/login"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/login.html"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+
 # 1. Redirecionar proposta.html para /proposta (URL Limpa)
 [[redirects]]
   from = "/proposta.html"

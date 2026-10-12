@@ -2992,10 +2992,84 @@
       const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
       window.supabaseClient = supabaseClient;
 
+      // ==========================================
+      // PROTEÇÃO CONTRA PERDA DE DADOS AO GRAVAR LEADS
+      // A lista de leads é carregada "leve" (sem `arquivos` e sem campos extras do payload).
+      // Vários pontos do painel (status, prospecção, atribuição...) gravavam o payload inteiro
+      // a partir dessa versão leve e APAGAVAM do banco os documentos e o que não tinha sido
+      // carregado. Aqui todo upsert em `leads` mescla com o payload atual do banco antes de
+      // gravar: o que veio da tela prevalece, o que a tela não conhecia é preservado, e um
+      // documento nunca é trocado por vazio.
+      // ==========================================
+      const mesclarPayloadLead = (atual, novo) => {
+        if (!atual || typeof atual !== 'object') return novo;
+        if (!novo || typeof novo !== 'object') return atual;
+        const merged = { ...atual, ...novo };
+        const arqAtual = atual.arquivos && typeof atual.arquivos === 'object' ? atual.arquivos : null;
+        const arqNovo = novo.arquivos && typeof novo.arquivos === 'object' ? novo.arquivos : null;
+        if (arqAtual) {
+          const arq = { ...arqAtual };
+          if (arqNovo) {
+            Object.entries(arqNovo).forEach(([k, v]) => {
+              const vazio = v === null || v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
+              if (!vazio) arq[k] = v;
+            });
+          }
+          merged.arquivos = arq;
+        }
+        return merged;
+      };
+
+      const _fromOriginal = supabaseClient.from.bind(supabaseClient);
+      supabaseClient.from = (tabela) => {
+        const builder = _fromOriginal(tabela);
+        if (tabela !== 'leads') return builder;
+        const upsertOriginal = builder.upsert.bind(builder);
+        builder.upsert = (valores, opcoes) => {
+          const executar = async () => {
+            const linhas = Array.isArray(valores) ? valores : [valores];
+            const ids = linhas.filter(r => r && r.id && r.payload).map(r => r.id);
+            if (ids.length) {
+              try {
+                const atuais = {};
+                for (let i = 0; i < ids.length; i += 100) {
+                  const { data: rows, error } = await _fromOriginal('leads').select('id, payload').in('id', ids.slice(i, i + 100));
+                  if (error) throw error;
+                  (rows || []).forEach(r => {
+                    let p = r.payload;
+                    if (typeof p === 'string') { try { p = JSON.parse(p); } catch (e) { p = null; } }
+                    atuais[r.id] = p;
+                  });
+                }
+                linhas.forEach(r => {
+                  if (r && r.id && r.payload && atuais[r.id]) r.payload = mesclarPayloadLead(atuais[r.id], r.payload);
+                });
+              } catch (mergeErr) {
+                // Sem conseguir ler o atual, não arrisca sobrescrever às cegas
+                console.warn("[Walker Bank] Não foi possível ler o lead antes de gravar:", mergeErr);
+                if (typeof window.showToast === "function") {
+                  window.showToast("Não foi possível salvar no banco agora (falha de conexão). Tente novamente.", "var(--red-error)");
+                }
+                return { data: null, error: mergeErr, status: 0, statusText: '' };
+              }
+            }
+            return await upsertOriginal(Array.isArray(valores) ? linhas : linhas[0], opcoes);
+          };
+          // Mantém a interface "await supabaseClient.from('leads').upsert(...)" usada no painel
+          let promessa = null;
+          const uma = () => (promessa = promessa || executar());
+          return { then: (ok, erro) => uma().then(ok, erro), catch: (erro) => uma().catch(erro) };
+        };
+        return builder;
+      };
+
       let currentLeads = [];
       let currentConfigs = {};
       const LEADS_PAGE_SIZE = 200;
       let hasMoreLeads = false;
+      // Posição real na paginação principal. Não usar currentLeads.length: a lista também
+      // recebe leads "extras" (acompanhamento/mesa) e o deslocamento errado pulava leads.
+      let leadsMainOffset = 0;
 
       // Verifica disponibilidade do localStorage (falha em aba anônima com cookies bloqueados)
       const _lsAvailable = (() => {
@@ -3062,10 +3136,44 @@
       const storageKey = `sb-${getProjectRef(supabaseUrl)}-auth-token`;
       const hasSessionStorage = sessionStorage.getItem("walker_admin_session") === "true";
       const hasLocalStorage = localStorage.getItem(storageKey) !== null;
+
+      // Modo demonstração só existe em ambiente local de desenvolvimento.
+      // Em produção, a flag é descartada (evita entrar no painel sem login).
+      const isLocalDevHost = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+      if (!isLocalDevHost && sessionStorage.getItem("walker_demo_mode") === "true") {
+        sessionStorage.removeItem("walker_demo_mode");
+        sessionStorage.removeItem("walker_admin_session");
+      }
       const isDemoMode = sessionStorage.getItem("walker_demo_mode") === "true";
 
       if (!hasSessionStorage && !hasLocalStorage && !isDemoMode) {
         window.location.href = "/login";
+      }
+
+      // Validação real da sessão no Supabase (as flags do navegador podem ser forjadas).
+      // Sem sessão válida ou com perfil ainda não liberado ('pendente'), volta para o login.
+      if (!isDemoMode) {
+        (async () => {
+          try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+              sessionStorage.removeItem("walker_admin_session");
+              sessionStorage.removeItem("walker_user_profile");
+              window.location.href = "/login";
+              return;
+            }
+            const { data: prof, error: profErr } = await supabaseClient
+              .from('profiles').select('role').eq('id', session.user.id).single();
+            if (!profErr && prof && prof.role !== 'admin' && prof.role !== 'operador') {
+              await supabaseClient.auth.signOut();
+              sessionStorage.removeItem("walker_admin_session");
+              sessionStorage.removeItem("walker_user_profile");
+              window.location.href = "/login?pendente=true";
+            }
+          } catch (sessErr) {
+            console.warn("[Walker Bank] Não foi possível validar a sessão:", sessErr);
+          }
+        })();
       }
 
       // Exibe banner de aviso quando em modo demonstração
@@ -3237,8 +3345,8 @@
           selector.innerHTML = `<option value="admin">🌐 Visão Geral (Todos os Operadores)</option>` +
             OPERADORES.map(op => {
               const icon = op.role === 'admin' ? '🔑' : '👤';
-              const label = op.role === 'admin' ? `${icon} ${op.nome} (Admin)` : `${icon} ${op.nome}`;
-              return `<option value="${op.id}">${label}</option>`;
+              const label = op.role === 'admin' ? `${icon} ${escapeHtml(op.nome)} (Admin)` : `${icon} ${escapeHtml(op.nome)}`;
+              return `<option value="${escapeHtml(op.id)}">${label}</option>`;
             }).join('');
           selector.value = getActiveProfile();
         }
@@ -3246,13 +3354,13 @@
         if (logOpFilter) {
           logOpFilter.innerHTML =
             `<option value="all">Todos os Membros</option><option value="admin">Administrador Geral (Legado)</option>` +
-            OPERADORES.map(op => `<option value="${op.id}">${op.nome} (${op.role === 'admin' ? 'Admin' : 'Operador'})</option>`).join('');
+            OPERADORES.map(op => `<option value="${escapeHtml(op.id)}">${escapeHtml(op.nome)} (${op.role === 'admin' ? 'Admin' : 'Operador'})</option>`).join('');
         }
         const finOpFilter = document.getElementById("fin-filter-op");
         if (finOpFilter) {
           finOpFilter.innerHTML =
             `<option value="all">Todos os Operadores</option>` +
-            OPERADORES.map(op => `<option value="${op.id}">${op.nome}</option>`).join('');
+            OPERADORES.map(op => `<option value="${escapeHtml(op.id)}">${escapeHtml(op.nome)}</option>`).join('');
         }
       };
 
@@ -4383,11 +4491,13 @@
 
           const { data, error } = await query
             .order('created_at', { ascending: false })
+            .order('id', { ascending: true }) // desempate: importações gravam muitos leads com a mesma data
             .range(0, LEADS_PAGE_SIZE - 1);
 
           if (error) throw error;
           if (data) {
             hasMoreLeads = data.length === LEADS_PAGE_SIZE;
+            leadsMainOffset = data.length;
             const previousLeads = currentLeads;
             currentLeads = data.map(row => mapLeadRow(row, previousLeads));
 
@@ -4403,13 +4513,24 @@
               'Recebida', 'Novo', 'Pendente', 'Em Análise', 'Aguardando Assinatura',
               'Aprovada', 'Aprovado', 'Recusada', 'Recusado', 'Paga', 'Em Digitação'
             ])
-              .order('created_at', { ascending: false });
+              .order('created_at', { ascending: false })
+              .order('id', { ascending: true });
             // Para operador, restringe aos próprios leads (evita trazer a carteira toda de todo mundo);
             // admin (sem filtro .or acima) já vê tudo, então busca-se todos eles à parte.
             if (realProfile && realProfile.role === 'operador') {
               followUpQuery = followUpQuery.eq('payload->>operador_id', realProfile.id);
             }
-            const { data: prospData, error: prospError } = await followUpQuery;
+            // O Supabase devolve no máximo ~1000 linhas por requisição; antes o excedente
+            // sumia da tela sem aviso. Busca em blocos até acabar.
+            let prospData = [];
+            let prospError = null;
+            for (let pFrom = 0; ; pFrom += 1000) {
+              const { data: pPage, error: pErr } = await followUpQuery.range(pFrom, pFrom + 999);
+              if (pErr) { prospError = pErr; break; }
+              if (!pPage || pPage.length === 0) break;
+              prospData.push(...pPage);
+              if (pPage.length < 1000) break;
+            }
             if (!prospError && prospData) {
               const extras = prospData
                 .filter(row => !loadedIds.has(row.id))
@@ -4437,7 +4558,7 @@
         const btn = document.getElementById("btn-load-more-leads");
         if (btn) { btn.textContent = "Carregando..."; btn.disabled = true; }
         try {
-          const from = currentLeads.length;
+          const from = leadsMainOffset;
           const to   = from + LEADS_PAGE_SIZE - 1;
           let query = supabaseClient
             .from('leads')
@@ -4460,10 +4581,12 @@
 
           const { data, error } = await query
             .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to);
           if (error) throw error;
           if (data && data.length > 0) {
             hasMoreLeads = data.length === LEADS_PAGE_SIZE;
+            leadsMainOffset = from + data.length;
             const newItems = data.map(row => {
               let statusMapped = row.status === "Aguardando Averbação" ? "Recebida" : row.status;
               return {
@@ -6148,6 +6271,9 @@
               canvas.height = height;
 
               const ctx = canvas.getContext('2d');
+              // Fundo branco: PNG com transparência virava JPG com fundo preto
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, width, height);
               ctx.drawImage(img, 0, 0, width, height);
 
               canvas.toBlob((blob) => {
@@ -6179,12 +6305,15 @@
       };
 
       // Faz upload de arquivo para o Supabase Storage (usado no dashboard ao editar lead)
+      const MIME_POR_EXT_DOC = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif', pdf: 'application/pdf' };
       const uploadToStorage = async (file, leadId, type) => {
-        const ext = file.name.split('.').pop().toLowerCase() || 'bin';
+        const ext = (file.name && file.name.includes('.') ? file.name.split('.').pop() : '').toLowerCase()
+          || (file.type === 'application/pdf' ? 'pdf' : 'jpg');
         const path = `leads/${leadId}/${type}.${ext}`;
+        const contentType = file.type || MIME_POR_EXT_DOC[ext] || 'application/octet-stream';
         const { error } = await supabaseClient.storage
           .from('walkerbank-docs')
-          .upload(path, file, { upsert: true, contentType: file.type });
+          .upload(path, file, { upsert: true, contentType });
         if (error) throw error;
         return path;
       };
@@ -9306,7 +9435,17 @@
           }
 
           if (data && data.user) {
-            // O trigger handle_new_user() já criou o perfil com nome/role/avatar corretos.
+            // O trigger handle_new_user() cria o perfil como 'pendente' (sem acesso).
+            // O admin logado libera o acesso com o role escolhido no formulário.
+            const { error: roleErr } = await supabaseClient
+              .from('profiles')
+              .update({ role: role === 'admin' ? 'admin' : 'operador', nome: nome, avatar: avatar })
+              .eq('id', data.user.id);
+            if (roleErr) {
+              console.warn("[Walker Bank] Erro ao liberar acesso do novo operador:", roleErr);
+              showToast("Conta criada, mas o acesso não foi liberado. Ajuste o campo 'role' do usuário em profiles no Supabase.", "var(--red-error)");
+            }
+            // Salva meta/função nas configs (abaixo) normalmente.
             // Salva meta_mensal, funcao, role e salario_base nas configs.operadores_config para aparecer imediatamente na UI.
             const cfg = getConfigs();
             if (!cfg.operadores_config) cfg.operadores_config = {};
@@ -9660,13 +9799,33 @@
             excelParsedLeads = {};
             let count = 0;
             
+            // Retorna null quando a coluna não existe ou a célula está vazia, para que
+            // a importação NÃO sobrescreva com 0 um valor que já existe no lead.
             const cleanVal = (val) => {
-              if (val === null || val === undefined) return 0.0;
-              if (typeof val === 'number') return val;
-              let valStr = String(val).trim().replace(/\./g, '').replace(',', '.');
+              if (val === null || val === undefined) return null;
+              if (typeof val === 'number') return isNaN(val) ? null : val;
+              let valStr = String(val).trim();
+              if (valStr === '' || valStr.toLowerCase() === 'nan') return null;
+              valStr = valStr.replace(/[R$\s]/g, '');
+              // "1.234,56" (BR), "2.500" (milhar BR) ou "2500.75" (ponto decimal)
+              if (valStr.includes(',')) valStr = valStr.replace(/\./g, '').replace(',', '.');
+              else if ((valStr.match(/\./g) || []).length > 1 || /^\d{1,3}\.\d{3}$/.test(valStr)) valStr = valStr.replace(/\./g, '');
               let f = parseFloat(valStr);
-              return isNaN(f) ? 0.0 : f;
+              return isNaN(f) ? null : f;
             };
+
+            // Datas do Excel chegam como número serial (ex.: 27154) — converte para dd/mm/aaaa
+            const dateVal = (v) => {
+              if (typeof v === 'number' && v > 0 && v < 100000 && XLSX.SSF && XLSX.SSF.parse_date_code) {
+                const d = XLSX.SSF.parse_date_code(v);
+                if (d && d.y) return `${String(d.d).padStart(2, '0')}/${String(d.m).padStart(2, '0')}/${d.y}`;
+              }
+              return (v === null || v === undefined || String(v).trim().toLowerCase() === 'nan') ? '' : String(v).trim();
+            };
+
+            let duplicadosPlanilha = 0;
+            let cpfsInvalidos = 0;
+            const strValTop = (v) => (v === null || v === undefined || String(v).trim().toLowerCase() === 'nan') ? '' : String(v).trim();
 
             // Normaliza nomes de coluna (maiúsculas, sem acento) para aceitar planilhas
             // com layouts diferentes (ex.: "base unificada" vs. exportações de órgãos como GOV_AM)
@@ -9684,19 +9843,22 @@
             };
 
             json.forEach(row => {
-              let cpfKey = Object.keys(row).find(k => k.toUpperCase() === 'CPF');
-              let nomeKey = Object.keys(row).find(k => k.toUpperCase() === 'NOME');
-              if (!cpfKey) return;
-
-              let cpfRaw = String(row[cpfKey]).replace(/\D/g, '');
-              if (!cpfRaw || cpfRaw === 'nan' || cpfRaw === 'undefined') return;
-              let cpfNorm = cpfRaw.padStart(11, '0');
-
-              let nome = nomeKey ? row[nomeKey] : '';
-
               const rowKeysOriginal = Object.keys(row);
               const rowKeysNorm = rowKeysOriginal.map(normalizeHeader);
               const alias = (...candidates) => findByAliases(rowKeysNorm, rowKeysOriginal, row, candidates);
+
+              // Aceita "CPF", "Cpf ", "C.P.F.", "CPF DO SERVIDOR", "NR_CPF" etc.
+              let cpfIdx = rowKeysNorm.findIndex(k => k === 'CPF');
+              if (cpfIdx === -1) cpfIdx = rowKeysNorm.findIndex(k => k.replace(/[^A-Z]/g, '') === 'CPF' || /(^|[^A-Z])CPF([^A-Z]|$)/.test(k));
+              if (cpfIdx === -1) return;
+              const cpfKey = rowKeysOriginal[cpfIdx];
+
+              let cpfRaw = String(row[cpfKey]).replace(/\D/g, '');
+              if (!cpfRaw || cpfRaw === 'nan' || cpfRaw === 'undefined') return;
+              if (cpfRaw.length > 11) { cpfsInvalidos++; return; }
+              let cpfNorm = cpfRaw.padStart(11, '0');
+
+              let nome = strValTop(alias('NOME', 'NOME COMPLETO', 'NOME DO SERVIDOR', 'NOME SERVIDOR', 'NOME_SERVIDOR', 'CLIENTE', 'NOME DO CLIENTE'));
 
               let mgMargem = cleanVal(alias('mg_margem', 'MARGEM CONSIGNAVEL', 'MARGEM'));
               let mgMargemCartao = cleanVal(alias('mg_margem_cartao', 'MARGEM CARTAO CONSIGNADO', 'MARGEM CARTAO'));
@@ -9711,14 +9873,14 @@
               const cel = strVal(row['CEL1']);
               if (ddd && cel) celular = ddd + cel;
               else if (cel) celular = cel;
-              else celular = strVal(alias('TEL 1', 'TELEFONE 1', 'TELEFONE'));
+              else celular = strVal(alias('TEL 1', 'TELEFONE 1', 'TELEFONE', 'CELULAR', 'CELULAR 1', 'FONE'));
 
               // Texto do órgão/vínculo: prioriza campos com frase completa (ex. "Governo do Estado do Amazonas")
               // para permitir o casamento com o convênio correto cadastrado
               const orgaoTexto = strVal(alias('mg_orgao', 'FOLHA', 'ORGAO')) || strVal(alias('ÓRGÃO'));
               const tipoServidorTexto = strVal(alias('mg_tipo_servidor', 'TIPO DE CARGO', 'PERFIL'));
 
-              excelParsedLeads[cpfNorm] = {
+              const parsed = {
                 nome: nome,
                 mg_margem: mgMargem,
                 mg_margem_cartao: mgMargemCartao,
@@ -9727,20 +9889,38 @@
                 mg_margem_cartao_bruta: mgMargemCartaoBruta,
                 mg_margem_cartao_beneficio_bruta: mgMargemCartaoBeneficioBruta,
                 salario_liquido: mgMargemBruta,
-                nome_mae: strVal(row['NOME_MAE']),
-                data_nascimento: strVal(row['NASC']),
+                nome_mae: strVal(alias('NOME_MAE', 'NOME DA MAE', 'NOME MAE', 'MAE')),
+                data_nascimento: dateVal(alias('NASC', 'DATA NASCIMENTO', 'DATA DE NASCIMENTO', 'DT_NASC', 'DT NASCIMENTO', 'NASCIMENTO')),
                 celular: celular.replace(/\D/g, ''),
-                email: strVal(row['EMAIL1']),
+                email: strVal(alias('EMAIL1', 'EMAIL', 'E-MAIL', 'E MAIL')),
                 profissao: strVal(alias('POSSIVEL_PROFISSAO', 'TIPO DE CARGO', 'CARGO')),
                 matricula: strVal(alias('mg_matricula', 'MATRICULA')),
                 mg_orgao: orgaoTexto,
                 mg_tipo_servidor: tipoServidorTexto
               };
-              count++;
+
+              // Mesmo CPF em mais de uma linha: antes a última linha apagava a anterior.
+              // Agora as linhas são mescladas — um campo vazio nunca apaga um preenchido.
+              const existente = excelParsedLeads[cpfNorm];
+              if (existente) {
+                duplicadosPlanilha++;
+                Object.keys(parsed).forEach(campo => {
+                  const atual = existente[campo];
+                  if ((atual === null || atual === undefined || atual === '') && parsed[campo] !== null && parsed[campo] !== '') {
+                    existente[campo] = parsed[campo];
+                  }
+                });
+              } else {
+                excelParsedLeads[cpfNorm] = parsed;
+                count++;
+              }
             });
-            
+
             if (count > 0) {
-              document.getElementById('excel-file-label').textContent = `Planilha carregada: ${count} registros encontrados`;
+              const extras = [];
+              if (duplicadosPlanilha) extras.push(`${duplicadosPlanilha} linha(s) com CPF repetido mescladas`);
+              if (cpfsInvalidos) extras.push(`${cpfsInvalidos} CPF(s) inválido(s) ignorado(s)`);
+              document.getElementById('excel-file-label').textContent = `Planilha carregada: ${count} CPFs encontrados${extras.length ? ` (${extras.join('; ')})` : ''}`;
               const btnImportar = document.getElementById('btn-excel-importar');
               if (btnImportar) {
                 btnImportar.disabled = false;
@@ -9812,6 +9992,48 @@
         if (s >= 1500) return 'D';
         return 'E';
       };
+
+      // Aplica os dados da planilha num lead que JÁ EXISTE sem apagar nada:
+      // - margens/salário só são gravados se a planilha trouxe valor (antes, coluna
+      //   ausente virava 0 e zerava a margem/salário que o lead já tinha);
+      // - o convênio só é recalculado se a planilha tem órgão/tipo (antes, sem essas
+      //   colunas, todo lead virava 'inss' e perdia o convênio original);
+      // - dados pessoais continuam só preenchendo o que estiver vazio.
+      const CAMPOS_MARGEM_EXCEL = [
+        'mg_margem', 'mg_margem_cartao', 'mg_margem_cartao_beneficio',
+        'mg_margem_bruta', 'mg_margem_cartao_bruta', 'mg_margem_cartao_beneficio_bruta', 'salario_liquido'
+      ];
+      const temValorExcel = (v) => v !== null && v !== undefined && v !== '';
+
+      const aplicarExcelEmLeadExistente = (payload, ex) => {
+        if (!payload.dados_funcionais) payload.dados_funcionais = {};
+        if (!payload.lead) payload.lead = {};
+        const df = payload.dados_funcionais;
+
+        const temOrgao = temValorExcel(ex.mg_orgao) || temValorExcel(ex.mg_tipo_servidor);
+        const convenioNovo = temOrgao ? mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor) : null;
+        if (convenioNovo) df.convenio = convenioNovo;
+        else if (!df.convenio) df.convenio = mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor);
+
+        CAMPOS_MARGEM_EXCEL.forEach(campo => {
+          if (temValorExcel(ex[campo])) df[campo] = ex[campo];
+        });
+        if (temValorExcel(ex.mg_margem)) df.margem_pre_aprovada = ex.mg_margem;
+
+        if (!payload.lead.nome && ex.nome) payload.lead.nome = ex.nome;
+        if (!payload.lead.nome_mae && ex.nome_mae) payload.lead.nome_mae = ex.nome_mae;
+        if (!payload.lead.data_nascimento && ex.data_nascimento) payload.lead.data_nascimento = ex.data_nascimento;
+        if (!payload.lead.celular && ex.celular) payload.lead.celular = ex.celular;
+        if (!payload.lead.email && ex.email) payload.lead.email = ex.email;
+        if (!df.matricula && ex.matricula) df.matricula = ex.matricula;
+        if (!df.profissao && ex.profissao) df.profissao = ex.profissao;
+        if (temValorExcel(ex.mg_margem_bruta)) payload.lead.classe_economica = inferirClasseEconomica(ex.mg_margem_bruta);
+
+        return df.convenio;
+      };
+
+      // Para lead NOVO mantém o formato de antes (campos numéricos ausentes = 0)
+      const numExcel = (v) => temValorExcel(v) ? v : 0;
 
       const initExcelImportListeners = () => {
         const dropZone = document.getElementById('excel-drop-zone');
@@ -9913,27 +10135,7 @@
                 if (excelParsedLeads[cpfNorm]) {
                   matchedCpfsLocal.add(cpfNorm);
                   const ex = excelParsedLeads[cpfNorm];
-                  if (!lead.dados_funcionais) lead.dados_funcionais = {};
-
-                  lead.dados_funcionais.convenio = mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor);
-                  lead.dados_funcionais.margem_pre_aprovada = ex.mg_margem;
-                  lead.dados_funcionais.mg_margem = ex.mg_margem;
-                  lead.dados_funcionais.mg_margem_cartao = ex.mg_margem_cartao;
-                  lead.dados_funcionais.mg_margem_cartao_beneficio = ex.mg_margem_cartao_beneficio;
-                  lead.dados_funcionais.mg_margem_bruta = ex.mg_margem_bruta;
-                  lead.dados_funcionais.mg_margem_cartao_bruta = ex.mg_margem_cartao_bruta;
-                  lead.dados_funcionais.mg_margem_cartao_beneficio_bruta = ex.mg_margem_cartao_beneficio_bruta;
-                  lead.dados_funcionais.salario_liquido = ex.salario_liquido;
-
-                  if (!lead.lead) lead.lead = {};
-                  if (!lead.lead.nome) lead.lead.nome = ex.nome;
-                  if (!lead.lead.nome_mae && ex.nome_mae) lead.lead.nome_mae = ex.nome_mae;
-                  if (!lead.lead.data_nascimento && ex.data_nascimento) lead.lead.data_nascimento = ex.data_nascimento;
-                  if (!lead.lead.celular && ex.celular) lead.lead.celular = ex.celular;
-                  if (!lead.lead.email && ex.email) lead.lead.email = ex.email;
-                  if (!lead.dados_funcionais.matricula && ex.matricula) lead.dados_funcionais.matricula = ex.matricula;
-                  if (!lead.dados_funcionais.profissao && ex.profissao) lead.dados_funcionais.profissao = ex.profissao;
-                  lead.lead.classe_economica = inferirClasseEconomica(ex.mg_margem_bruta);
+                  aplicarExcelEmLeadExistente(lead, ex);
 
                   successCount++;
                   logProgress(`[LOCAL] Lead CPF ${cpfNorm} (${ex.nome}) atualizado.`, 'var(--green-success)');
@@ -9973,20 +10175,19 @@
                     },
                     dados_funcionais: {
                       convenio: mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor),
-                      margem_pre_aprovada: ex.mg_margem,
-                      mg_margem: ex.mg_margem,
-                      mg_margem_cartao: ex.mg_margem_cartao,
-                      mg_margem_cartao_beneficio: ex.mg_margem_cartao_beneficio,
-                      mg_margem_bruta: ex.mg_margem_bruta,
-                      mg_margem_cartao_bruta: ex.mg_margem_cartao_bruta,
-                      mg_margem_cartao_beneficio_bruta: ex.mg_margem_cartao_beneficio_bruta,
-                      salario_liquido: ex.salario_liquido,
+                      margem_pre_aprovada: numExcel(ex.mg_margem),
+                      mg_margem: numExcel(ex.mg_margem),
+                      mg_margem_cartao: numExcel(ex.mg_margem_cartao),
+                      mg_margem_cartao_beneficio: numExcel(ex.mg_margem_cartao_beneficio),
+                      mg_margem_bruta: numExcel(ex.mg_margem_bruta),
+                      mg_margem_cartao_bruta: numExcel(ex.mg_margem_cartao_bruta),
+                      mg_margem_cartao_beneficio_bruta: numExcel(ex.mg_margem_cartao_beneficio_bruta),
+                      salario_liquido: numExcel(ex.salario_liquido),
                       matricula: ex.matricula || '',
                       profissao: ex.profissao || ''
                     },
                     dados_bancarios: {},
-                    proposta: {
-                      score_faixa: ['RISCO BAIXO', 'RISCO MÉDIO', 'RISCO MUITO BAIXO', 'RISCO ALTO'][Math.floor(Math.random() * 4)],
+                    proposta: {
                       valor_solicitado: 0
                     }
                   };
@@ -10031,6 +10232,9 @@
                   const { data: page, error: getErr } = await supabaseClient
                     .from('leads')
                     .select('id, cpf')
+                    // Ordem estável é obrigatória na paginação: sem ela o Postgres pode
+                    // repetir/pular linhas entre páginas, e um lead "pulado" virava duplicado
+                    .order('id', { ascending: true })
                     .range(pageFrom, pageFrom + PAGE_SIZE - 1);
 
                   if (getErr) throw getErr;
@@ -10073,40 +10277,22 @@
 
                       let payload = singleData?.payload || {};
                       if (typeof payload === 'string') {
-                        try { payload = JSON.parse(payload); } catch(e) { payload = {}; }
+                        // Antes: texto ilegível virava {} e o update apagava a proposta inteira.
+                        try { payload = JSON.parse(payload); }
+                        catch(e) { throw new Error('payload do lead não pôde ser lido; lead mantido sem alteração'); }
                       }
+                      if (!payload || typeof payload !== 'object') payload = {};
 
-                      if (!payload.dados_funcionais) payload.dados_funcionais = {};
-                      const df_func = payload.dados_funcionais;
-
-                      df_func.convenio = mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor);
-                      df_func.margem_pre_aprovada = ex.mg_margem;
-                      df_func.mg_margem = ex.mg_margem;
-                      df_func.mg_margem_cartao = ex.mg_margem_cartao;
-                      df_func.mg_margem_cartao_beneficio = ex.mg_margem_cartao_beneficio;
-                      df_func.mg_margem_bruta = ex.mg_margem_bruta;
-                      df_func.mg_margem_cartao_bruta = ex.mg_margem_cartao_bruta;
-                      df_func.mg_margem_cartao_beneficio_bruta = ex.mg_margem_cartao_beneficio_bruta;
-                      df_func.salario_liquido = ex.salario_liquido;
-
-                      if (!payload.lead) payload.lead = {};
-                      if (!payload.lead.nome) payload.lead.nome = ex.nome;
-                      if (!payload.lead.nome_mae && ex.nome_mae) payload.lead.nome_mae = ex.nome_mae;
-                      if (!payload.lead.data_nascimento && ex.data_nascimento) payload.lead.data_nascimento = ex.data_nascimento;
-                      if (!payload.lead.celular && ex.celular) payload.lead.celular = ex.celular;
-                      if (!payload.lead.email && ex.email) payload.lead.email = ex.email;
-                      if (!payload.dados_funcionais.matricula && ex.matricula) payload.dados_funcionais.matricula = ex.matricula;
-                      if (!payload.dados_funcionais.profissao && ex.profissao) payload.dados_funcionais.profissao = ex.profissao;
-                      payload.lead.classe_economica = inferirClasseEconomica(ex.mg_margem_bruta);
+                      const convenioFinal = aplicarExcelEmLeadExistente(payload, ex);
 
                       if (!payload.id) payload.id = leadId;
                       payload = await sanitizeLeadPayload(payload);
 
                       const { error: updErr } = await supabaseClient
                         .from('leads')
-                        .update({ 
+                        .update({
                           payload: payload,
-                          convenio: mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor)
+                          convenio: convenioFinal
                         })
                         .eq('id', leadId);
 
@@ -10159,20 +10345,19 @@
                           },
                           dados_funcionais: {
                             convenio: mapearConvenioExcel(ex.mg_orgao, ex.mg_tipo_servidor),
-                            margem_pre_aprovada: ex.mg_margem,
-                            mg_margem: ex.mg_margem,
-                            mg_margem_cartao: ex.mg_margem_cartao,
-                            mg_margem_cartao_beneficio: ex.mg_margem_cartao_beneficio,
-                            mg_margem_bruta: ex.mg_margem_bruta,
-                            mg_margem_cartao_bruta: ex.mg_margem_cartao_bruta,
-                            mg_margem_cartao_beneficio_bruta: ex.mg_margem_cartao_beneficio_bruta,
-                            salario_liquido: ex.salario_liquido,
+                            margem_pre_aprovada: numExcel(ex.mg_margem),
+                            mg_margem: numExcel(ex.mg_margem),
+                            mg_margem_cartao: numExcel(ex.mg_margem_cartao),
+                            mg_margem_cartao_beneficio: numExcel(ex.mg_margem_cartao_beneficio),
+                            mg_margem_bruta: numExcel(ex.mg_margem_bruta),
+                            mg_margem_cartao_bruta: numExcel(ex.mg_margem_cartao_bruta),
+                            mg_margem_cartao_beneficio_bruta: numExcel(ex.mg_margem_cartao_beneficio_bruta),
+                            salario_liquido: numExcel(ex.salario_liquido),
                             matricula: ex.matricula || '',
                             profissao: ex.profissao || ''
                           },
                           dados_bancarios: {},
-                          proposta: {
-                            score_faixa: ['RISCO BAIXO', 'RISCO MÉDIO', 'RISCO MUITO BAIXO', 'RISCO ALTO'][Math.floor(Math.random() * 4)],
+                          proposta: {
                             valor_solicitado: 0
                           }
                         };
@@ -12411,6 +12596,7 @@
             .from('leads')
             .select('id, status, operador_id:payload->>operador_id, operador_nome:payload->>operador_nome')
             .not('payload->>operador_id', 'is', null)
+            .order('id', { ascending: true }) // ordem estável entre os blocos
             .range(from, from + BATCH - 1);
           if (error) {
             console.error('Erro ao buscar leads com operador:', error);
