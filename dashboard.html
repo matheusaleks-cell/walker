@@ -7955,12 +7955,48 @@
       const pageSizeBase = 10;
 
       const renderBaseGeral = async () => {
-        const leads = getLeads();
+        let leads = getLeads();
         const search = document.getElementById("base-search").value.toLowerCase();
         const filterConvenio = document.getElementById("base-convenio").value;
         const filterClasse = document.getElementById("base-classe").value;
         const filterScore = document.getElementById("base-score").value;
         const filterMargem = document.getElementById("base-margem").value;
+
+        // A carga inicial traz só os 200 leads mais novos; importações em massa empurram os
+        // antigos para fora dessa janela. Quando há busca ou filtro de convênio, consulta o banco
+        // (uma vez por combinação) e junta o resultado antes de filtrar localmente.
+        const remoteKey = `${search}|${filterConvenio}`;
+        if ((search || filterConvenio !== 'all') && sessionStorage.getItem("walker_demo_mode") !== "true"
+            && window._baseRemoteKeyDone !== remoteKey) {
+          window._baseRemoteKeyDone = remoteKey;
+          try {
+            let sbQuery = supabaseClient.from('leads').select(LEADS_SELECT_FIELDS)
+              .in('status', ['Consulta de Margem', 'Importado']);
+            if (filterConvenio !== 'all') sbQuery = sbQuery.eq('convenio', filterConvenio);
+            const sDigits = search.replace(/\D/g, '');
+            // Sem zeros à esquerda: casa tanto CPF gravado com 11 dígitos quanto sem os zeros
+            const sCore = sDigits.replace(/^0+/, '');
+            if (sCore.length >= 4) {
+              sbQuery = sbQuery.ilike('cpf', `%${sCore}%`);
+            } else if (search.length >= 3) {
+              sbQuery = sbQuery.ilike('nome', `%${search}%`);
+            }
+            const { data: remoteRows, error: remoteErr } = await sbQuery
+              .order('created_at', { ascending: false })
+              .order('id', { ascending: true })
+              .limit(200);
+            if (remoteErr) throw remoteErr;
+            if (remoteRows && remoteRows.length > 0) {
+              const newMapped = remoteRows.map(r => mapLeadRow(r, currentLeads));
+              const remoteIds = new Set(remoteRows.map(r => r.id));
+              currentLeads = [...newMapped, ...currentLeads.filter(c => !remoteIds.has(c.id))];
+              leads = getLeads();
+            }
+          } catch (err) {
+            window._baseRemoteKeyDone = null;
+            console.warn('[Walker Bank] Erro na busca remota da Base Geral:', err);
+          }
+        }
 
         // Agrupar por CPF (Filtrando para mostrar apenas os leads cujo status é "Consulta de Margem" ou "Importado")
         const cpfMap = {};
@@ -8039,32 +8075,14 @@
           const searchDigits = search.replace(/\D/g, '');
           baseLeads = baseLeads.filter(c => {
             const matchNome     = (c.lead?.nome || '').toLowerCase().includes(search);
-            const matchCpf      = searchDigits ? (c.cpf || '').replace(/\D/g,'').includes(searchDigits) : false;
+            const cpfDigits     = (c.cpf || '').replace(/\D/g,'');
+            const matchCpf      = searchDigits ? (cpfDigits.includes(searchDigits) || cpfDigits.padStart(11, '0').includes(searchDigits)) : false;
             const matchCelular  = searchDigits ? (c.lead?.celular || '').replace(/\D/g,'').includes(searchDigits) : false;
             const matchEmail    = (c.lead?.email || '').toLowerCase().includes(search);
             const matchConvenio = getConvenioLabel(c.dados_funcionais?.convenio).toLowerCase().includes(search);
             return matchNome || matchCpf || matchCelular || matchEmail || matchConvenio;
           });
 
-          // Se não encontrou na fatia local de 200 leads, busca diretamente no Supabase em tempo real
-          if (baseLeads.length === 0 && sessionStorage.getItem("walker_demo_mode") !== "true") {
-            try {
-              let sbQuery = supabaseClient.from('leads').select(LEADS_SELECT_FIELDS).in('status', ['Consulta de Margem', 'Importado']);
-              if (searchDigits.length >= 4) {
-                sbQuery = sbQuery.ilike('cpf', `%${searchDigits}%`);
-              } else if (search.length >= 3) {
-                sbQuery = sbQuery.ilike('nome', `%${search}%`);
-              }
-              const { data: remoteRows } = await sbQuery.limit(50);
-              if (remoteRows && remoteRows.length > 0) {
-                const newMapped = remoteRows.map(r => mapLeadRow(r, currentLeads));
-                currentLeads = [...newMapped, ...currentLeads.filter(c => !remoteRows.some(r => r.id === c.id))];
-                return renderBaseGeral();
-              }
-            } catch (err) {
-              console.warn('[Walker Bank] Erro na busca remota da Base Geral:', err);
-            }
-          }
         }
 
         const navCountBase = document.getElementById("nav-count-base");
@@ -10187,7 +10205,7 @@
                       profissao: ex.profissao || ''
                     },
                     dados_bancarios: {},
-                    proposta: {
+                    proposta: {
                       valor_solicitado: 0
                     }
                   };
@@ -10357,7 +10375,7 @@
                             profissao: ex.profissao || ''
                           },
                           dados_bancarios: {},
-                          proposta: {
+                          proposta: {
                             valor_solicitado: 0
                           }
                         };
@@ -10885,17 +10903,29 @@
 
             if (!foundLead) {
               // Fila randômica normal (restrita ao(s) convênio(s) autorizado(s) para o operador, se houver)
-              let poolQuery = supabaseClient.from('leads').select('id, payload').in('status', ['Consulta de Margem', 'Importado']);
-              if (allowedConvenios) poolQuery = poolQuery.in('convenio', allowedConvenios);
-              const { data, error } = await poolQuery;
-              if (error) throw error;
-              if (data && data.length > 0) {
-                const qualificados = data.map(row => {
-                  let payload = {};
-                  try { payload = typeof row.payload === 'string' ? JSON.parse(row.payload) : (row.payload || {}); } catch(e) {}
-                  return { id: row.id, ...payload };
-                }).filter(l => !l.wpp_bloqueado_ate || new Date(l.wpp_bloqueado_ate) <= agora);
-
+              // O Supabase devolve no máximo ~1000 linhas por consulta; com dezenas de milhares de
+              // leads, sortear só entre as primeiras 1000 deixava o resto da base fora da fila.
+              // Conta o total e sorteia uma janela aleatória (algumas tentativas, por causa dos bloqueados).
+              const buildPoolQuery = (cols, opts) => {
+                let q = supabaseClient.from('leads').select(cols, opts).in('status', ['Consulta de Margem', 'Importado']);
+                if (allowedConvenios) q = q.in('convenio', allowedConvenios);
+                return q;
+              };
+              const { count: poolCount, error: poolCountErr } = await buildPoolQuery('id', { count: 'exact', head: true });
+              if (poolCountErr) throw poolCountErr;
+              const WINDOW = 50;
+              let qualificados = [];
+              for (let attempt = 0; attempt < 6 && qualificados.length === 0 && (poolCount || 0) > 0; attempt++) {
+                const offset = Math.floor(Math.random() * Math.max(1, (poolCount || 0) - WINDOW + 1));
+                const { data, error } = await buildPoolQuery('id, bloqueado:payload->>wpp_bloqueado_ate')
+                  .order('id', { ascending: true })
+                  .range(offset, offset + WINDOW - 1);
+                if (error) throw error;
+                qualificados = (data || [])
+                  .map(row => ({ id: row.id, wpp_bloqueado_ate: row.bloqueado }))
+                  .filter(l => !l.wpp_bloqueado_ate || new Date(l.wpp_bloqueado_ate) <= agora);
+              }
+              {
                 if (qualificados.length > 0) {
                   const idx = Math.floor(Math.random() * qualificados.length);
                   const selectedId = qualificados[idx].id;
